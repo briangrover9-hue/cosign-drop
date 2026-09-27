@@ -97,7 +97,7 @@ function mount(root) {
     playing: false,
     autoplayed: false,
     resumeOnShow: false,
-    onScreen: false,
+    inReadingArea: false,
     lastFinished: null, // { key, metrics } of the most recent finished run
     reference: null, // the finished run before the current one, for "last run"
   };
@@ -452,24 +452,33 @@ function mount(root) {
     else if (tweenStart >= 0) moveTo(to.slice(), false);
   });
 
-  // Autoplay once when the field is 40% visible; pause while it is offscreen
-  // or the tab is hidden, and pick up again on return.
+  // Autoplay once when the field is well inside the reading area: below the sticky
+  // header and above the bottom fifth of the screen. Pause as soon as none of it can
+  // be seen (behind the header counts) or the tab is hidden, and pick up again once
+  // it is back in the reading area.
   if ('IntersectionObserver' in window) {
+    const headerHeight = document.querySelector('.site-header')?.offsetHeight ?? 0;
     new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
-          state.onScreen = entry.isIntersecting;
-          if (!entry.isIntersecting) pause(true);
-          else if (entry.intersectionRatio >= 0.4 && !state.autoplayed && !reduced) play();
-          else if (state.resumeOnShow && !document.hidden) play();
-        }
+        const entry = entries[entries.length - 1];
+        const tall = entry.rootBounds && entry.intersectionRect.height >= entry.rootBounds.height * 0.9;
+        state.inReadingArea = entry.isIntersecting && (entry.intersectionRatio >= 0.9 || tall);
+        if (!state.inReadingArea || document.hidden) return;
+        if (!state.autoplayed && !reduced) play();
+        else if (state.resumeOnShow) play();
       },
-      { threshold: [0, 0.4] },
+      { rootMargin: `-${headerHeight}px 0px -20% 0px`, threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
+    ).observe(fieldWrap);
+    new IntersectionObserver(
+      (entries) => {
+        if (!entries[entries.length - 1].isIntersecting) pause(true);
+      },
+      { rootMargin: `-${headerHeight}px 0px 0px 0px` },
     ).observe(fieldWrap);
   }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) pause(true);
-    else if (state.resumeOnShow && state.onScreen) play();
+    else if (state.resumeOnShow && state.inReadingArea) play();
   });
 
   let resizeTimer = 0;

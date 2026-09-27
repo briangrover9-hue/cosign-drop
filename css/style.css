@@ -43,7 +43,7 @@
   --measure: 38rem;
   --wide: 66rem;
   --gutter: 16px;
-  --header-h: 48px;
+  --header-h: 3rem; /* 48px at the default text size; grows with the reader's text size */
   color-scheme: light;
 }
 
@@ -173,13 +173,15 @@ strong {
   padding-inline: var(--gutter);
 }
 
-/* Header: a slim bar whose rating climbs as you read. */
+/* Header: a slim bar whose rating climbs as you read. It is solid paper, because
+   without a blur a see-through bar only ghosts the text behind it. The hairline
+   shows once anything scrolls under the bar. */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 10;
   height: var(--header-h);
-  background: rgba(243, 238, 227, 0.94);
+  background: var(--paper);
   border-bottom: 1px solid transparent;
   transition: border-color 0.2s ease;
 }
@@ -208,10 +210,11 @@ strong {
   opacity: 0;
   transition: opacity 0.2s ease;
 }
-.site-header.is-scrolled .site-title {
+/* The bar's title takes over once the headline has gone behind the bar. */
+.site-header.is-titled .site-title {
   opacity: 1;
 }
-/* The title is hidden near the top of the page but still takes focus, so show it then. */
+/* Keyboard focus never lands on an invisible link: the title shows at once. */
 .site-title:focus-visible {
   opacity: 1;
   transition: none;
@@ -616,6 +619,8 @@ figcaption .src,
 }
 .table-scroll {
   overflow-x: auto;
+  /* A sideways swipe that reaches the table's edge stops there instead of going Back. */
+  overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
 }
 /* Phones: hyphenated cells let all four columns fit from 360px. Narrower than that the table
@@ -663,7 +668,7 @@ figcaption .src,
 @media (min-width: 720px) {
   :root {
     --gutter: 28px;
-    --header-h: 52px;
+    --header-h: 3.25rem; /* 52px */
   }
   body {
     font-size: 1.1875rem;

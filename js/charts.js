@@ -87,12 +87,15 @@ function watchWidth(el, render) {
   return () => check(true);
 }
 
-// Runs fn once, the first time half of el (or half the viewport, for tall elements) is on screen.
-function onceInView(el, fn, share = 0.5) {
+// Runs fn once, the first time el is well inside the reading area: below the sticky
+// header and above the bottom fifth of the screen, so nothing starts while it is only
+// peeking in at an edge. An element taller than that area counts once it fills most of it.
+function onceInView(el, fn, share = 0.9) {
   if (!('IntersectionObserver' in window)) {
     fn();
     return;
   }
+  const headerHeight = document.querySelector('.site-header')?.offsetHeight ?? 0;
   const io = new IntersectionObserver(
     (entries) => {
       const seen = entries.some((e) => {
@@ -104,7 +107,8 @@ function onceInView(el, fn, share = 0.5) {
         fn();
       }
     },
-    { threshold: [0, 0.25, 0.5, 0.6, 0.75, 1] }
+    // Fine steps, so a tall element reports in before it has filled the whole area.
+    { rootMargin: `-${headerHeight}px 0px -20% 0px`, threshold: Array.from({ length: 21 }, (_, i) => i / 20) }
   );
   io.observe(el);
 }
@@ -384,6 +388,18 @@ async function buildGuess(root) {
 
   const scrollBehavior = () => (motionAllowed() ? 'smooth' : 'auto');
 
+  // Scrolls just far enough to show first through last, but never so far that first
+  // goes behind the sticky header. Smooth only when motion is allowed.
+  const bringIntoView = (first, last) => {
+    const top = first.getBoundingClientRect().top;
+    const bottom = last.getBoundingClientRect().bottom;
+    const clear = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    const room = window.innerHeight - 16;
+    let dy = bottom > room ? bottom - room : 0;
+    if (top - dy < clear) dy = top - clear;
+    if (Math.abs(dy) >= 1) window.scrollBy({ top: dy, behavior: scrollBehavior() });
+  };
+
   const reveal = (guess) => {
     state.revealed = true;
     state.guess = guess;
@@ -398,7 +414,9 @@ async function buildGuess(root) {
           belowSentence(guess);
     if (answer) answer.hidden = false;
     againBtn.focus({ preventScroll: true });
-    result.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
+    // The histogram, the sentence about the reader's guess and the focused button,
+    // measured two frames on so every style change on the new content has landed.
+    requestAnimationFrame(() => requestAnimationFrame(() => bringIntoView(result, again)));
   };
 
   const reset = () => {
@@ -542,8 +560,9 @@ async function buildDrift(root) {
   root.insertAdjacentHTML('beforeend', `${html}</ul>`);
 
   if (animate) {
-    root.querySelectorAll('.dr-pair').forEach((item) => {
-      onceInView(item, () => play(item.querySelector('.dr-stars')), 0.6);
+    // Watch the grid itself, where the fill happens, not the whole block around it.
+    root.querySelectorAll('.dr-pair .dr-stars').forEach((grid) => {
+      onceInView(grid, () => play(grid));
     });
   }
 }
