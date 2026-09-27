@@ -66,7 +66,7 @@ Older Inside Airbnb snapshots (2015 to 2023) are no longer served (HTTP 403 on 2
 | Lab: blind feedback cut the correlation between the two sides' ratings | 0.680 to 0.411 | same, Table 4 | Confirmed (lab experiment, n = 192) |
 | Employers who privately would definitely not rehire but publicly gave 4+ stars | 28.4% | Filippas, Horton and Golden, NBER w25857 | Confirmed |
 | Private feedback over the same period | fell while public feedback rose, for the same transactions | same | Confirmed |
-| eBay negative feedback actually reported | 0.55% (buyers), 0.58% (sellers) | Dellarocas and Wood (2008), "The Sound of Silence in Online Feedback," Management Science 54(3), [preprint](https://www.cs.princeton.edu/courses/archive/spr08/cos444/papers/dellarocas_wood06.pdf), Table 2 | Confirmed |
+| Share of eBay feedback that was negative, when any was left | 0.55% of buyers' comments, 0.58% of sellers' comments (buyers commented on 67% of auctions) | Dellarocas and Wood (2008), "The Sound of Silence in Online Feedback," Management Science 54(3), [preprint](https://www.cs.princeton.edu/courses/archive/spr08/cos444/papers/dellarocas_wood06.pdf), Table 2 | Confirmed |
 | Their estimate of buyers who were actually dissatisfied | about 18.5% (Model A) to 21% (Model C) | same, Tables 5 and 6 | Confirmed |
 | Mildly dissatisfied traders who leave any feedback | almost none; satisfied traders report 82% (buyers) and 87% (sellers) of the time | same, p. 13 | Confirmed |
 | Matthew effect | definition in Merton's words | Merton (1968), "The Matthew Effect in Science," Science 159(3810), [DOI](https://doi.org/10.1126/science.159.3810.56), p. 58 | Confirmed |
