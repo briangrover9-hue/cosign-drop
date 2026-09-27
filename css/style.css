@@ -34,9 +34,9 @@
   font-family: "Newsreader Fallback";
   src: local("Georgia");
   font-weight: 300 450;
-  size-adjust: 92.5%;
-  ascent-override: 79.5%;
-  descent-override: 28.6%;
+  size-adjust: 91.8%;
+  ascent-override: 80.1%;
+  descent-override: 28.9%;
   line-gap-override: 0%;
 }
 @font-face {
