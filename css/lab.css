@@ -73,8 +73,10 @@
   color: var(--ink);
   pointer-events: none;
 }
-.lab-seg input:hover + span {
-  background: var(--paper-2);
+@media (hover: hover) and (pointer: fine) {
+  .lab-seg input:hover + span {
+    background: var(--paper-2);
+  }
 }
 .lab-seg input:checked + span {
   background: var(--ink);
@@ -393,10 +395,46 @@
   justify-self: start;
 }
 
-@media (min-width: 600px) and (max-width: 879.98px) {
+/* Phones: each value sits above its track, where a finger on the thumb cannot cover it,
+   and every track takes the full width. */
+@media (max-width: 599.98px) {
+  .lab-slider-row {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+  .lab-slider-value {
+    order: -1;
+    width: 100%;
+    text-align: left;
+  }
+  .lab-slider input[type="range"] {
+    flex-basis: 100%; /* its own line, even with the wider touch box below */
+  }
+}
+
+@media (min-width: 600px) and (max-width: 879.98px) and (min-height: 500.02px) {
   .lab-switches {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 24px;
+  }
+}
+
+/* Landscape phones: a short screen cannot show the switches above the field, so they sit
+   beside it, where a switch and the dots it moves are in view together. */
+@media (min-width: 640px) and (max-width: 879.98px) and (max-height: 500px) {
+  .lab-grid {
+    grid-template-columns: 18rem minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  .lab-switches {
+    row-gap: 8px; /* four switches fit a 360px tall screen under the header */
+  }
+  .lab-readouts,
+  .lab-status,
+  .lab-legend,
+  .lab-drawer {
+    grid-column: 1 / -1;
   }
 }
 
@@ -460,6 +498,51 @@
   .lab-slider input[type="range"]::-moz-range-track,
   .lab-slider input[type="range"]::-moz-range-thumb {
     outline: 1px solid;
+  }
+}
+
+/* Touch */
+.lab-seg label,
+.lab-drawer summary {
+  touch-action: manipulation;
+}
+.lab-slider-row {
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* On touch screens only the thumb takes a touch, so a scroll that starts on a track cannot
+   change an assumption, and the thumb gets a 44px square to grab while the bar is still
+   drawn 14 by 26. The input grows 15px on each side, which keeps the bar's path, and the
+   track is drawn inset by the same 15px, a flat line of the same length. */
+@media (pointer: coarse) {
+  .lab-slider input[type="range"] {
+    margin: 0 -15px;
+    pointer-events: none;
+  }
+  .lab-slider input[type="range"]::-webkit-slider-runnable-track {
+    background: linear-gradient(var(--ink-3), var(--ink-3)) center / calc(100% - 30px) 100% no-repeat;
+  }
+  .lab-slider input[type="range"]::-webkit-slider-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    margin-top: -21px;
+    border: solid transparent;
+    border-width: 9px 15px;
+    background-clip: content-box;
+    pointer-events: auto;
+  }
+  .lab-slider input[type="range"]::-moz-range-track {
+    background: linear-gradient(var(--ink-3), var(--ink-3)) center / calc(100% - 30px) 100% no-repeat;
+  }
+  .lab-slider input[type="range"]::-moz-range-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    border: solid transparent;
+    border-width: 9px 15px;
+    background-clip: content-box;
+    pointer-events: auto;
   }
 }
 

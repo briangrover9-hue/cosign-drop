@@ -85,8 +85,11 @@ a {
   text-underline-offset: 0.16em;
   text-decoration-color: var(--rule-strong);
 }
-a:hover {
-  text-decoration-color: currentColor;
+/* Hover only where a pointer can hover; on touch screens a tap would leave it stuck on. */
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    text-decoration-color: currentColor;
+  }
 }
 
 :focus-visible {
@@ -278,7 +281,8 @@ strong {
   margin: 0;
 }
 .hero-stars {
-  width: clamp(150px, 42vw, 250px);
+  /* The 128px floor keeps the stars beside the number down to a 320px screen. */
+  width: clamp(128px, 42vw, 250px);
   height: auto;
   margin-bottom: 0.55em;
 }
@@ -466,6 +470,8 @@ figcaption .src,
 }
 .card-inner {
   position: relative;
+  /* Both faces share one grid cell, so a card grows with its longer face at any text size. */
+  display: grid;
   width: 100%;
   height: 100%;
   min-height: 11.75rem;
@@ -476,8 +482,7 @@ figcaption .src,
   transform: rotateY(180deg);
 }
 .card-face {
-  position: absolute;
-  inset: 0;
+  grid-area: 1 / 1;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   border: 1px solid var(--rule-strong);
@@ -539,8 +544,10 @@ figcaption .src,
   padding: 10px 16px;
   cursor: pointer;
 }
-.btn:hover {
-  background: #37312a;
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background: #37312a;
+  }
 }
 .btn[disabled] {
   opacity: 0.45;
@@ -551,8 +558,14 @@ figcaption .src,
   background: transparent;
   border-color: var(--rule-strong);
 }
-.btn-quiet:hover {
-  background: var(--paper-2);
+@media (hover: hover) and (pointer: fine) {
+  .btn-quiet:hover {
+    background: var(--paper-2);
+  }
+}
+/* Touch: quick repeat taps on a button never zoom the page. */
+.btn {
+  touch-action: manipulation;
 }
 
 /* "Numbers that didn't survive" box */
@@ -605,6 +618,18 @@ figcaption .src,
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+/* Phones: hyphenated cells let all four columns fit from 360px. Narrower than that the table
+   still scrolls, so the scroller runs to the screen edges and the clipped column shows. */
+@media (max-width: 479.98px) {
+  .methods td {
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+  .table-scroll {
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+  }
+}
 .methods ol,
 .methods ul {
   padding-left: 1.2em;
@@ -621,17 +646,18 @@ figcaption .src,
 .site-footer p {
   margin-bottom: 0.4em;
 }
-/* 44px tall tap targets, widened 10px on each side so the one-letter X link is easy to hit. */
+/* Touch: each footer link gets a 44px tall target, reaching down into the footer's padding,
+   without moving the line. */
 .site-footer a {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
 }
 .site-footer a::after {
   content: "";
   position: absolute;
-  inset: 0 -10px;
+  top: -6px;
+  right: -9px;
+  left: -9px;
+  height: 44px;
 }
 
 @media (min-width: 720px) {
