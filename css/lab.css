@@ -444,6 +444,25 @@
   }
 }
 
+/* Forced colors paint every background alike, which hides the chosen option and the sliders,
+   so mark the choice with system colors and draw the sliders with outlines. */
+@media (forced-colors: active) {
+  .lab-seg input:checked + span {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    outline-color: CanvasText;
+  }
+  .lab-slider input[type="range"]::-webkit-slider-runnable-track,
+  .lab-slider input[type="range"]::-webkit-slider-thumb {
+    outline: 1px solid;
+  }
+  .lab-slider input[type="range"]::-moz-range-track,
+  .lab-slider input[type="range"]::-moz-range-thumb {
+    outline: 1px solid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lab-drawer summary::before {
     transition: none;

@@ -95,6 +95,16 @@ a:hover {
   border-radius: 2px;
 }
 
+/* Readers who ask for more contrast get hairlines, link underlines and quiet button borders
+   at 3:1 or better, and the lightest ink one step darker. The default look is unchanged. */
+@media (prefers-contrast: more) {
+  :root {
+    --rule: rgba(29, 26, 22, 0.5);
+    --rule-strong: rgba(29, 26, 22, 0.7);
+    --ink-3: var(--ink-2);
+  }
+}
+
 p {
   margin: 0 0 1em;
 }

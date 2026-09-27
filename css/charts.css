@@ -395,6 +395,16 @@
   flex: none;
 }
 
+/* Forced colors repaint backgrounds, which would erase the slider's track; outlines survive. */
+@media (forced-colors: active) {
+  .gs-range::-webkit-slider-runnable-track {
+    outline: 1px solid;
+  }
+  .gs-range::-moz-range-track {
+    outline: 1px solid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wn-bar,
   .gs-bars,
