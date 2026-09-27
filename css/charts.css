@@ -80,7 +80,7 @@
 .wn-bar {
   transform-box: fill-box;
   transform-origin: 0 50%;
-  /* Bars grow from $0; starting at scaleX(0) is the data, not a pop-in. */
+  /* Bars grow out of the $0 axis, so scaleX(0) is their real starting length. */
   transition: transform 500ms var(--ease-out);
 }
 .is-pending .wn-bar {
