@@ -1,4 +1,6 @@
-/* Trust lab. Phone first; the controls move beside the field from 880px. */
+/* Trust lab. Phone first. On a phone the block with the field stays pinned under the header
+   while the presets, switches and buttons scroll under it; from 880px the controls sit beside
+   the field. */
 
 .lab {
   /* The bottom margin is the figures', so the prose after the lab gets the same space. */
@@ -8,53 +10,153 @@
 }
 
 /* Before the script builds the lab, hold the room it will take, so the text below does not
-   jump. The values are the built lab's measured heights; the steps at 552, 600, 880 and
-   956px are where the field grows or the controls move, the others are line wraps. */
+   jump; once built, the lab takes its own height. The numbers are the built lab's measured
+   heights. --lab-rest is everything but the field, stepping where lines wrap and where the
+   controls move; below 880px the field adds its own height, which on screens at least 640px
+   tall is the pinned field: 55% of the small viewport less the header and the 152px of round,
+   line and summary around it, between 120px and its full height (lab.js does the same sum). */
 @media (scripting: enabled) {
-  .lab {
-    min-height: 1152px;
+  .lab:not(.is-built) {
+    --lab-base: 240px;
+    --lab-rest: 1496.14px;
+    min-height: calc(var(--lab-rest) - 15px + var(--lab-base)); /* not pinned: no padding or rule */
   }
-  @media (min-width: 360px) {
-    .lab {
-      min-height: 1129px;
+  @media (min-width: 325px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1444.14px;
     }
   }
-  @media (min-width: 442px) {
-    .lab {
-      min-height: 1107px;
+  @media (min-width: 327px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1427.95px;
+    }
+  }
+  @media (min-width: 330px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1427.45px;
+    }
+  }
+  @media (min-width: 349px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1407.16px;
+    }
+  }
+  @media (min-width: 353px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1406.66px;
+    }
+  }
+  @media (min-width: 362px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1384.16px;
+    }
+  }
+  @media (min-width: 426px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1361.77px;
+    }
+  }
+  @media (min-width: 443px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1339.27px;
+    }
+  }
+  @media (min-width: 507px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1285.27px;
     }
   }
   @media (min-width: 552px) {
-    .lab {
-      min-height: 1144px;
+    .lab:not(.is-built) {
+      --lab-base: 300px;
+    }
+  }
+  @media (min-width: 570px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1262.77px;
     }
   }
   @media (min-width: 600px) {
-    .lab {
-      min-height: 976px;
+    .lab:not(.is-built) {
+      --lab-rest: 1033.92px;
     }
   }
-  @media (min-width: 852px) {
-    .lab {
-      min-height: 954px;
+  @media (min-width: 651px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1033.42px;
+    }
+  }
+  @media (min-width: 689px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1013.13px;
+    }
+  }
+  @media (min-width: 698px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1012.63px;
+    }
+  }
+  @media (min-width: 720px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1013.13px;
+    }
+  }
+  @media (min-width: 722px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1012.63px;
+    }
+  }
+  @media (min-width: 867px) {
+    .lab:not(.is-built) {
+      --lab-rest: 990.23px;
+    }
+  }
+  @media (max-width: 879.98px) and (min-height: 640px) {
+    .lab:not(.is-built) {
+      min-height: calc(var(--lab-rest) + clamp(120px, 55vh - var(--header-h) - 152px, var(--lab-base)));
+      min-height: calc(var(--lab-rest) + clamp(120px, 55svh - var(--header-h) - 152px, var(--lab-base)));
+    }
+  }
+  /* Short screens from 600px: the switches take one column, or sit beside the field. */
+  @media (min-width: 600px) and (max-width: 639.98px) and (max-height: 500px) {
+    .lab:not(.is-built) {
+      min-height: 1527.23px;
+    }
+  }
+  @media (min-width: 640px) and (max-width: 879.98px) and (max-height: 500px) {
+    .lab:not(.is-built) {
+      min-height: 1141.42px;
     }
   }
   @media (min-width: 880px) {
-    .lab {
-      min-height: 699px;
-    }
-  }
-  @media (min-width: 956px) {
-    .lab {
-      min-height: 759px;
+    .lab:not(.is-built) {
+      min-height: 985.11px;
     }
   }
 }
 
-.lab-grid {
+.lab-grid,
+.lab-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 22px;
+}
+.lab-controls {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Presets: three quiet buttons, the one that matches the switches marked as pressed */
+.lab-preset-row {
+  clear: both;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lab-preset[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--paper-2);
 }
 
 /* Switches: native radios drawn as segmented controls */
@@ -67,6 +169,25 @@
   margin: 0;
   padding: 0;
   border: 0;
+}
+/* "A vouch is" and the anchor slider under it move as one piece. */
+.lab-switch-group {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.lab-anchor label {
+  font-size: 0.9375rem;
+}
+.lab-anchor-note {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.lab-slider[hidden] {
+  display: none;
 }
 .lab-switch legend {
   float: left;
@@ -154,6 +275,73 @@
 .lab-field-wrap {
   width: 100%;
 }
+/* The line of the average under the field. The last run's line stays faint behind it. */
+.lab-trend {
+  margin-top: 8px;
+}
+.lab-trend-title {
+  margin: 0 0 2px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+.lab-trend-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.lab-trend-rule {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.lab-trend-ghost,
+.lab-trend-line {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.lab-trend-ghost {
+  stroke: var(--ink-3);
+  stroke-opacity: 0.4;
+}
+.lab-trend-line {
+  stroke: var(--ink);
+}
+.lab-trend-dot {
+  fill: var(--ink);
+}
+.lab-trend-value {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--ink-2);
+}
+/* One line of the readouts, for screens where the full readouts sit below the controls. */
+.lab-summary {
+  margin: 6px 0 0;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ink);
+}
+/* Reads the small viewport height, which does not change as a phone's toolbars slide. */
+.lab-probe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100vh;
+  height: 100svh;
+  visibility: hidden;
+  pointer-events: none;
+}
 .lab-field {
   display: block;
   width: 100%;
@@ -219,7 +407,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 16px;
 }
 .lab-play {
   min-width: 6.5em;
@@ -290,6 +477,13 @@
 }
 .lab-last[hidden] {
   display: none;
+}
+.lab-chance {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ink-3);
 }
 
 /* Status and legend. Their prose keeps the article's text measure, even inside the wide lab. */
@@ -472,24 +666,56 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 24px;
   }
+  /* "A vouch is" with its slider is the tallest piece, so it takes two rows. */
+  .lab-switch-group {
+    grid-row: span 2;
+  }
+}
+
+/* One column (phones and small tablets): the round, the field, the line and a one-line summary
+   stay pinned under the header while the controls scroll under them, so a switch and the dots
+   it moves are in view together. lab.js keeps the pinned block to at most 55% of the screen and
+   gives each control a scroll margin as tall as the block, so keyboard focus never lands under
+   it. Screens shorter than 640px do not pin. */
+@media (max-width: 879.98px) and (min-height: 640px) {
+  .lab-stage {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 2;
+    padding: 6px 0 8px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+  }
+  .lab-controls input,
+  .lab-controls button,
+  .lab-playback button {
+    scroll-margin-top: var(--lab-stuck, 0px);
+  }
 }
 
 /* Landscape phones: a short screen cannot show the switches above the field, so they sit
-   beside it, where a switch and the dots it moves are in view together. */
+   beside it, and the field stays pinned under the header while they scroll. */
 @media (min-width: 640px) and (max-width: 879.98px) and (max-height: 500px) {
-  .lab-grid {
-    grid-template-columns: 18rem minmax(0, 1fr);
+  .lab-top {
+    grid-template-columns: 19rem minmax(0, 1fr); /* wide enough for "Who vouched" on one line */
+    grid-template-areas: "controls stage" "playback stage";
+    grid-template-rows: auto 1fr;
     column-gap: 24px;
     align-items: start;
   }
-  .lab-switches {
-    row-gap: 8px; /* four switches fit a 360px tall screen under the header */
+  .lab-controls {
+    grid-area: controls;
   }
-  .lab-readouts,
-  .lab-status,
-  .lab-legend,
-  .lab-drawer {
-    grid-column: 1 / -1;
+  .lab-playback {
+    grid-area: playback;
+  }
+  .lab-stage {
+    grid-area: stage;
+    position: sticky;
+    top: var(--header-h);
+  }
+  .lab-switches {
+    row-gap: 8px;
   }
 }
 
@@ -499,16 +725,28 @@
     padding-top: 24px;
   }
   .lab-grid {
-    grid-template-columns: 21rem minmax(0, 1fr);
-    column-gap: 44px;
     row-gap: 26px;
+  }
+  .lab-top {
+    grid-template-columns: 21rem minmax(0, 1fr);
+    grid-template-areas: "controls stage" "controls playback";
+    grid-template-rows: auto 1fr;
+    column-gap: 44px;
+    row-gap: 18px;
     align-items: start;
   }
-  .lab-readouts,
-  .lab-status,
-  .lab-legend,
-  .lab-drawer {
-    grid-column: 1 / -1;
+  .lab-controls {
+    grid-area: controls;
+  }
+  .lab-stage {
+    grid-area: stage;
+  }
+  .lab-playback {
+    grid-area: playback;
+  }
+  /* The full readouts sit right under the field here. */
+  .lab-summary {
+    display: none;
   }
   .lab-readouts {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -536,6 +774,12 @@
 /* Forced colors paint every background alike, which hides the chosen option and the sliders,
    so mark the choice with system colors and draw the sliders with outlines. */
 @media (forced-colors: active) {
+  .lab-preset[aria-pressed="true"] {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
   .lab-seg input:checked + span {
     forced-color-adjust: none;
     background: Highlight;

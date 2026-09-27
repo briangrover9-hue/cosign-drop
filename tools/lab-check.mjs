@@ -11,7 +11,7 @@
 import { createWorld, createRun, DEFAULTS, WORST, BEST, COSIGN } from '../js/lab-model.js';
 
 const WORLDS = [11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133];
-const PAGE_WORLD = 11;
+const PAGE_WORLD = 165; // the world index.html sets on #lab-root, closest to the 12-world averages
 const LINKEDIN = Object.freeze({ scale: 'yes', type: 'tap', vis: 'visible', who: 'anyone', feed: 'count' });
 const COSIGN_COUNT = Object.freeze({ ...COSIGN, feed: 'count' });
 
@@ -32,6 +32,7 @@ const ROWS = [
   ['LinkedIn-like: yes, one tap, visible, anyone, count', LINKEDIN, [null, null, 0.78, 0, 2.5]],
   ['Cosign-like, feed ranked by count', COSIGN_COUNT, [null, null, 0.64, 21.4, 3.7]],
   ['Cosign-like, feed ranked by reputation', COSIGN, [null, null, 0.64, 20.2, 5.9]],
+  ['Cosign-like, feed that ranks no one', { ...COSIGN, feed: 'plain' }, [null, null, null, null, null]],
 ];
 
 let failures = 0;
@@ -92,16 +93,16 @@ console.log('\n3. Checks\n');
 {
   for (const settings of [WORST, COSIGN, BEST]) {
     const name = settings === WORST ? 'WORST' : settings === COSIGN ? 'COSIGN' : 'BEST';
-    const a = JSON.stringify(runAll(11, settings, 1));
-    const b = JSON.stringify(runAll(11, settings, 1));
+    const a = JSON.stringify(runAll(PAGE_WORLD, settings, 1));
+    const b = JSON.stringify(runAll(PAGE_WORLD, settings, 1));
     check(a === b, `${name}: the same world seed, settings and run seed give identical snapshots for all 30 rounds`);
-    check(a !== JSON.stringify(runAll(11, settings, 2)), `${name}: a different run seed gives a different run`);
+    check(a !== JSON.stringify(runAll(PAGE_WORLD, settings, 2)), `${name}: a different run seed gives a different run`);
   }
 
   for (const settings of [WORST, COSIGN]) {
-    const quiet = createRun(createWorld(11), settings, 1);
+    const quiet = createRun(createWorld(PAGE_WORLD), settings, 1);
     while (!quiet.done) quiet.step();
-    const noisy = createRun(createWorld(11), settings, 1);
+    const noisy = createRun(createWorld(PAGE_WORLD), settings, 1);
     while (!noisy.done) {
       noisy.snapshot();
       noisy.step();
@@ -110,7 +111,7 @@ console.log('\n3. Checks\n');
     check(JSON.stringify(quiet.snapshot()) === JSON.stringify(noisy.snapshot()), `${settings.scale} scale: reading snapshots never changes the run`);
   }
 
-  const merged = createRun(createWorld(11), WORST, 1, { push: { visible: 0.2 } }).params;
+  const merged = createRun(createWorld(PAGE_WORLD), WORST, 1, { push: { visible: 0.2 } }).params;
   check(merged.push.visible === 0.2 && merged.push.blind === DEFAULTS.push.blind, 'overrides deep-merge: push.visible changes and push.blind keeps its default');
   const throws = (fn) => {
     try {
@@ -120,20 +121,20 @@ console.log('\n3. Checks\n');
       return true;
     }
   };
-  check(throws(() => createRun(createWorld(11), WORST, 1, { pushh: 1 })), 'an unknown parameter name is rejected');
-  check(throws(() => createRun(createWorld(11), WORST, 1, { halo: 'high' })), 'a parameter that is not a number is rejected');
-  check(throws(() => createRun(createWorld(11), { ...WORST, who: 'worked' })), 'a setting from the old model (who: worked) is rejected');
-  const base = runAll(11, WORST).at(-1).metrics.mean;
-  const flat = runAll(11, WORST, 1, { push: { visible: 0 }, autoFive: { tap: 0 } }).at(-1).metrics.mean;
+  check(throws(() => createRun(createWorld(PAGE_WORLD), WORST, 1, { pushh: 1 })), 'an unknown parameter name is rejected');
+  check(throws(() => createRun(createWorld(PAGE_WORLD), WORST, 1, { halo: 'high' })), 'a parameter that is not a number is rejected');
+  check(throws(() => createRun(createWorld(PAGE_WORLD), { ...WORST, who: 'worked' })), 'a setting from the old model (who: worked) is rejected');
+  const base = runAll(PAGE_WORLD, WORST).at(-1).metrics.mean;
+  const flat = runAll(PAGE_WORLD, WORST, 1, { push: { visible: 0 }, autoFive: { tap: 0 } }).at(-1).metrics.mean;
   check(flat < base, `overrides change the run: no push and no reflexive fives lower the worst final average from ${base.toFixed(2)} to ${flat.toFixed(2)}`);
 
-  const starsZero = createRun(createWorld(11), WORST, 1).snapshot();
+  const starsZero = createRun(createWorld(PAGE_WORLD), WORST, 1).snapshot();
   check(starsZero.round === 0 && starsZero.metrics.mean === null && starsZero.metrics.unrated === 80 && starsZero.history.length === 0, 'stars round 0: no scores, 80 unrated, empty history');
-  const yesZero = createRun(createWorld(11), COSIGN, 1).snapshot();
+  const yesZero = createRun(createWorld(PAGE_WORLD), COSIGN, 1).snapshot();
   check(yesZero.metrics.meanYeses === 0 && yesZero.metrics.yesRate === null && yesZero.metrics.top48 === null, 'yes round 0: no yeses, no yes rate, no 4.8+ count');
 
-  const starsRun = runAll(11, WORST);
-  const yesRun = runAll(11, LINKEDIN);
+  const starsRun = runAll(PAGE_WORLD, WORST);
+  const yesRun = runAll(PAGE_WORLD, LINKEDIN);
   check(
     starsRun.at(-1).history.length === 30 && starsRun.every((s, i) => i === 0 || (s.history.length === i && s.history[i - 1].mean === s.metrics.mean && s.history[i - 1].round === i)),
     'stars history: one entry per completed round, carrying that round\'s average',
