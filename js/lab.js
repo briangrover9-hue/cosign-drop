@@ -201,7 +201,7 @@ function mount(root) {
   // With reduced motion the dots jump straight to their new places, and a short fade marks
   // the jump so it is not missed. Nothing moves. A jump within 300ms of the last one, as when
   // clicking or arrowing quickly through a switch, starts no new fade and lets a running one
-  // finish, so the dots never blink.
+  // finish, so a burst of quick changes fades once.
   let lastJump = -Infinity;
   function fadeIn() {
     const now = performance.now();
