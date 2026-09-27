@@ -100,6 +100,12 @@ a:hover {
 p {
   margin: 0 0 1em;
 }
+/* No paragraph, list item or caption ends on a line holding one word. */
+p,
+li,
+figcaption {
+  text-wrap: pretty;
+}
 
 strong {
   font-weight: 600;
