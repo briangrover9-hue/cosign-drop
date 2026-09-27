@@ -263,7 +263,8 @@ strong {
   margin: 0;
 }
 .hero-stars {
-  width: clamp(150px, 42vw, 250px);
+  /* The 128px floor keeps the stars beside the number down to a 320px screen. */
+  width: clamp(128px, 42vw, 250px);
   height: auto;
   margin-bottom: 0.55em;
 }

@@ -312,8 +312,9 @@
   font-weight: 500;
   color: var(--ink);
 }
+/* Kept on one line when it fits; in a column too narrow for it, it wraps inside itself. */
 .dr-nw {
-  white-space: nowrap;
+  display: inline-block;
 }
 .dr-sub {
   font-size: 0.75rem;
