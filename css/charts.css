@@ -41,10 +41,10 @@
   gap: 8px;
 }
 
-/* Room held for each chart before its script draws it, so the text below does not jump
-   when the chart appears: on a link to a section, a reload partway down, or a slow
-   connection. Each value is the drawn chart's measured height, or just under it where
-   the height steps with the width. Without scripting the fallback keeps its own height. */
+/* Before its script draws a chart, hold the room the chart will take, so the text below
+   does not jump when it appears, for example after a link to a section or a reload partway
+   down. Each value is the drawn chart's measured height, or just under it where the height
+   steps with the width. Without scripting the fallback keeps its own height. */
 @media (scripting: enabled) {
   #why-now-root {
     min-height: 227px;

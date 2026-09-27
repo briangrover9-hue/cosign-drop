@@ -26,10 +26,10 @@
   font-weight: 500;
   font-display: swap;
 }
-/* Georgia, resized to Newsreader's widths and given its ascent (0.735) and descent
-   (0.265), shows until Newsreader loads, so the text keeps its line breaks when the
-   font swaps in. Newsreader runs narrower at text sizes and wider at display sizes,
-   so body weights, the 500 headings and the 600 headings each get their own size. */
+/* Until Newsreader loads, the page uses Georgia resized to Newsreader's widths and given
+   Newsreader's ascent (0.735) and descent (0.265), so lines break in nearly the same
+   places when the font swaps in. Newsreader is narrower than Georgia at text sizes and
+   wider at display sizes, so each weight range gets its own size. */
 @font-face {
   font-family: "Newsreader Fallback";
   src: local("Georgia");
@@ -57,8 +57,8 @@
   descent-override: 31.9%;
   line-gap-override: 0%;
 }
-/* The hero's 4.8 is set at display size, where Newsreader and Georgia are the same
-   width, so the stars beside it stay put when the font swaps in. */
+/* At the hero's display size Newsreader and Georgia are the same width, so the 4.8 gets
+   its own face and the stars beside it stay put when the font swaps in. */
 @font-face {
   font-family: "Newsreader Numeral Fallback";
   src: local("Georgia");
@@ -386,9 +386,9 @@ figure {
 .figure {
   margin-inline: auto;
 }
-/* Sections, figures and the lab each paint as their own group, so when the lab's dots
-   move, a chart fills in or the guess slider is dragged, the browser repaints that block
-   instead of walking the whole article, drift grids included, on every frame. */
+/* Sections, figures and the lab each paint as a separate group, so motion in one of them,
+   such as the lab's dots, repaints that block alone instead of the whole article, with its
+   800 drift stars, on every frame. */
 main > section,
 .figure,
 .lab {

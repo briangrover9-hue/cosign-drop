@@ -6,9 +6,9 @@
   border-top: 1px solid var(--rule-strong);
 }
 
-/* Room held for the lab before its script builds it, so the text below does not jump.
-   The values are the built lab's measured heights; the steps at 552, 600, 880 and 956px
-   are where the field grows or the controls move, the others are line wraps. */
+/* Before the script builds the lab, hold the room it will take, so the text below does not
+   jump. The values are the built lab's measured heights; the steps at 552, 600, 880 and
+   956px are where the field grows or the controls move, the others are line wraps. */
 @media (scripting: enabled) {
   .lab {
     min-height: 1152px;
