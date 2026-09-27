@@ -76,7 +76,7 @@ const READOUTS = {
     { key: 'unrated', label: 'No vouches at all' },
   ],
   yes: [
-    { key: 'meanYeses', label: 'Yeses per person' },
+    { key: 'yesCount', label: 'Yeses per person' },
     { key: 'yesRate', label: 'Said yes' },
     { key: 'hits', label: 'The top 10 by standing' },
     { key: 'unrated', label: 'No yeses at all' },
@@ -331,7 +331,7 @@ function mount(root) {
 
   function placedBy() {
     if (state.settings.scale === 'stars') return 'by score';
-    return state.settings.feed === 'reputation' ? 'by yeses weighted by track record' : 'by yeses received';
+    return weightedYeses(state.settings) ? 'by weighted yeses' : 'by yeses received';
   }
 
   /* ---------- Drawing ---------- */
@@ -432,7 +432,7 @@ function mount(root) {
         `<text class="lab-label" x="${G.width - 1}" y="${labelY}" text-anchor="end">${HIGH_BAR}+</text>`;
       for (let v = 1; v <= 5; v++) body += tick(G.x(v), v);
     } else {
-      const title = state.settings.feed === 'reputation' ? 'Yeses, weighted by track record' : 'Yeses received';
+      const title = weightedYeses(state.settings) ? 'Weighted yeses' : 'Yeses received';
       body += `<text class="lab-label" x="${G.width - 1}" y="${labelY}" text-anchor="end">${title}</text>`;
       for (let k = 0; k <= 4; k++) body += tick(G.x1 + (G.span * k) / 4, (G.axisMax * k) / 4, k === 4 && String(G.axisMax).length > 1);
     }
@@ -793,8 +793,8 @@ function valueParts(key, m, N, scale) {
       return m.mean === null ? { num: '', unit: 'no scores yet' } : { num: m.mean.toFixed(2), unit: '' };
     case 'top48':
       return { num: String(m.top48), unit: ` of ${N}` };
-    case 'meanYeses':
-      return { num: m.meanYeses.toFixed(1), unit: '' };
+    case 'yesCount':
+      return { num: m.yesCount.toFixed(1), unit: '' };
     case 'yesRate':
       return m.yesRate === null ? { num: '', unit: 'no rounds yet' } : { num: percent(m.yesRate), unit: ' of judgments' };
     case 'hits':
@@ -813,15 +813,21 @@ function valueText(key, m, N, scale) {
 
 function numberText(key, m) {
   if (key === 'mean') return m.mean.toFixed(2);
-  if (key === 'meanYeses') return m.meanYeses.toFixed(1);
+  if (key === 'yesCount') return m.yesCount.toFixed(1);
   if (key === 'yesRate') return percent(m.yesRate);
   return String(m[key]);
+}
+
+// On the yes scale, standing is a plain count of yeses unless a stranger's yes counts less
+// (vouches say how the giver knows you) or the feed weights each yes by track record.
+function weightedYeses(S) {
+  return S.who === 'said' || S.feed === 'reputation';
 }
 
 // The one-line reading of a finished run.
 function verdict(m, S) {
   if (S.scale === 'yes') {
-    const by = S.feed === 'reputation' ? 'yeses weighted by track record' : 'yeses';
+    const by = S.feed === 'reputation' ? 'yeses weighted by track record' : weightedYeses(S) ? 'weighted yeses' : 'yeses';
     let text = `People said yes to ${percent(m.yesRate)} of those they judged, and a top 10 by ${by} finds ${m.hits} of the 10 most skilled.`;
     if (m.unrated >= 5) text += ` ${m.unrated} people got no yes at all.`;
     return text;
@@ -837,7 +843,7 @@ function verdict(m, S) {
 
 function finishedLabel(m, S, rounds) {
   if (S.scale === 'yes') {
-    return `After ${rounds} rounds, people said yes to ${percent(m.yesRate)} of those they judged, the average person has ${m.meanYeses.toFixed(1)} yeses, and the top ${TOP_N} by standing includes ${m.hits} of the ${TOP_N} most skilled.`;
+    return `After ${rounds} rounds, people said yes to ${percent(m.yesRate)} of those they judged, the average person has ${m.yesCount.toFixed(1)} yeses, and the top ${TOP_N} by standing includes ${m.hits} of the ${TOP_N} most skilled.`;
   }
   return `After ${rounds} rounds, the average score is ${m.mean.toFixed(2)}, ${m.top48} of 80 people are at ${HIGH_BAR} or above, and the top ${TOP_N} by score includes ${m.hits} of the ${TOP_N} most skilled.`;
 }
@@ -854,7 +860,7 @@ function legendHtml(scale) {
   const star = keyGlyph('is-star');
   const edge = keyGlyph('is-star is-edge');
   if (scale === 'yes') {
-    return `Each dot ${dot}is a person, placed by how many yeses they have. Filled dots ${filled}are the 10 most skilled. A gold star ${star}marks the top 10 by standing, with a dark edge ${edge}when that person is also one of the 10 most skilled. People with no yeses sit in the lane at the left. Under the field, a dashed line shows the last finished run.`;
+    return `Each dot ${dot}is a person, placed by their yeses. When vouches say how the giver knows you, a stranger’s yes counts a quarter, and in a feed ranked by who vouched, each yes also counts by the giver’s track record. Filled dots ${filled}are the 10 most skilled. A gold star ${star}marks the top 10 by standing, with a dark edge ${edge}when that person is also one of the 10 most skilled. People with no yeses sit in the lane at the left. Under the field, a dashed line shows the last finished run.`;
   }
   return `Each dot ${dot}is a person, placed by score. Filled dots ${filled}are the 10 most skilled. A gold star ${star}marks the top 10 by score, with a dark edge ${edge}when that person is also one of the 10 most skilled. People nobody has vouched for sit in the lane at the left. Under the field, a dashed line shows the last finished run.`;
 }
@@ -927,7 +933,7 @@ function template(N) {
         <summary>Change the assumptions</summary>
         <div class="lab-drawer-body">
           ${ASSUMPTIONS.map((a) => sliderHtml(a)).join('')}
-          <p class="lab-note">These change the size of each effect. The directions come from the research; the sizes are ours.</p>
+          <p class="lab-note">These change the size of each effect, and at the extremes some effects reverse. The directions at the defaults come from the research; the sizes are ours.</p>
           <button class="btn btn-quiet" type="button" data-action="reset">Reset assumptions</button>
         </div>
       </details>

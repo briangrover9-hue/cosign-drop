@@ -8,8 +8,8 @@ By [Brian Grover](https://www.linkedin.com/in/briantgrover) ([@briantgrover](htt
 
 1. **Why now.** Freelancer.com data showing that once ChatGPT, and then the site's own AI tool, made tailored proposals cheap, employers would pay less for them and more for a worker's reputation score.
 2. **The drift.** A guess-then-reveal chart of our own measurement: the median San Francisco and New York Airbnb listing with 10 or more reviews is rated 4.84. Then college grades, Harvard, an online labor market, eBay, Airbnb against TripAdvisor hotels, LinkedIn endorsements and GitHub stars, each drawn as a grid of 100 stars.
-3. **The trust lab.** A simulation of 80 coworkers with five switches: stars or a named yes; one tap, written or tied to a piece of work; seen right away or only after both people write; whether a vouch says how the giver knows you; and a feed ranked by count, by the track record of who vouched, or not at all. It starts in the worst setting, has a Cosign-style preset, and the methods list every rule and assumption.
-4. **Why it happens.** Four forces, each backed by research: giving is free, the other person sees what you said, honesty costs you, and unhappy people go quiet. Ranked feeds make all four worse.
+3. **The trust lab.** A simulation of 80 coworkers with five switches: stars or a named yes; one tap, written or tied to a piece of work; seen right away or only after both people write; whether a vouch says how the giver knows you; and a feed ranked by count, by the track record of who vouched, or not at all. It starts in the worst setting, has a Cosign-style preset, and the methods set out its rules and the numbers behind them.
+4. **Why it happens.** Four forces, each backed by research: giving is free, the other person sees what you said, honesty costs you, and unhappy people go quiet. Then a ranked feed sends more attention to whoever is already ahead.
 5. **What predicts the job.** Schmidt and Hunter's 1998 ranking of hiring methods against Sackett and colleagues' 2022 revision.
 6. **What holds up.** Four rules for a vouch that the research supports, with the versions Cosign already ships.
 7. **Methods and caveats**, including a box of widely repeated hiring statistics that fell apart when traced.
@@ -30,7 +30,7 @@ The page is static HTML, CSS and JavaScript with no framework, no build step, no
 - `css/style.css`: the design system; `css/charts.css` and `css/lab.css` for the interactive parts
 - `js/main.js`: the header rating and the blind-reveal cards
 - `js/charts.js`: the four charts
-- `js/lab-model.js`: the trust lab's model, with no DOM code, so it runs in Node too; `js/lab.js` draws it, and `node tools/lab-check.mjs` checks every claim the page makes about it
+- `js/lab-model.js`: the trust lab's model, with no DOM code, so it runs in Node too; `js/lab.js` draws it, and `node tools/lab-check.mjs` checks the claims the page makes about it
 - `js/stars.js`: the star used everywhere
 - `tools/`: the share card and icon templates, the script that renders them, and the lab check
 

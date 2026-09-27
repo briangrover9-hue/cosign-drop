@@ -54,7 +54,7 @@ function runAll(worldSeed, settings, runSeed = 1, overrides = {}) {
 // averaged over the given worlds.
 function summarize(worlds, settings, overrides = {}) {
   const yes = settings.scale === 'yes';
-  const key = yes ? 'meanYeses' : 'mean';
+  const key = yes ? 'yesCount' : 'mean';
   const sum = [0, 0, 0, 0, 0];
   for (const w of worlds) {
     const snaps = runAll(w, settings, 1, overrides);
@@ -72,7 +72,7 @@ function cells(values, yes) {
 
 const header = 'setting'.padEnd(52) + '  r1 avg  final 4.8+/yes unrtd   hits';
 
-console.log('1. Averages over 12 worlds, run seed 1. For yes rows the averages are yeses per person and the third column is the yes rate.\n');
+console.log('1. Averages over 12 worlds, run seed 1. For yes rows the averages are yeses received per person, unweighted, and the third column is the yes rate.\n');
 console.log(header + '   | prototype');
 const averages = new Map();
 for (const [label, settings, proto] of ROWS) {
@@ -133,7 +133,12 @@ console.log('\n3. Checks\n');
   const starsZero = createRun(createWorld(PAGE_WORLD), WORST, 1).snapshot();
   check(starsZero.round === 0 && starsZero.metrics.mean === null && starsZero.metrics.unrated === 80 && starsZero.history.length === 0, 'stars round 0: no scores, 80 unrated, empty history');
   const yesZero = createRun(createWorld(PAGE_WORLD), COSIGN, 1).snapshot();
-  check(yesZero.metrics.meanYeses === 0 && yesZero.metrics.yesRate === null && yesZero.metrics.top48 === null, 'yes round 0: no yeses, no yes rate, no 4.8+ count');
+  check(yesZero.metrics.meanYeses === 0 && yesZero.metrics.yesCount === 0 && yesZero.metrics.yesRate === null && yesZero.metrics.top48 === null, 'yes round 0: no yeses, no yes rate, no 4.8+ count');
+  // "Yeses per person" counts yeses; standing weights them. With a count feed and vouches
+  // that say how the giver knows you, a stranger's yes counts a quarter in standing only.
+  const saidCount = runAll(PAGE_WORLD, { ...COSIGN, feed: 'count' }).at(-1).metrics;
+  const total = saidCount.yesCount * 80;
+  check(Math.abs(total - Math.round(total)) < 1e-9 && saidCount.meanYeses < saidCount.yesCount, `yes scale: yeses per person is a plain count (${saidCount.yesCount.toFixed(1)}), and the weighted standing is lower (${saidCount.meanYeses.toFixed(1)})`);
 
   const starsRun = runAll(PAGE_WORLD, WORST);
   const yesRun = runAll(PAGE_WORLD, LINKEDIN);
@@ -165,6 +170,18 @@ console.log('\n3. Checks\n');
     check(Math.abs(plainYes[4] - reputation[4]) <= 1, `${where}: on the yes scale, ranking no one does about as well as ranking by track record (${plainYes[4].toFixed(1)} against ${reputation[4].toFixed(1)})`);
     check([count[3], reputation[3]].every((u) => u >= 15 && u <= 25), `${where}: a ranked feed on the yes scale leaves about a quarter of the 80 with no yes (${count[3].toFixed(1)} by count, ${reputation[3].toFixed(1)} by track record)`);
     check(plainYes[3] < 10, `${where}: a feed that ranks no one leaves far fewer with no yes (${plainYes[3].toFixed(1)})`);
+  }
+
+  // The text under the lab: on the yes scale, vouches tied to work leave more
+  // people with no yes than written ones, with a ranked feed (about 33 of 80)
+  // and without one (about 14).
+  {
+    const workRanked = summarize(WORLDS, { ...COSIGN, type: 'work' });
+    const workPlain = summarize(WORLDS, { ...COSIGN, type: 'work', feed: 'plain' });
+    const written = averages.get(ROWS[10][0]);
+    const writtenPlain = averages.get(ROWS[11][0]);
+    check(workRanked[3] > written[3] && workRanked[3] >= 28 && workRanked[3] <= 38, `12-world average: tied to work on the yes scale leaves about 33 with no yes in a ranked feed (${workRanked[3].toFixed(1)}, against ${written[3].toFixed(1)} written)`);
+    check(workPlain[3] > writtenPlain[3] && workPlain[3] >= 10 && workPlain[3] <= 18, `12-world average: and about 14 with no ranking (${workPlain[3].toFixed(1)}, against ${writtenPlain[3].toFixed(1)} written)`);
   }
 
   // The anchor slider's note: with the other switches at their worst, a vouch

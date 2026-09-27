@@ -66,6 +66,7 @@ Older Inside Airbnb snapshots (2015 to 2023) are no longer served (HTTP 403 on 2
 | eBay sellers answered negative feedback in kind, which kept buyers from leaving it | qualitative, from the timing of mutual feedback | Bolton, Greiner and Ockenfels (2013), "Engineering Trust," Management Science 59(2), [author draft](https://ben.orsee.org/papers/engineering_trust.pdf) | Confirmed. A "46.8% retaliation" figure reported to us could not be found in either draft and is cut. The paper does not measure the effect of eBay's 2008 change; the page must not imply it does. |
 | Lab: blind feedback cut the correlation between the two sides' ratings | 0.680 to 0.411 | same, Table 4 | Confirmed (lab experiment, n = 192) |
 | Employers who privately would definitely not rehire but publicly gave 4+ stars | 28.4% | Filippas, Horton and Golden, NBER w25857 | Confirmed |
+| Why raters hold back | "In surveys conducted by the platform, some employers report they fear retaliation, while others claim to not want to harm the rated individual" | same | Confirmed (qualitative) |
 | Private feedback over the same period | fell while public feedback rose, for the same transactions | same | Confirmed |
 | Share of eBay feedback that was negative, when any was left | 0.55% of buyers' comments, 0.58% of sellers' comments (buyers commented on 67% of auctions) | Dellarocas and Wood (2008), "The Sound of Silence in Online Feedback," Management Science 54(3), [preprint](https://www.cs.princeton.edu/courses/archive/spr08/cos444/papers/dellarocas_wood06.pdf), Table 2 | Confirmed |
 | Their estimate of buyers who were actually dissatisfied | about 18.5% (Model A) to 21% (Model C) | same, Tables 5 and 6 | Confirmed |
@@ -94,7 +95,7 @@ Operational validity for overall job performance. 1998 values from Schmidt and H
 | Reference checks | .26 | not re-estimated |
 | Years of education | .10 | not re-estimated |
 
-Why work samples fell: Sackett et al. (2022) say the drop from .54 to .33 "is the result of a new meta-analysis" (Roth et al., 2005, 54 studies, nearly all concurrent, so no range restriction correction), replacing an estimate that predates meta-analysis. Most other methods fell because the earlier range restriction corrections were too large. Both kinds of correction are described on the page in plain words.
+Why each value changed, from Sackett et al. (2022), pp. 22 to 23. Revised range restriction corrections are the main driver for cognitive ability (.51 to .31), unstructured interviews (.38 to .19), structured interviews (.51 to .42, which also adds a new meta-analysis) and job knowledge (.48 to .40, a more current meta-analysis adjusted for an untrustworthy correction). Newer meta-analyses drive the rest: work samples (.54 to .33, "the result of a new meta-analysis", Roth et al., 2005, 54 studies, replacing Asher and Sciarrino's 1974 narrative review), integrity tests (.41 to .31, "Range restriction is not a significant factor"), conscientiousness (.31 to .19, "multiple new meta-analyses"), and experience (.18 to .07, "a new meta-analysis which focuses on prior work experience at point of hire"). The page gives both kinds of reason in plain words.
 
 Caveats: Sackett et al. (2023, IOP 16(3)) revise cognitive ability again to .23 using an unpublished conference analysis. Oh, Le and Roth (2023, JAP 108(8)) and Bobko et al. (2024, IJSA 33(1)) dispute how much the 2022 paper lowers the estimates. Work samples show a larger Black-White gap (d = .67) than most methods in the same table.
 
@@ -120,5 +121,18 @@ Caveats: Sackett et al. (2023, IOP 16(3)) revise cognitive ability again to .23 
 | Private signals (Would Meet, Would Work With, "Work/Worked Together", Would Hire, Would Fund, Would Take Funding From) are separate from public cosigns; "The recipient can see the type of signal you send; it isn't public. When interest is reciprocal, Cosign can open a private conversation." "Work/Worked Together" "lets you indicate an existing or past relationship" | same | Confirmed |
 | "On ranked lists, ordering can reflect the reputation behind contributions as well as how many people have contributed" | same | Confirmed |
 | "Read who is saying what, and why." and "Having few or no cosigns is not a negative judgment about a person." | same | Confirmed |
+| How Cosign measures reputation | Not described. The homepage says "Build a reputation as a Cosigner. Make discoveries before anyone else." | [cosign.co](https://cosign.co) | The lab's track record (how the people a giver backed turned out) is our stand-in, and the page says so |
 | Cosign is focused on positive recognition | same | Confirmed |
 | Launched September 25, 2026, as a free product from a16z | [a16z launch post](https://a16zjobs.substack.com/p/introducing-cosign-a-new-space-to) | Confirmed |
+
+## Numbers that didn't survive
+
+These appear on the page only in the box of repeated statistics that fell apart when traced.
+
+| Claim as usually repeated | What the source says | Source | Status |
+|---|---|---|---|
+| "46 percent of resumes contain false information" | 46% of workers polled "said they know someone who included false information on a resume" | OfficeTeam press release, [August 17, 2017](https://press.roberthalf.com/2017-08-17-Resume-Lies-On-The-Rise) | Cut as a resume statistic; often credited to SHRM |
+| "Only 0.4 percent of applications succeed" | A blog's arithmetic: one hire divided by an average of 242 applications | [The Interview Guys](https://blog.theinterviewguys.com/the-average-job-opening-now-gets-242-applications/), May 4, 2026 | Cut; no study measured it |
+| "Referrals are 7 percent of applicants and 40 percent of hires" | Not found | Jobvite recruiting reports for 2015, 2016 and 2024, searched for every referral figure | Cut |
+| "63 percent of candidates get ghosted" | Not found | Searched; no study matched | Cut |
+| Job seekers who plan to ghost an employer | 62% in 2023, up from 56% in 2022 and 37% in 2019, among 4,516 job seekers in the US, UK and Canada who admit to having ghosted an employer before, surveyed April 26 to May 9, 2023 | [Indeed](https://www.indeed.com/career-advice/news/ghosting-in-hiring-insights-strategies), footnote 1 | Confirmed, vendor survey; the page gives the population |

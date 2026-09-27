@@ -313,7 +313,8 @@ export function createRun(world, settings, seed = 1, overrides = {}) {
   function buildSnapshot(yesRate) {
     const frozen = Object.freeze(scores.slice());
     const topScore = Object.freeze(rankByScore(frozen, tieOrder).slice(0, TOP_N));
-    const metrics = Object.freeze(measure(people, frozen, topScore, topSkillSet, yesScale, yesRate));
+    const yesTotal = yesScale ? countReceived.reduce((a, b) => a + b, 0) : null;
+    const metrics = Object.freeze(measure(people, frozen, topScore, topSkillSet, yesScale, yesRate, yesTotal));
     if (round > 0) history.push(Object.freeze(yesScale ? { round, yesRate } : { round, mean: metrics.mean }));
     return Object.freeze({
       round,
@@ -354,12 +355,13 @@ export function createRun(world, settings, seed = 1, overrides = {}) {
 // The measures shown under the lab. Scores of null mean nothing to count yet.
 //   mean       stars: average score of everyone with at least one vouch (null before round 1)
 //   top48      stars: people whose score is 4.8 or higher (null on the yes scale)
-//   meanYeses  yes: average standing across everyone, counting people with no yeses as 0
+//   meanYeses  yes: average standing (weighted yeses) across everyone, counting people with no yeses as 0
+//   yesCount   yes: average number of yeses received across everyone, unweighted
 //   yesRate    yes: share of this round's vouches that were yes (null before round 1)
 //   unrated    people with nothing to count: no vouches (stars) or no yeses (yes)
 //   hits       how many of the top 10 by score are among the 10 most skilled (null before round 1)
 //   rho        rank correlation between score and skill, with unrated people tied at the bottom
-function measure(people, scores, topScore, topSkillSet, yesScale, yesRate) {
+function measure(people, scores, topScore, topSkillSet, yesScale, yesRate, yesTotal) {
   const N = people.length;
   const rated = scores.filter((s) => s !== null);
   const any = rated.length > 0;
@@ -370,12 +372,13 @@ function measure(people, scores, topScore, topSkillSet, yesScale, yesRate) {
     rho: Number.isFinite(rho) ? rho : null,
   };
   if (yesScale) {
-    return { mean: null, top48: null, meanYeses: rated.reduce((a, b) => a + b, 0) / N, yesRate, ...common };
+    return { mean: null, top48: null, meanYeses: rated.reduce((a, b) => a + b, 0) / N, yesCount: yesTotal / N, yesRate, ...common };
   }
   return {
     mean: any ? rated.reduce((a, b) => a + b, 0) / rated.length : null,
     top48: rated.filter((s) => s >= HIGH_BAR).length,
     meanYeses: null,
+    yesCount: null,
     yesRate: null,
     ...common,
   };
