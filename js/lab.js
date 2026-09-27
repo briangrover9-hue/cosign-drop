@@ -657,10 +657,14 @@ function mount(root) {
     }
   }
 
-  // A new setting of the switches. A change of scale or feed changes the axis too, so the
-  // field is redrawn first; the dots then travel from where they are to the new run.
+  // A new setting of the switches. A change of scale or feed changes the axis too, and on the
+  // yes scale so does saying how the giver knows you (it decides whether yeses are weighted),
+  // so the field is redrawn first; the dots then travel from where they are to the new run.
   function changeSettings(next) {
-    const redraw = next.scale !== state.settings.scale || next.feed !== state.settings.feed;
+    const redraw =
+      next.scale !== state.settings.scale ||
+      next.feed !== state.settings.feed ||
+      (next.scale === 'yes' && weightedYeses(next) !== weightedYeses(state.settings));
     state.settings = next;
     syncControls();
     applyScale();

@@ -730,20 +730,15 @@ figcaption .src,
     padding-inline: var(--gutter);
   }
 }
-/* Touch: links alone in a table cell get a hit area at least 44px tall, centered on the
-   link, without moving the text. Rows are taller than that, so neighbors never overlap. */
-.table-scroll td a {
+/* Touch: a table cell holds at most one link, so the whole cell is that link's hit area, at
+   least 58px tall, without moving the text. */
+.table-scroll td {
   position: relative;
 }
 .table-scroll td a::after {
   content: "";
   position: absolute;
-  top: 50%;
-  right: -4px;
-  left: -4px;
-  height: 100%;
-  min-height: 44px;
-  transform: translateY(-50%);
+  inset: 0;
 }
 .methods ol,
 .methods ul {

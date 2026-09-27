@@ -11,7 +11,7 @@
 import { createWorld, createRun, DEFAULTS, WORST, BEST, COSIGN } from '../js/lab-model.js';
 
 const WORLDS = [11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133];
-const PAGE_WORLD = 102; // the world index.html sets on #lab-root: of worlds 1 to 600, its first run sits closest to the 12-world averages with the same order of switches
+const PAGE_WORLD = 102; // the world index.html sets on #lab-root: of worlds 1 to 600 whose first run keeps the averages' main results (tied to work finds the most on its own; on the yes scale a track record beats a raw count), its results sit closest to the 12-world averages
 const LINKEDIN = Object.freeze({ scale: 'yes', type: 'tap', vis: 'visible', who: 'anyone', feed: 'count' });
 const COSIGN_COUNT = Object.freeze({ ...COSIGN, feed: 'count' });
 
@@ -195,6 +195,29 @@ console.log('\n3. Checks\n');
     const rise = (r) => r[1] - r[0];
     check(rise(held) < 0.25 * rise(worst), `${where}: tied to work at the default anchor rises ${rise(held).toFixed(2)}, under a quarter of the worst setting's ${rise(worst).toFixed(2)}`);
     check(rise(loose) > 0.6 * rise(worst), `${where}: with the anchor at 0 it rises ${rise(loose).toFixed(2)}, most of the way back to the worst setting's drift`);
+    if (worlds === WORLDS) {
+      const share = rise(loose) / rise(worst);
+      check(share >= 0.65 && share <= 0.9, `${where}: that is about three quarters of the worst setting's climb (${share.toFixed(2)})`);
+    }
+  }
+
+  // The text's extreme: if strangers judge a piece of work entirely by how visible its
+  // maker is, tying vouches to work stops helping.
+  {
+    const worst = averages.get(ROWS[0][0]);
+    const extreme = summarize(WORLDS, WORK_ONLY, { workVis: 1 });
+    check(extreme[4] <= worst[4], `12-world average: with workVis at 1, tied to work finds ${extreme[4].toFixed(2)}, no more than the worst setting's ${worst[4].toFixed(2)}`);
+  }
+
+  // The text's reason more people get no yes when yeses are tied to work: none of them is
+  // reflexive. Give them written's 3 percent and the counts fall back to written's.
+  {
+    const written = averages.get(ROWS[10][0]);
+    const writtenPlain = averages.get(ROWS[11][0]);
+    const reflexive = { autoYes: { work: DEFAULTS.autoYes.written } };
+    const ranked = summarize(WORLDS, { ...COSIGN, type: 'work' }, reflexive);
+    const plain = summarize(WORLDS, { ...COSIGN, type: 'work', feed: 'plain' }, reflexive);
+    check(Math.abs(ranked[3] - written[3]) <= 3 && Math.abs(plain[3] - writtenPlain[3]) <= 3, `12-world average: with written's reflexive yeses, tied to work leaves ${ranked[3].toFixed(1)} and ${plain[3].toFixed(1)} with no yes, close to written's ${written[3].toFixed(1)} and ${writtenPlain[3].toFixed(1)}`);
   }
 }
 

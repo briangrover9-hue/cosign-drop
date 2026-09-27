@@ -165,9 +165,11 @@
   padding: 0;
   border: 0;
 }
-/* "A vouch is" and the anchor slider under it move as one piece. */
+/* "A vouch is" and the anchor slider under it move as one piece. The column is capped at the
+   group's width: left to size itself, Firefox grew it past a narrow column at 600 to 640px. */
 .lab-switch-group {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   min-width: 0;
 }
