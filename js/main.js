@@ -1,5 +1,6 @@
-// Page-level behavior: the header rating that climbs as you read, and the two
-// hidden vouch cards that flip at the same moment.
+// Page-level behavior: the header rating that climbs as you read, keeping the
+// reader's place while the page builds, and the two hidden vouch cards that flip
+// at the same moment.
 import { setStarRow } from './stars.js';
 
 const header = document.querySelector('.site-header');
@@ -45,6 +46,60 @@ window.addEventListener('resize', onScroll);
 // The page also changes height with no scroll event: charts arriving, the lab's drawer opening.
 if ('ResizeObserver' in window) new ResizeObserver(onScroll).observe(document.body);
 update();
+
+// Reloads and links to a section. The charts build once their data arrives, which
+// can be after the browser has restored the reader's place or jumped to the link,
+// and each chart above the reader then moves the text. Until the reader scrolls,
+// taps or types, put the place back after every change in the page's height.
+const PLACE_KEY = 'everyones-a-4.8:scroll-y';
+const savePlace = () => {
+  try {
+    sessionStorage.setItem(PLACE_KEY, String(Math.round(window.scrollY)));
+  } catch {
+    // Storage can be switched off; the browser's own restore still runs.
+  }
+};
+window.addEventListener('pagehide', savePlace);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') savePlace();
+});
+
+function holdPlace() {
+  if (!('ResizeObserver' in window)) return;
+  const type = performance.getEntriesByType?.('navigation')[0]?.type;
+  let putBack = null;
+  if (type === 'reload' || type === 'back_forward') {
+    let y = NaN;
+    try {
+      y = Number(sessionStorage.getItem(PLACE_KEY));
+    } catch {
+      return;
+    }
+    if (y > 0) putBack = () => window.scrollTo(0, y);
+  } else if (location.hash.length > 1) {
+    let target = null;
+    try {
+      target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    } catch {
+      return;
+    }
+    if (target) putBack = () => target.scrollIntoView();
+  }
+  if (!putBack) return;
+  const holder = new ResizeObserver(() => putBack());
+  const inputs = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
+  const release = () => {
+    holder.disconnect();
+    inputs.forEach((name) => window.removeEventListener(name, release, true));
+  };
+  inputs.forEach((name) => window.addEventListener(name, release, { capture: true, passive: true }));
+  holder.observe(document.body);
+  // A chart slower than this lands wherever the browser leaves it.
+  const later = () => setTimeout(release, 4000);
+  if (document.readyState === 'complete') later();
+  else window.addEventListener('load', later, { once: true });
+}
+holdPlace();
 
 // Blind reveal: both cards stay face down until both vouches are in, then flip together.
 const reveal = document.getElementById('reveal');
