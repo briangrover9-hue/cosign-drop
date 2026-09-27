@@ -5,8 +5,11 @@
 //   #validity-root  dot plot, how well hiring methods predict the job, 1998 and 2022
 //
 // Each container starts with a fallback (a table, list or sentence). Once a chart's data
-// loads, the fallback moves into a visually hidden wrapper, so screen readers still get
-// the numbers, and the chart renders beside it. If the data cannot load, the fallback stays.
+// loads, a table fallback moves into a visually hidden wrapper, so screen readers still get
+// the numbers, and the chart renders beside it. The drift list and the guess sentence are
+// removed instead: the drift chart's own text already gives every number, and the guess
+// sentence would tell screen reader users the answer before they guess. If the data cannot
+// load, the fallback stays.
 
 import { STAR_PATH, starRow, setStarRow } from './stars.js';
 
@@ -37,20 +40,21 @@ const dec = (v) => v.toFixed(2).replace(/^0/, ''); // .54 style: two decimals, n
 const monoWidth = (text, size) => text.length * size * 0.6; // IBM Plex Mono is 0.6em wide
 const motionAllowed = () => !reduceMotion.matches;
 
-// Builds a chart, then moves the fallback out of sight. On any failure the chart's
-// own nodes are removed and the fallback stays where it was.
-async function mount(id, build, { fallbackLast = false } = {}) {
+// Builds a chart, then moves the fallback out of sight, or removes it when dropFallback
+// is set. On any failure the chart's own nodes are removed and the fallback stays where it was.
+async function mount(id, build, { dropFallback = false } = {}) {
   const root = document.getElementById(id);
   if (!root) return;
   const fallback = root.querySelector(':scope > .fallback');
   const existing = new Set(root.children);
   try {
     await build(root);
-    if (fallback) {
+    if (fallback && dropFallback) {
+      fallback.remove();
+    } else if (fallback) {
       const hidden = document.createElement('div');
       hidden.className = 'visually-hidden';
-      if (fallbackLast) root.append(hidden);
-      else root.insertBefore(hidden, fallback);
+      root.insertBefore(hidden, fallback);
       hidden.append(fallback);
     }
   } catch (err) {
@@ -640,6 +644,6 @@ function validitySVG(revised, kept, W, wide, label) {
 }
 
 mount('why-now-root', buildWhyNow);
-mount('guess-root', buildGuess, { fallbackLast: true });
-mount('drift-root', buildDrift);
+mount('guess-root', buildGuess, { dropFallback: true });
+mount('drift-root', buildDrift, { dropFallback: true });
 mount('validity-root', buildValidity);
