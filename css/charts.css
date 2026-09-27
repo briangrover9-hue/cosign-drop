@@ -228,8 +228,10 @@
 .ch-svg .gs-top-label {
   fill: var(--ink-2);
 }
+/* The median and labels arrive once the bars are 96% grown; the reader's own star is drawn
+   outside this group, so it is on the axis from the start. */
 .gs-anno {
-  transition: opacity 0.3s ease 0.4s;
+  transition: opacity 250ms var(--ease-out) 300ms;
 }
 .is-pending .gs-bars {
   transform: scaleY(0);
