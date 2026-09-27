@@ -141,12 +141,16 @@ strong {
   font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1.5;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
   color: var(--ink-3);
 }
-.label,
-.kicker {
+/* Only wayfinding keeps capitals: the kicker, the section numbers and the header's
+   rating. Every other label reads in sentence case. */
+.kicker,
+.section-head .label,
+.page-rating .label {
   text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .wrap {
@@ -362,13 +366,15 @@ figcaption .src,
   display: block;
   margin-top: 6px;
 }
+/* A chart's title is its headline: the body face at body size in semibold, so it
+   outranks the chart's own mono labels. */
 .fig-title {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: var(--ink);
   margin: 0 0 12px;
+  text-wrap: balance;
 }
 .fallback {
   font-size: 0.9375rem;
@@ -495,8 +501,7 @@ figcaption .src,
 .card-face .who {
   font-family: var(--mono);
   font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--ink-3);
 }
 .card-face .sealed {
