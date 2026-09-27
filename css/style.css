@@ -602,6 +602,18 @@ figcaption .src,
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+/* Phones: hyphenated cells let all four columns fit from 360px. Narrower than that the table
+   still scrolls, so the scroller runs to the screen edges and the clipped column shows. */
+@media (max-width: 479.98px) {
+  .methods td {
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+  .table-scroll {
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+  }
+}
 .methods ol,
 .methods ul {
   padding-left: 1.2em;
@@ -617,6 +629,16 @@ figcaption .src,
 }
 .site-footer p {
   margin-bottom: 0.4em;
+}
+/* Touch: each footer link gets a 44px tall target, reaching down into the footer's padding,
+   without moving the line. */
+.site-footer a {
+  position: relative;
+}
+.site-footer a::after {
+  content: "";
+  position: absolute;
+  inset: -6px -9px -23px;
 }
 
 @media (min-width: 720px) {
