@@ -71,9 +71,9 @@
           <h2 id="h-why-now">When writing got cheap, reputation got expensive</h2>
         </div>
         <p>Freelancer.com ran the experiment before anyone planned it. In April 2023 the site gave workers on paid plans a tool that writes a proposal with one click. Economists Anaïs Galdin and Jesse Silbert then estimated how much more an employer would pay a worker for a proposal tailored to the job, and for a stronger track record on the site.</p>
-        <figure class="figure" id="fig-why-now">
+        <figure class="figure" id="fig-why-now" aria-labelledby="why-now-title" aria-describedby="why-now-cap">
           <p class="fig-title" id="why-now-title">What an employer would pay for one step more of each</p>
-          <div id="why-now-root" class="chart" data-chart="why-now" aria-describedby="why-now-cap">
+          <div id="why-now-root" class="chart" data-chart="why-now">
             <table class="fallback">
               <caption class="visually-hidden">Willingness to pay before and after the AI writing tool</caption>
               <thead><tr><th scope="col">For one standard deviation more of</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
@@ -98,19 +98,19 @@
           <h2 id="h-drift">Where ratings actually sit</h2>
         </div>
         <p>Start with a scale everyone has used. Before you look, make a guess.</p>
-        <figure class="figure" id="fig-guess">
+        <figure class="figure" id="fig-guess" aria-describedby="guess-cap">
           <div id="guess-root" class="chart guess" data-chart="guess">
             <p class="fallback">The median Airbnb listing in San Francisco and New York with at least 10 reviews is rated 4.84 out of 5.</p>
           </div>
           <div class="guess-answer" id="guess-answer">
             <p>Of 15,694 listings with at least 10 reviews, 92.3 percent sit at 4.5 or above and 60.6 percent at 4.8 or above. Only 0.3 percent fall below 4.0, a score three quarters of the way up the scale. In San Francisco, anything under 4.7 lands in the bottom 15 percent.</p>
           </div>
-          <figcaption>Guest ratings of Airbnb listings with at least 10 reviews, San Francisco and New York City, 14 June 2026.<span class="src">Data: <a href="https://insideairbnb.com/get-the-data/">Inside Airbnb</a>, CC BY 4.0. Our measurement, <a href="https://github.com/briangrover9-hue/cosign-drop/blob/main/research/airbnb_measure.py">code here</a>.</span></figcaption>
+          <figcaption id="guess-cap">Guest ratings of Airbnb listings with at least 10 reviews, San Francisco and New York City, 14 June 2026.<span class="src">Data: <a href="https://insideairbnb.com/get-the-data/">Inside Airbnb</a>, CC BY 4.0. Our measurement, <a href="https://github.com/briangrover9-hue/cosign-drop/blob/main/research/airbnb_measure.py">code here</a>.</span></figcaption>
         </figure>
         <p>The pattern is old, and it shows up everywhere people rate each other. Here is each system drawn the same way: a hundred stars, with gold for the share at the top of its scale.</p>
       </div>
       <div class="wrap-wide">
-        <figure class="figure" id="fig-drift">
+        <figure class="figure" id="fig-drift" aria-describedby="drift-cap">
           <div id="drift-root" class="chart drift" data-chart="drift">
             <ul class="fallback">
               <li>College grades that are A's: 15 percent in 1960, 43 percent by the late 2000s.</li>
@@ -121,7 +121,7 @@
               <li>LinkedIn endorsements and GitHub stars can only say yes: 100 percent.</li>
             </ul>
           </div>
-          <figcaption>Each grid is 100 stars. Gold is the share at the top of that system's scale; where there are two dates, the lighter gold is what was added between them.<span class="src">Sources for every grid are listed in <a href="#m-drift">the methods</a>.</span></figcaption>
+          <figcaption id="drift-cap">Each grid is 100 stars. Gold is the share at the top of that system's scale; where there are two dates, the lighter gold is what was added between them.<span class="src">Sources for every grid are listed in <a href="#m-drift">the methods</a>.</span></figcaption>
         </figure>
       </div>
       <div class="wrap">
@@ -137,7 +137,7 @@
           <h2 id="h-why">Four ordinary forces push every scale up</h2>
         </div>
         <p>None of this needs anyone to lie. Each force is small and reasonable on its own, and they all push the same way.</p>
-        <ol class="forces">
+        <ol class="forces" role="list">
           <li>
             <h3>Giving is free</h3>
             <p>A one-click endorsement costs nothing, so people give them to be nice, to return a favor or to clear a notification. Signals that cost something behave differently. At two events run by a South Korean dating company, each participant got two or eight virtual roses to attach to date requests. All else equal, attaching a rose raised the chance a request was accepted by 3.3 percentage points, about a fifth. Economics job candidates can send only two signals of interest, and a signal came with a 6.8 point higher chance of an interview.</p>
@@ -167,9 +167,9 @@
           <h2 id="h-predicts">Watching someone work beats counting their years</h2>
         </div>
         <p>If vouches are going to carry more of hiring, it helps to know what predicts job performance in the first place. In 1998, Frank Schmidt and John Hunter pooled 85 years of research into one ranking of hiring methods. In 2022, Paul Sackett and colleagues redid the statistical corrections behind those numbers and found most of them had been set too high.</p>
-        <figure class="figure" id="fig-validity">
+        <figure class="figure" id="fig-validity" aria-labelledby="validity-title" aria-describedby="validity-cap">
           <p class="fig-title" id="validity-title">How well each method predicts job performance</p>
-          <div id="validity-root" class="chart" data-chart="validity" aria-describedby="validity-cap">
+          <div id="validity-root" class="chart" data-chart="validity">
             <table class="fallback">
               <caption class="visually-hidden">Validity of hiring methods, 1998 and 2022 estimates</caption>
               <thead><tr><th scope="col">Method</th><th scope="col">1998</th><th scope="col">2022</th></tr></thead>
@@ -224,7 +224,7 @@
           <h2 id="h-holds">Praise tied to real work keeps its value</h2>
         </div>
         <p>I spent nine months designing a hiring network built on vouches and work samples. The design came down to four rules, and each one answers a force from section 3.</p>
-        <ol class="rules">
+        <ol class="rules" role="list">
           <li>
             <h3>A vouch stays hidden until both people have written theirs</h3>
             <div class="reveal" id="reveal">

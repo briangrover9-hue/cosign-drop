@@ -16,9 +16,11 @@
   font-size: 12px;
   fill: var(--ink);
 }
+/* The axis carries the scale (the histogram's nearly empty low end is drawn by it alone),
+   so it needs 3:1 on paper: ink-3 gives 5.2:1 where the hairline rule gave 1.4:1. */
 .ch-axis,
 .ch-tick {
-  stroke: var(--rule);
+  stroke: var(--ink-3);
   stroke-width: 1;
 }
 .ch-svg .ch-tick-label {
@@ -329,21 +331,25 @@
   letter-spacing: 0.02em;
   color: var(--ink-3);
 }
+/* Every star gets the page's gold edge (4.4:1 on paper). Empty stars are hollow: with edges on
+   all three kinds, a beige fill would match the lighter gold in lightness (1.03:1). */
+.dr-stars use {
+  stroke: var(--gold-edge);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
 .dr-s0 {
-  fill: var(--paper-3);
+  fill: var(--paper);
 }
 .dr-s1 {
   fill: var(--gold);
 }
 .dr-s2 {
   fill: var(--gold-soft);
-  stroke: var(--gold);
-  stroke-width: 1;
   transition: fill 0.2s ease, stroke 0.2s ease;
 }
 .is-pending .dr-s2 {
-  fill: var(--paper-3);
-  stroke: transparent;
+  fill: var(--paper);
 }
 @media (min-width: 900px) {
   .dr-list {
@@ -387,6 +393,16 @@
 .va-key {
   display: block;
   flex: none;
+}
+
+/* Forced colors repaint backgrounds, which would erase the slider's track; outlines survive. */
+@media (forced-colors: active) {
+  .gs-range::-webkit-slider-runnable-track {
+    outline: 1px solid;
+  }
+  .gs-range::-moz-range-track {
+    outline: 1px solid;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
