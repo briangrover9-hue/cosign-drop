@@ -198,6 +198,11 @@ strong {
 .site-header.is-scrolled .site-title {
   opacity: 1;
 }
+/* The title is hidden near the top of the page but still takes focus, so show it then. */
+.site-title:focus-visible {
+  opacity: 1;
+  transition: none;
+}
 .page-rating {
   display: flex;
   align-items: center;
