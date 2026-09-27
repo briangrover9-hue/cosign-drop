@@ -1,1 +1,400 @@
-/* Chart styles: built in the charts pass. */
+/* Charts: paired bars, the guess and reveal, star grids and the dot plot.
+   Class prefixes: ch (shared), wn (why now), gs (guess), dr (drift), va (validity). */
+
+:root {
+  --gold-soft: #f0d27f;
+}
+
+/* Shared */
+.ch-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.ch-svg text {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--ink);
+}
+.ch-axis,
+.ch-tick {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.ch-svg .ch-tick-label {
+  fill: var(--ink-3);
+}
+.ch-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  margin: 0 0 16px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+}
+.ch-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 1. Why now */
+.wn-swatch {
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 12px;
+}
+.wn-swatch-before {
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+}
+.wn-swatch-after {
+  background: var(--ink);
+}
+.ch-svg .wn-label {
+  font-family: var(--serif);
+  font-weight: 500;
+}
+.ch-svg .wn-note {
+  font-size: 13px;
+  font-weight: 500;
+}
+.ch-svg .wn-value {
+  font-size: 13px;
+  transition: opacity 0.25s ease 0.45s;
+}
+.wn-before {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.wn-after {
+  fill: var(--ink);
+}
+.wn-bar {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.is-pending .wn-bar {
+  transform: scaleX(0);
+}
+.ch-svg.is-pending .wn-value {
+  opacity: 0;
+}
+
+/* 2. The guess */
+#guess-root [hidden] {
+  display: none !important;
+}
+.gs-prompt {
+  margin: 0 0 18px;
+}
+.gs-readout {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 0;
+}
+.gs-num {
+  font-size: 3.25rem;
+  line-height: 0.86;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-variation-settings: "opsz" 60;
+}
+.gs-stars {
+  width: 136px;
+  height: 24px;
+  margin-bottom: 2px;
+}
+.gs-slider {
+  margin: 14px 0 0;
+}
+.gs-range {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.gs-range::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--ink);
+  border: 0;
+}
+.gs-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 36px;
+  height: 36px;
+  margin-top: -17px;
+  border: 0;
+  background: transparent center / 100% 100% no-repeat;
+}
+.gs-range::-moz-range-track {
+  height: 2px;
+  background: var(--ink);
+  border: 0;
+}
+.gs-range::-moz-range-thumb {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 0;
+  background: transparent center / 100% 100% no-repeat;
+}
+.gs-range:focus {
+  outline: none;
+}
+.gs-range:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+/* Where :has() works, ring the whole slider, ticks included, so the ring never crosses them. */
+@supports selector(:has(*)) {
+  .gs-range:focus-visible {
+    outline: none;
+  }
+  .gs-slider:has(.gs-range:focus-visible) {
+    outline: 2px solid var(--ink);
+    outline-offset: 6px;
+  }
+}
+/* Tick labels sit under the thumb's center at 1 to 5, so they are inset by half a thumb. */
+.gs-ticks {
+  position: relative;
+  height: 28px;
+  margin: -18px 18px 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--ink-3);
+}
+.gs-ticks span {
+  position: absolute;
+  top: 14px;
+  transform: translateX(-50%);
+}
+.gs-ticks span::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -12px;
+  width: 1px;
+  height: 6px;
+  background: var(--rule-strong);
+}
+.gs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  margin-top: 20px;
+}
+.gs-hist {
+  margin-top: 4px;
+}
+.gs-band {
+  fill: var(--paper-3);
+}
+.gs-bars {
+  fill: var(--ink);
+  transform-box: view-box;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.gs-median {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.ch-svg .gs-median-label,
+.ch-svg .gs-guess-label {
+  font-weight: 500;
+}
+.ch-svg .gs-band-label,
+.ch-svg .gs-top-label {
+  fill: var(--ink-2);
+}
+.gs-anno {
+  transition: opacity 0.3s ease 0.4s;
+}
+.is-pending .gs-bars {
+  transform: scaleY(0);
+}
+.is-pending .gs-anno {
+  opacity: 0;
+}
+.gs-stats {
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+}
+.gs-stats span {
+  white-space: nowrap;
+}
+.gs-message {
+  margin: 18px 0 0;
+  font-size: 1.3125rem;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.gs-message:empty {
+  margin: 0;
+}
+.gs-again {
+  margin-top: 14px;
+}
+#guess-root + .guess-answer {
+  margin-top: 22px;
+}
+
+/* 3. The drift */
+.dr-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.dr-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+}
+/* Each block spans five shared rows, so titles, grids and values line up across a row. */
+.dr-item {
+  display: grid;
+  grid-row: span 5;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  align-content: start;
+  min-width: 0;
+  margin: 0 0 18px;
+}
+.dr-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.22;
+}
+.dr-measure {
+  margin: 4px 0 12px;
+}
+.dr-stars {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+}
+.dr-value {
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.dr-value b {
+  font-weight: 500;
+  color: var(--ink);
+}
+.dr-nw {
+  white-space: nowrap;
+}
+.dr-sub {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.dr-src {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+.dr-s0 {
+  fill: var(--paper-3);
+}
+.dr-s1 {
+  fill: var(--gold);
+}
+.dr-s2 {
+  fill: var(--gold-soft);
+  stroke: var(--gold);
+  stroke-width: 1;
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+.is-pending .dr-s2 {
+  fill: var(--paper-3);
+  stroke: transparent;
+}
+@media (min-width: 900px) {
+  .dr-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 28px;
+  }
+}
+
+/* 4. What predicts the job */
+.ch-svg .va-label {
+  font-family: var(--serif);
+  font-size: 16px;
+}
+.ch-svg .va-label.is-strong {
+  font-weight: 600;
+}
+.ch-svg .va-value {
+  fill: var(--ink-2);
+}
+.ch-svg .va-sub {
+  fill: var(--ink-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.va-grid {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.va-line {
+  stroke: var(--ink-3);
+  stroke-width: 1.5;
+}
+.va-1998 {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.va-2022 {
+  fill: var(--ink);
+}
+.va-key {
+  display: block;
+  flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wn-bar,
+  .gs-bars,
+  .gs-anno,
+  .dr-s2,
+  .ch-svg .wn-value {
+    transition: none;
+  }
+}
