@@ -610,15 +610,23 @@ figcaption .src,
   .hero .kicker {
     margin-bottom: 30px;
   }
+  /* On wider screens the number, stars and title stay on one line each and may
+     run past the text column to the right; the sizes are capped so they fit. */
+  .hero-score {
+    flex-wrap: nowrap;
+    gap: 22px;
+  }
   .hero-number {
-    font-size: clamp(9rem, 17vw, 15.5rem);
+    font-size: clamp(9rem, 16vw, 14rem);
   }
   .hero-stars {
-    width: clamp(220px, 23vw, 320px);
+    width: clamp(220px, 22vw, 300px);
+    flex: none;
     margin-bottom: 0.7em;
   }
   .hero h1 {
-    font-size: clamp(3.4rem, 6vw, 5.2rem);
+    font-size: clamp(3.4rem, 6vw, 5rem);
+    white-space: nowrap;
   }
   .section {
     padding-block: 80px 32px;
