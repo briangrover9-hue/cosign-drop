@@ -72,6 +72,12 @@
   text-align: center;
   color: var(--ink);
   pointer-events: none;
+  transition: transform 160ms var(--ease-out);
+}
+/* Press feedback for a pointer press on an option that will change something. A key press gets
+   none, and neither does the option already chosen, since pressing it does nothing. */
+.lab-seg input:not(:checked):active:not(:focus-visible) + span {
+  transform: scale(0.97);
 }
 @media (hover: hover) and (pointer: fine) {
   .lab-seg input:hover + span {
@@ -319,10 +325,14 @@
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
   transform: rotate(-45deg);
-  transition: transform 0.2s ease;
+  transition: transform 200ms var(--ease-out);
 }
 .lab-drawer[open] summary::before {
   transform: translateY(-2px) rotate(45deg);
+}
+/* Toggled from the keyboard, the chevron turns without animating. */
+.lab-drawer summary:focus-visible::before {
+  transition: none;
 }
 .lab-drawer-body {
   display: grid;
@@ -543,8 +553,17 @@
   }
 }
 
+/* Reduced motion: no autoplay or tweening (lab.js jumps to the end and fades the dots in),
+   and a press dims the segment instead of shrinking it. */
 @media (prefers-reduced-motion: reduce) {
   .lab-drawer summary::before {
     transition: none;
+  }
+  .lab-seg span {
+    transition: opacity 160ms var(--ease-out);
+  }
+  .lab-seg input:not(:checked):active:not(:focus-visible) + span {
+    transform: none;
+    opacity: 0.8;
   }
 }

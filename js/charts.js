@@ -374,8 +374,10 @@ async function buildGuess(root) {
     `${stats[0]}, the median is ${medianText}` +
     (guess == null ? '.' : `, and your guess of ${guess.toFixed(2)} is marked on the axis.`);
 
+  // The first reveal always starts pending: charts.css grows the bars, or fades them in when
+  // motion is reduced. The reader asked for this one, so it is not autoplay.
   const renderHist = (width) => {
-    const pending = !state.played && motionAllowed();
+    const pending = !state.played;
     hist.innerHTML = histogramSVG(m, width, state.guess, pending, labelFor(state.guess));
     if (pending) {
       state.played = true;
@@ -493,16 +495,19 @@ function histogramSVG(m, W, guess, pending, label) {
     anno += `<text class="gs-top-label" x="${r2(clamp(cx, half, W - half))}" y="${plotTop - 5}" text-anchor="middle">${topShare}</text>`;
   }
 
+  // The reader's guess stays outside the fading group, so their star is on the axis from the
+  // first frame, where the slider left it, while the bars grow.
+  let you = '';
   if (guess != null) {
     const xg = x(guess);
-    anno += starGlyph(xg, yAxis, narrow ? 20 : 22, 'gs-guess');
+    you += starGlyph(xg, yAxis, narrow ? 20 : 22, 'gs-guess');
     const text = `Your guess ${guess.toFixed(2)}`;
     const half = monoWidth(text, 12) / 2;
-    anno += `<text class="gs-guess-label" x="${r2(clamp(xg, half + 1, W - half - 1))}" y="${yAxis + 47}" text-anchor="middle">${text}</text>`;
+    you += `<text class="gs-guess-label" x="${r2(clamp(xg, half + 1, W - half - 1))}" y="${yAxis + 47}" text-anchor="middle">${text}</text>`;
   }
 
   const H = guess == null ? yAxis + 26 : yAxis + 54;
-  return svgTag('gs-svg', W, H, label, `${body}<g class="gs-anno">${anno}</g>`, pending);
+  return svgTag('gs-svg', W, H, label, `${body}<g class="gs-anno">${anno}</g>${you}`, pending);
 }
 
 /* 3. The drift: a grid of 100 stars per system */

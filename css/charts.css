@@ -67,7 +67,8 @@
 }
 .ch-svg .wn-value {
   font-size: 13px;
-  transition: opacity 0.25s ease 0.45s;
+  /* Fades in as the bars land: at 250ms they are 96% grown. */
+  transition: opacity 200ms var(--ease-out) 250ms;
 }
 .wn-before {
   fill: var(--paper);
@@ -81,7 +82,8 @@
 .wn-bar {
   transform-box: fill-box;
   transform-origin: 0 50%;
-  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Bars grow out of the $0 axis, so scaleX(0) is their real starting length. */
+  transition: transform 500ms var(--ease-out);
 }
 .is-pending .wn-bar {
   transform: scaleX(0);
@@ -252,7 +254,7 @@
 .gs-bars {
   fill: var(--ink);
   transform-box: view-box;
-  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 600ms var(--ease-out);
 }
 .gs-median {
   stroke: var(--ink);
@@ -266,8 +268,10 @@
 .ch-svg .gs-top-label {
   fill: var(--ink-2);
 }
+/* The median and labels arrive once the bars are 96% grown; the reader's own star is drawn
+   outside this group, so it is on the axis from the start. */
 .gs-anno {
-  transition: opacity 0.3s ease 0.4s;
+  transition: opacity 250ms var(--ease-out) 300ms;
 }
 .is-pending .gs-bars {
   transform: scaleY(0);
@@ -450,12 +454,20 @@
   }
 }
 
+/* Reduced motion: the why-now bars and the drift grids start in their final state (charts.js
+   skips the growth), and the histogram fades in when the reader asks for it. */
 @media (prefers-reduced-motion: reduce) {
   .wn-bar,
-  .gs-bars,
-  .gs-anno,
   .dr-s2,
   .ch-svg .wn-value {
     transition: none;
+  }
+  .gs-bars,
+  .gs-anno {
+    transition: opacity 200ms var(--ease-out);
+  }
+  .is-pending .gs-bars {
+    transform: none;
+    opacity: 0;
   }
 }

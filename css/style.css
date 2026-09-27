@@ -48,6 +48,11 @@
   /* Space under a figure, which the trust lab shares. */
   --after-figure: 36px;
   --header-h: 3rem; /* 48px at the default text size; grows with the reader's text size */
+  /* Motion: ease-out for things entering, leaving or answering a press; ease-in-out for anything
+     CSS moves across the screen, which nothing does yet (the lab's dots are tweened in lab.js,
+     which says why they keep a cubic ease-out). Color changes keep plain ease. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   color-scheme: light;
 }
 
@@ -222,15 +227,20 @@ strong {
   text-decoration: none;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  /* Rises in as the headline scrolls away and sinks out as it comes back; leaving is quicker. */
+  transform: translateY(0.25em);
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
 }
 /* The bar's title takes over once the headline has gone behind the bar. */
 .site-header.is-titled .site-title {
   opacity: 1;
+  transform: none;
+  transition-duration: 200ms;
 }
 /* Keyboard focus never lands on an invisible link: the title shows at once. */
 .site-title:focus-visible {
   opacity: 1;
+  transform: none;
   transition: none;
 }
 .page-rating {
@@ -507,7 +517,9 @@ figcaption .src,
   height: 100%;
   min-height: 11.75rem;
   transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Both cards turn at once. Ease-out starts the turn on the press and swaps faces by about
+     80ms; the settle is visible until about 370ms. */
+  transition: transform 600ms var(--ease-out);
 }
 .reveal.is-open .card-inner {
   transform: rotateY(180deg);
@@ -573,7 +585,13 @@ figcaption .src,
   min-height: 44px;
   padding: 10px 16px;
   cursor: pointer;
+  transition: transform 160ms var(--ease-out);
 }
+/* Press feedback for a pointer press. A key press gets none, and neither does a disabled button. */
+.btn:not([disabled]):active:not(:focus-visible) {
+  transform: scale(0.97);
+}
+/* Hover only where a pointer can hover, so a tapped button does not stay tinted on a phone. */
 @media (hover: hover) and (pointer: fine) {
   .btn:hover {
     background: #37312a;
@@ -735,13 +753,39 @@ figcaption .src,
   }
 }
 
+/* Reduced motion: nothing moves, turns or grows. Short fades and color changes stay, because
+   they still show that something changed. charts.css and lab.css carry the rest. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  /* Nothing sets smooth scrolling today; this keeps it off here if something later does. */
+  html {
+    scroll-behavior: auto;
+  }
+  .site-title {
+    transform: none;
+  }
+  .btn {
+    transition: opacity 160ms var(--ease-out);
+  }
+  .btn:not([disabled]):active:not(:focus-visible) {
+    transform: none;
+    opacity: 0.8;
+  }
+  /* The answers fade in over the sealed cards instead of turning them over. */
+  .card-inner,
+  .reveal.is-open .card-inner {
+    transform: none;
+    transform-style: flat;
+    transition: none;
+  }
+  .card-back {
+    transform: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms;
+  }
+  .reveal.is-open .card-back {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
   }
 }

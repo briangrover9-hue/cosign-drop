@@ -77,6 +77,7 @@ function mount(root) {
   const filledLayer = svgEl('g');
   const starLayer = svgEl('g');
   svg.append(staticLayer, hollowLayer, filledLayer, starLayer);
+  const peopleLayers = [hollowLayer, filledLayer, starLayer];
   const nodes = world.people.map((p) => {
     const home = skilled.has(p.id) ? filledLayer : hollowLayer;
     const g = svgEl('g', { class: skilled.has(p.id) ? 'lab-p is-skilled' : 'lab-p' });
@@ -169,8 +170,10 @@ function mount(root) {
     state.autoplayed = true;
     state.playing = false;
     startRun();
-    if (reduced) idle();
-    else play();
+    if (reduced) {
+      idle();
+      fadeIn();
+    } else play();
   }
 
   // Round 0: nobody has been vouched for yet.
@@ -191,7 +194,22 @@ function mount(root) {
     state.playing = false;
     while (!state.run.done) state.run.step();
     show(state.run.snapshot(), false);
+    fadeIn();
     finish();
+  }
+
+  // With reduced motion the dots jump straight to their new places, and a short fade marks
+  // the jump so it is not missed. Nothing moves. A jump within 300ms of the last one, as when
+  // clicking or arrowing quickly through a switch, starts no new fade and lets a running one
+  // finish, so a burst of quick changes fades once.
+  let lastJump = -Infinity;
+  function fadeIn() {
+    const now = performance.now();
+    const quick = now - lastJump < 300;
+    lastJump = now;
+    if (!reduced || quick || !svg.animate) return;
+    const easing = getComputedStyle(document.documentElement).getPropertyValue('--ease-out').trim() || 'ease-out';
+    for (const layer of peopleLayers) layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing });
   }
 
   function finish() {
@@ -368,7 +386,10 @@ function mount(root) {
 
   function tween(now) {
     const t = Math.min(1, Math.max(0, (now - tweenStart) / TWEEN_MS));
-    const e = 1 - (1 - t) ** 3; // ease out
+    // Cubic ease-out. The dots leave on the round's tick and stay visibly in motion long enough
+    // to follow. The page's --ease-out would cut that travel short, and --ease-in-out starts so
+    // slowly (15% of the way after 100ms) that the dots would trail the round counter.
+    const e = 1 - (1 - t) ** 3;
     for (let i = 0; i < N; i++) {
       const x = 2 * i;
       if (from[x] === to[x] && from[x + 1] === to[x + 1]) continue;
