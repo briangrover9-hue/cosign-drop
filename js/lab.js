@@ -1,7 +1,7 @@
 // The trust lab: 80 coworkers vouching for each other, drawn as a dot plot
 // that moves round by round, with a line of the average underneath. The model
 // lives in lab-model.js; this file draws it and wires up the controls.
-import { createWorld, createRun, DEFAULTS, WORST, BEST, COSIGN, TOP_N, HIGH_BAR } from './lab-model.js';
+import { createWorld, createRun, DEFAULTS, WORST, COSIGN, TOP_N, HIGH_BAR } from './lab-model.js';
 import { STAR_PATH, starRow, setStarRow } from './stars.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -23,10 +23,12 @@ const YES_AXIS = [4, 8, 12, 16, 20, 24, 40, 60, 80, 100, 120, 160, 200, 240, 300
 const PHONE_PIN = '(max-width: 879.98px) and (min-height: 640px)';
 const SIDE_PIN = '(min-width: 640px) and (max-width: 879.98px) and (max-height: 500px)';
 
+// Two starting points: the setting where the drift shows, and the one closest to Cosign's
+// design. There is no "best" preset: the setting that scores highest does so because of
+// assumptions we chose for vouches tied to work, and the page says so.
 const PRESETS = [
   { id: 'worst', label: 'Worst', settings: WORST },
   { id: 'cosign', label: 'Cosign-style', settings: COSIGN },
-  { id: 'best', label: 'Best', settings: BEST },
 ];
 
 const SWITCHES = [
@@ -50,7 +52,7 @@ const ASSUMPTIONS = [
   { id: 'autofive', path: ['autoFive', 'tap'], min: 0, max: 0.5, step: 0.01, format: percent, scale: 'stars',
     label: 'Share of one-tap ratings that are a reflexive five' },
   { id: 'autoyes', path: ['autoYes', 'tap'], min: 0, max: 0.6, step: 0.01, format: percent, scale: 'yes',
-    label: 'Share of one-tap yeses given without judging' },
+    label: 'Share of one-tap judgments that are a reflexive yes' },
   { id: 'repstrength', path: ['repStrength'], min: 0, max: 2, step: 0.1, format: (v) => v.toFixed(1), scale: 'yes',
     label: 'How strongly a track record weights a vouch' },
   { id: 'known', path: ['knownShare'], min: 0, max: 1, step: 0.05, format: percent,
@@ -93,7 +95,7 @@ const root = document.getElementById('lab-root');
 if (root) mount(root);
 
 function mount(root) {
-  const world = createWorld(Number(root.dataset.seed) || 165);
+  const world = createWorld(Number(root.dataset.seed) || 102);
   const N = world.people.length;
   const skilled = new Set(world.topSkill);
   // Within a column the most skilled sit lowest, so the order never shuffles.
@@ -166,7 +168,7 @@ function mount(root) {
     inReadingArea: false,
     axisMax: YES_AXIS[0], // yes scale: the axis end, which only grows during a run
     lastFinished: null, // { key, scale, metrics, history } of the most recent finished run
-    reference: null, // the finished run before the current one, for "last run" and the faint line
+    reference: null, // the finished run before the current one, for "last run" and the dashed line
   };
 
   // Positions: where each dot is drawn now, where a tween started, where it ends.
@@ -852,9 +854,9 @@ function legendHtml(scale) {
   const star = keyGlyph('is-star');
   const edge = keyGlyph('is-star is-edge');
   if (scale === 'yes') {
-    return `Each dot ${dot}is a person, placed by how many yeses they have. Filled dots ${filled}are the 10 most skilled. A gold star ${star}marks the top 10 by standing, with a dark edge ${edge}when that person is also one of the 10 most skilled. People with no yeses sit in the lane at the left.`;
+    return `Each dot ${dot}is a person, placed by how many yeses they have. Filled dots ${filled}are the 10 most skilled. A gold star ${star}marks the top 10 by standing, with a dark edge ${edge}when that person is also one of the 10 most skilled. People with no yeses sit in the lane at the left. Under the field, a dashed line shows the last finished run.`;
   }
-  return `Each dot ${dot}is a person, placed by score. Filled dots ${filled}are the 10 most skilled. A gold star ${star}marks the top 10 by score, with a dark edge ${edge}when that person is also one of the 10 most skilled. People nobody has vouched for sit in the lane at the left.`;
+  return `Each dot ${dot}is a person, placed by score. Filled dots ${filled}are the 10 most skilled. A gold star ${star}marks the top 10 by score, with a dark edge ${edge}when that person is also one of the 10 most skilled. People nobody has vouched for sit in the lane at the left. Under the field, a dashed line shows the last finished run.`;
 }
 
 function sliderHtml(a, extra = '') {
@@ -878,7 +880,7 @@ function template(N) {
   const [scale, type, ...rest] = SWITCHES;
   const switches =
     fieldset(scale) +
-    `<div class="lab-switch-group">${fieldset(type)}${sliderHtml(ANCHOR, '<p class="lab-anchor-note">Our assumption. Lower it and the drift comes back.</p>')}</div>` +
+    `<div class="lab-switch-group">${fieldset(type)}${sliderHtml(ANCHOR, '<p class="lab-anchor-note">Our assumption. With the other switches at their worst, lowering it brings the drift back.</p>')}</div>` +
     rest.map(fieldset).join('');
 
   const presets = PRESETS.map(

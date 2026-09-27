@@ -275,7 +275,7 @@
 .lab-field-wrap {
   width: 100%;
 }
-/* The line of the average under the field. The last run's line stays faint behind it. */
+/* The line of the average under the field. The last run's line stays behind it, dashed. */
 .lab-trend {
   margin-top: 8px;
 }
@@ -304,9 +304,12 @@
   stroke-linejoin: round;
   stroke-linecap: round;
 }
+/* The last finished run: dashed, so it reads as the earlier line by its pattern and still
+   clears 3:1 against the paper. */
 .lab-trend-ghost {
   stroke: var(--ink-3);
-  stroke-opacity: 0.4;
+  stroke-width: 1.25;
+  stroke-dasharray: 3 3;
 }
 .lab-trend-line {
   stroke: var(--ink);

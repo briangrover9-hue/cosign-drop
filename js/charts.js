@@ -1,5 +1,5 @@
 // The four charts in "Everyone's a 4.8":
-//   #why-now-root   paired bars, what employers paid before and after an AI writing tool
+//   #why-now-root   paired bars, what employers would pay before ChatGPT and in 2024
 //   #guess-root     guess the typical Airbnb rating, then see every listing on the full scale
 //   #drift-root     100 stars per rating system, gold for the share at the top of its scale
 //   #validity-root  dot plot, how well hiring methods predict the job, 1998 and 2022
@@ -152,7 +152,7 @@ async function buildWhyNow(root) {
     rows
       .map(
         (r) =>
-          `${lowerFirst(r.label)}, $${r.before.toFixed(2)} before and $${r.after.toFixed(2)} after, ${r.note}`
+          `${lowerFirst(r.label)}, $${r.before.toFixed(2)} ${data.beforeWhen} and $${r.after.toFixed(2)} ${data.afterWhen}, ${r.note}`
       )
       .join('; ') +
     '.';

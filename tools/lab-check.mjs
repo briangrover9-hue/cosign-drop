@@ -5,13 +5,13 @@
 //    setting, each single switch flipped from it, the best setting, a
 //    LinkedIn-like yes setting, and the Cosign-like settings, next to the
 //    prototype the model was ported from.
-// 2. The same rows for the world the page shows first (seed 11).
+// 2. The same rows for the world the page shows first (seed 102).
 // 3. Assertions, which fail loudly: determinism, snapshots that never change
 //    a run, overrides, and the directions the page relies on.
 import { createWorld, createRun, DEFAULTS, WORST, BEST, COSIGN } from '../js/lab-model.js';
 
 const WORLDS = [11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133];
-const PAGE_WORLD = 165; // the world index.html sets on #lab-root, closest to the 12-world averages
+const PAGE_WORLD = 102; // the world index.html sets on #lab-root: of worlds 1 to 600, its first run sits closest to the 12-world averages with the same order of switches
 const LINKEDIN = Object.freeze({ scale: 'yes', type: 'tap', vis: 'visible', who: 'anyone', feed: 'count' });
 const COSIGN_COUNT = Object.freeze({ ...COSIGN, feed: 'count' });
 
@@ -19,7 +19,9 @@ const COSIGN_COUNT = Object.freeze({ ...COSIGN, feed: 'count' });
 // (stars) or the final yes rate (yes), unrated, hits. The prototype averaged
 // yes standings over people with at least one yes, so its yes averages are
 // left out. Its reputation feed on the stars scale had a bug, fixed in the
-// port; that row shows the prototype with the same fix.
+// port; that row shows the prototype with the same fix. The prototype also let
+// a ranked feed sway vouches tied to work less than other vouches (0.3 against
+// 0.5); the port sways every vouch the same, so its tied-to-work row finds fewer.
 const ROWS = [
   ['Worst: stars, one tap, visible, anyone, count', WORST, [3.48, 4.44, 24, 0, 4.4]],
   ['Only switch flipped: tied to work', { ...WORST, type: 'work' }, [3.19, 3.24, 2, 0, 7.2]],
@@ -50,12 +52,12 @@ function runAll(worldSeed, settings, runSeed = 1, overrides = {}) {
 
 // Round-1 average, final average, 4.8+ or final yes rate, unrated, hits,
 // averaged over the given worlds.
-function summarize(worlds, settings) {
+function summarize(worlds, settings, overrides = {}) {
   const yes = settings.scale === 'yes';
   const key = yes ? 'meanYeses' : 'mean';
   const sum = [0, 0, 0, 0, 0];
   for (const w of worlds) {
-    const snaps = runAll(w, settings);
+    const snaps = runAll(w, settings, 1, overrides);
     const first = snaps[1].metrics;
     const last = snaps[snaps.length - 1].metrics;
     [first[key], last[key], yes ? last.yesRate : last.top48, last.unrated, last.hits].forEach((v, i) => (sum[i] += v / worlds.length));
@@ -156,6 +158,26 @@ console.log('\n3. Checks\n');
     check(best[4] > worst[4], `${where}: the best setting finds more of the 10 most skilled than the worst (${best[4].toFixed(1)} against ${worst[4].toFixed(1)})`);
     check(reputation[4] > count[4], `${where}: Cosign-like with the reputation feed finds more of them than with the count feed (${reputation[4].toFixed(1)} against ${count[4].toFixed(1)})`);
     check(linkedin[2] > 0.7, `${where}: the LinkedIn-like yes rate ends above 0.7 (${linkedin[2].toFixed(2)})`);
+    const work = rows.get(ROWS[1][0]);
+    const otherSingles = Math.max(...[2, 3, 4, 5, 6].map((i) => rows.get(ROWS[i][0])[4]));
+    check(work[4] > otherSingles, `${where}: tied to work is the single switch that finds the most of the 10 most skilled (${work[4].toFixed(1)} against at most ${otherSingles.toFixed(1)})`);
+    const plainYes = rows.get(ROWS[11][0]);
+    check(Math.abs(plainYes[4] - reputation[4]) <= 1, `${where}: on the yes scale, ranking no one does about as well as ranking by track record (${plainYes[4].toFixed(1)} against ${reputation[4].toFixed(1)})`);
+    check([count[3], reputation[3]].every((u) => u >= 15 && u <= 25), `${where}: a ranked feed on the yes scale leaves about a quarter of the 80 with no yes (${count[3].toFixed(1)} by count, ${reputation[3].toFixed(1)} by track record)`);
+    check(plainYes[3] < 10, `${where}: a feed that ranks no one leaves far fewer with no yes (${plainYes[3].toFixed(1)})`);
+  }
+
+  // The anchor slider's note: with the other switches at their worst, a vouch
+  // tied to work drifts far less than the worst setting at the default anchor,
+  // and nearly as much once the anchor is 0.
+  const WORK_ONLY = { ...WORST, type: 'work' };
+  for (const [where, worlds] of [['12-world average', WORLDS], [`page world ${PAGE_WORLD}`, [PAGE_WORLD]]]) {
+    const worst = summarize(worlds, WORST);
+    const held = summarize(worlds, WORK_ONLY);
+    const loose = summarize(worlds, WORK_ONLY, { anchor: { work: 0 } });
+    const rise = (r) => r[1] - r[0];
+    check(rise(held) < 0.25 * rise(worst), `${where}: tied to work at the default anchor rises ${rise(held).toFixed(2)}, under a quarter of the worst setting's ${rise(worst).toFixed(2)}`);
+    check(rise(loose) > 0.6 * rise(worst), `${where}: with the anchor at 0 it rises ${rise(loose).toFixed(2)}, most of the way back to the worst setting's drift`);
   }
 }
 

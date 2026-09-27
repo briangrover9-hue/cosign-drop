@@ -9,13 +9,15 @@
         "after": 14.85
       },
       {
-        "label": "A stronger record on the site",
+        "label": "A higher reputation score on the site",
         "before": 27.96,
         "after": 46.24
       }
     ],
-    "beforeLabel": "Before the AI tool",
-    "afterLabel": "After",
+    "beforeLabel": "Before ChatGPT",
+    "afterLabel": "2024",
+    "beforeWhen": "before ChatGPT",
+    "afterWhen": "in 2024",
     "source": {
       "label": "Galdin and Silbert (2025), Table 2, columns 2 and 4",
       "url": "https://arxiv.org/abs/2511.08785"

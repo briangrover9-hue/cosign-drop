@@ -19,7 +19,7 @@ export const DEFAULTS = deepFreeze({
   // The world
   N: 80, // people in the lab
   teamSize: 8, // people per team, so ten teams
-  crossLinks: 2, // each person also picks two people on other teams they worked with; links go both ways, so some people have more
+  crossLinks: 2, // each person also picks two people at random on other teams as people they worked with (rarely the same one twice); links go both ways, so most people have more
   rounds: 30, // rounds in one run
   window: 12, // on the stars scale, a score is the average of the last 12 vouches a person received
   skillVisCorr: 0.2, // how closely visibility (presence) tracks skill: only loosely
@@ -28,7 +28,7 @@ export const DEFAULTS = deepFreeze({
   volume: { tap: 3, written: 1, work: 1 }, // vouches each person gives per round
   knownShare: 0.5, // share of each person's vouches that go to people they worked with; the rest go to whoever the feed shows them
   autoFive: { tap: 0.12, written: 0.04, work: 0 }, // stars scale: share of vouches that are reflexive fives, given without judging
-  autoYes: { tap: 0.25, written: 0.03, work: 0 }, // yes scale: share of vouches that are reflexive yeses, given without judging
+  autoYes: { tap: 0.25, written: 0.03, work: 0 }, // yes scale: share of judgments that are a reflexive yes, given without judging
 
   // Judging someone's skill
   noiseKnown: 0.6, // noise when judging someone you worked with
@@ -40,8 +40,7 @@ export const DEFAULTS = deepFreeze({
   readNoise: 0.3, // noise in reading the work of someone you worked with
   readNoiseStranger: 0.8, // noise in reading the work of someone you never worked with
   workVis: 0, // how much a stranger judging a piece of work still goes by the person's visibility; at 0 only the work counts
-  halo: 0.5, // in a ranked feed, how much a person's place in the feed sways judgment
-  haloWork: 0.3, // the same sway when the vouch is tied to a piece of work
+  halo: 0.5, // in a ranked feed, how much a person's place in the feed sways judgment, whatever kind of vouch it is
   expo: 1.3, // a ranked feed shows each person in proportion to (1 + their rank value) raised to this power
 
   // The stars scale
@@ -185,7 +184,7 @@ export function createRun(world, settings, seed = 1, overrides = {}) {
     } else {
       perceived = P.strangerSkill * p.skill + P.strangerVis * p.vis + gauss(random) * P.noiseStranger * P.noiseMult[S.type];
     }
-    if (ranked) perceived += (S.type === 'work' ? P.haloWork : P.halo) * (logRank[j] - mu) / sd;
+    if (ranked) perceived += (P.halo * (logRank[j] - mu)) / sd;
     return perceived;
   }
 
