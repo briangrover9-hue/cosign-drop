@@ -605,7 +605,20 @@ figcaption .src,
     font-size: 1.1875rem;
   }
   .hero {
-    padding-block: 44px 80px;
+    padding-block: 48px 88px;
+  }
+  .hero .kicker {
+    margin-bottom: 30px;
+  }
+  .hero-number {
+    font-size: clamp(9rem, 17vw, 15.5rem);
+  }
+  .hero-stars {
+    width: clamp(220px, 23vw, 320px);
+    margin-bottom: 0.7em;
+  }
+  .hero h1 {
+    font-size: clamp(3.4rem, 6vw, 5.2rem);
   }
   .section {
     padding-block: 80px 32px;
