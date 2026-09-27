@@ -391,12 +391,20 @@
   flex: none;
 }
 
+/* Reduced motion: the why-now bars and the drift grids start in their final state (charts.js
+   skips the growth), and the histogram fades in when the reader asks for it. */
 @media (prefers-reduced-motion: reduce) {
   .wn-bar,
-  .gs-bars,
-  .gs-anno,
   .dr-s2,
   .ch-svg .wn-value {
     transition: none;
+  }
+  .gs-bars,
+  .gs-anno {
+    transition: opacity 200ms var(--ease-out);
+  }
+  .is-pending .gs-bars {
+    transform: none;
+    opacity: 0;
   }
 }

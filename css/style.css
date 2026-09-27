@@ -669,13 +669,38 @@ figcaption .src,
   }
 }
 
+/* Reduced motion: nothing moves, turns or grows. Short fades and color changes stay, because
+   they still show that something changed. charts.css and lab.css carry the rest. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  html {
+    scroll-behavior: auto;
+  }
+  .site-title {
+    transform: none;
+  }
+  .btn {
+    transition: opacity 160ms var(--ease-out);
+  }
+  .btn:not([disabled]):active:not(:focus-visible) {
+    transform: none;
+    opacity: 0.8;
+  }
+  /* The answers fade in over the sealed cards instead of turning them over. */
+  .card-inner,
+  .reveal.is-open .card-inner {
+    transform: none;
+    transform-style: flat;
+    transition: none;
+  }
+  .card-back {
+    transform: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms;
+  }
+  .reveal.is-open .card-back {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
   }
 }

@@ -77,6 +77,7 @@ function mount(root) {
   const filledLayer = svgEl('g');
   const starLayer = svgEl('g');
   svg.append(staticLayer, hollowLayer, filledLayer, starLayer);
+  const peopleLayers = [hollowLayer, filledLayer, starLayer];
   const nodes = world.people.map((p) => {
     const home = skilled.has(p.id) ? filledLayer : hollowLayer;
     const g = svgEl('g', { class: skilled.has(p.id) ? 'lab-p is-skilled' : 'lab-p' });
@@ -169,8 +170,10 @@ function mount(root) {
     state.autoplayed = true;
     state.playing = false;
     startRun();
-    if (reduced) idle();
-    else play();
+    if (reduced) {
+      idle();
+      fadeIn();
+    } else play();
   }
 
   // Round 0: nobody has been vouched for yet.
@@ -191,7 +194,16 @@ function mount(root) {
     state.playing = false;
     while (!state.run.done) state.run.step();
     show(state.run.snapshot(), false);
+    fadeIn();
     finish();
+  }
+
+  // With reduced motion the dots jump straight to their new places, and a short fade marks
+  // the jump so it is not missed. Nothing moves.
+  function fadeIn() {
+    if (!reduced || !svg.animate) return;
+    const easing = getComputedStyle(document.documentElement).getPropertyValue('--ease-out').trim() || 'ease-out';
+    for (const layer of peopleLayers) layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing });
   }
 
   function finish() {

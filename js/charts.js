@@ -366,8 +366,10 @@ async function buildGuess(root) {
     `${stats[0]}, the median is ${medianText}` +
     (guess == null ? '.' : `, and your guess of ${guess.toFixed(2)} is marked on the axis.`);
 
+  // The first reveal always starts pending: charts.css grows the bars, or fades them in when
+  // motion is reduced. The reader asked for this one, so it is not autoplay.
   const renderHist = (width) => {
-    const pending = !state.played && motionAllowed();
+    const pending = !state.played;
     hist.innerHTML = histogramSVG(m, width, state.guess, pending, labelFor(state.guess));
     if (pending) {
       state.played = true;

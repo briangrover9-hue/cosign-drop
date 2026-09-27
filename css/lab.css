@@ -453,8 +453,17 @@
   }
 }
 
+/* Reduced motion: no autoplay or tweening (lab.js jumps to the end and fades the dots in),
+   and a press dims the segment instead of shrinking it. */
 @media (prefers-reduced-motion: reduce) {
   .lab-drawer summary::before {
     transition: none;
+  }
+  .lab-seg span {
+    transition: opacity 160ms var(--ease-out);
+  }
+  .lab-seg input:not(:checked):active:not(:focus-visible) + span {
+    transform: none;
+    opacity: 0.8;
   }
 }
