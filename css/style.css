@@ -43,6 +43,8 @@
   --measure: 38rem;
   --wide: 66rem;
   --gutter: 16px;
+  /* The text column's inner width, so prose inside wide blocks keeps the same measure. */
+  --text: calc(var(--measure) - 2 * var(--gutter));
   --header-h: 48px;
   color-scheme: light;
 }
@@ -365,6 +367,10 @@ figcaption .src,
 .caption .src {
   display: block;
   margin-top: 6px;
+}
+/* A caption under a wide figure keeps the text measure instead of running its full width. */
+.wrap-wide figcaption {
+  max-width: var(--text);
 }
 /* A chart's title is its headline: the body face at body size in semibold, so it
    outranks the chart's own mono labels. */
