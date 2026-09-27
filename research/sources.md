@@ -112,6 +112,8 @@ Caveats: Sackett et al. (2023, IOP 16(3)) revise cognitive ability again to .23 
 |---|---|---|
 | "A curated professional network for the people and companies that drive the startup ecosystem." | [cosign.co](https://cosign.co) | Confirmed |
 | "A directory of people and companies built around who believes in them - and why." | [cosign.co/faq](https://cosign.co/faq) | Confirmed |
+| "Attributable context from people who have worked together," and "see who emerges when a trusted network compares notes" | [cosign.co](https://cosign.co), read September 27, 2026 | Confirmed. The page says a cosign comes with context from people who have worked together, not that every cosigner worked with the person, since the FAQ says working together is not required. |
+| "It means you believe in them enough to put your name and reputation behind that belief," and "A cosign should carry weight. Give it thoughtfully, when you really mean it." | [cosign.co/faq](https://cosign.co/faq), read September 27, 2026 | Confirmed |
 | A cosign means putting "your name and reputation behind that belief," and the FAQ asks cosigners to be specific about what they know | same | Confirmed |
 | Having worked together is not required; the FAQ asks that "you can explain its basis" | same | Confirmed |
 | "Be specific about what you know" and "Don't imply a relationship or experience you haven't had" | same | Confirmed |

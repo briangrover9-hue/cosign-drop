@@ -322,14 +322,15 @@
 /* Four grids, two by two. charts.js sets --dr-n to the biggest size that fits; this first
    guess holds until it does. */
 .dr-list {
-  --dr-n: min(calc(50cqw - 12px), calc((100cqh - 140px) / 2.42), 300px);
+  --dr-gap: 12px;
+  --dr-n: min(calc((100cqw - 2 * var(--dr-gap)) / 3), calc((100cqh - 200px) / 2.4), 300px);
   /* A column is never narrower than its labels need, even when the grid in it is small. */
-  --dr-col: max(var(--dr-n), min(10.5rem, calc(50cqw - 12px)));
+  --dr-col: max(var(--dr-n), min(10.5rem, calc((100cqw - 2 * var(--dr-gap)) / 3)));
   display: grid;
-  grid-template-columns: repeat(2, var(--dr-col));
+  grid-template-columns: repeat(3, var(--dr-col));
   justify-content: center;
   align-content: center;
-  gap: 16px 24px;
+  gap: 14px var(--dr-gap);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -397,7 +398,8 @@
 }
 @media (min-width: 960px) {
   .dr-list {
-    gap: 28px 40px;
+    --dr-gap: 36px;
+    gap: 28px var(--dr-gap);
   }
   .dr-name,
   .dr-note {

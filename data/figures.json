@@ -49,8 +49,8 @@
         "label": "Harvard OUE (2025)",
         "url": "https://oue.fas.harvard.edu/faculty-resources/report-on-grading/"
       },
-      "name": "Harvard A’s",
-      "note": "24% in 2005"
+      "name": "Harvard grades that are A’s",
+      "note": "Up from 24% in 2005"
     },
     {
       "id": "ebay",
@@ -64,8 +64,8 @@
         "label": "Nosko and Tadelis (2015)",
         "url": "https://www.nber.org/system/files/working_papers/w20830/w20830.pdf"
       },
-      "name": "eBay positive",
-      "note": "Average seller"
+      "name": "eBay feedback that’s positive",
+      "note": "For the average seller"
     },
     {
       "id": "linkedin",
@@ -80,7 +80,7 @@
         "url": "https://web.archive.org/web/20130308140056/http://blog.linkedin.com:80/2013/03/06/1-billion-endorsements-given-on-linkedin-infographic/"
       },
       "name": "LinkedIn endorsements",
-      "note": "A billion by 2013"
+      "note": "Can only say yes"
     },
     {
       "id": "github",
@@ -95,7 +95,37 @@
         "url": "https://cmustrudel.github.io/papers/icse2026fakestars.pdf"
       },
       "name": "GitHub stars",
-      "note": "6.0M suspected fakes"
+      "note": "Can only say yes"
+    },
+    {
+      "id": "airbnb2015",
+      "title": "Airbnb listings",
+      "measure": "Rated 4.5 or higher",
+      "now": {
+        "label": "2015",
+        "value": 94
+      },
+      "source": {
+        "label": "Zervas, Proserpio and Byers (2015)",
+        "url": "https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf"
+      },
+      "name": "Airbnb listings, 2015",
+      "note": "Rated 4.5 or higher"
+    },
+    {
+      "id": "tripadvisor2015",
+      "title": "TripAdvisor hotels",
+      "measure": "Rated 4.5 or higher",
+      "now": {
+        "label": "2015",
+        "value": 26
+      },
+      "source": {
+        "label": "Zervas, Proserpio and Byers (2015)",
+        "url": "https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf"
+      },
+      "name": "TripAdvisor hotels, 2015",
+      "note": "Rated 4.5 or higher"
     }
   ],
   "validity": {

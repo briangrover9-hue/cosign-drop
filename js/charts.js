@@ -1,6 +1,6 @@
 // The charts in "Everyone's a 4.8":
-//   #guess-root     scene 1: guess the typical Airbnb rating, then see every listing
-//   #drift-root     scene 2: 100 stars per rating system, gold for the share at the top
+//   #guess-root     scene 2: guess the typical Airbnb rating, then see every listing
+//   #drift-root     scene 3: 100 stars per rating system, gold for the share at the top
 //   #why-now-root   methods page: what employers would pay before ChatGPT and in 2024
 //   #validity-root  methods page: how well hiring methods predict the job, 1998 and 2022
 //
@@ -46,11 +46,12 @@ const oneDecimal = (n) => (Math.round(n * 10) / 10).toFixed(1);
 const dec = (v) => v.toFixed(2).replace(/^0/, ''); // .54 style: two decimals, no leading zero
 
 // The stage's scene changes: the handler gets each one, and the current scene at once.
+const SCENE_IDS = ['start', 'everywhere', 'guess', 'lab', 'fix', 'cosign'];
 function onScene(handler) {
   document.addEventListener('stage:scene', (event) => handler(event.detail));
   if (html.dataset.scene !== undefined && html.classList.contains('stage-ready')) {
     const index = Number(html.dataset.scene);
-    handler({ index, previous: -1, direction: 1, staged: html.classList.contains('stage-on') });
+    handler({ index, previous: -1, id: SCENE_IDS[index], previousId: null, direction: 1, staged: html.classList.contains('stage-on') });
   }
 }
 
@@ -257,7 +258,7 @@ async function buildGuess(root) {
   const intro = body ? body.textContent.trim() : '';
   const start = Number(g.defaultGuess ?? 3);
   const medianText = Number(g.median).toFixed(2);
-  const answer = `Half of these places are rated ${medianText} or higher. Fewer than 1 in 100 falls below 4.`;
+  const answer = `By our own count of this year’s listings, half are rated ${medianText} or higher. When nearly everyone is near a 5, the rating stops telling you much.`;
   const ticks = [1, 2, 3, 4, 5].map((v) => `<span style="left:${(v - 1) * 25}%">${v}</span>`).join('');
 
   root.insertAdjacentHTML(
@@ -374,8 +375,8 @@ async function buildGuess(root) {
   button.addEventListener('click', () => (state.revealed ? reset() : reveal()));
 
   // Coming back to the guess after the reveal, the bars grow again.
-  onScene(({ index, previous }) => {
-    if (index !== 0 || previous === 0 || !state.revealed || !motionAllowed()) return;
+  onScene(({ id, previousId }) => {
+    if (id !== 'guess' || previousId === 'guess' || !state.revealed || !motionAllowed()) return;
     const svg = hist.firstElementChild;
     unfill(svg);
     play(svg, 160);
@@ -463,15 +464,20 @@ async function buildDrift(root) {
     const style = getComputedStyle(list);
     const gapX = parseFloat(style.columnGap) || 0;
     const gapY = parseFloat(style.rowGap) || 0;
-    let n = Math.floor(Math.min(300, (width - gapX) / 2));
-    for (let pass = 0; pass < 4; pass++) {
+    const cols = style.gridTemplateColumns.split(' ').length;
+    const items = [...list.children];
+    const rows = Math.ceil(items.length / cols);
+    const across = (width - (cols - 1) * gapX) / cols;
+    let n = Math.floor(Math.min(300, across));
+    for (let pass = 0; pass < 5; pass++) {
       list.style.setProperty('--dr-n', `${n}px`);
-      const items = [...list.children];
-      const text = (row) =>
-        Math.max(...items.slice(row * 2, row * 2 + 2).map((it) => it.getBoundingClientRect().height - it.querySelector('.dr-stars').getBoundingClientRect().height));
-      const next = Math.floor(Math.min(300, (width - gapX) / 2, (height - gapY - text(0) - text(1)) / 2));
+      let text = 0;
+      for (let row = 0; row < rows; row++) {
+        text += Math.max(...items.slice(row * cols, row * cols + cols).map((it) => it.getBoundingClientRect().height - it.querySelector('.dr-stars').getBoundingClientRect().height));
+      }
+      const next = Math.floor(Math.min(300, across, (height - (rows - 1) * gapY - text) / rows));
       if (!Number.isFinite(next) || Math.abs(next - n) < 1) break;
-      n = Math.max(60, next);
+      n = Math.max(36, next);
     }
   };
   fit();
@@ -481,12 +487,12 @@ async function buildDrift(root) {
   const grids = [...root.querySelectorAll('.dr-stars')];
   // Each arrival fills the grids from empty; a departure empties them once they are hidden.
   let leaveTimer = 0;
-  onScene(({ index, previous }) => {
+  onScene(({ id, previousId }) => {
     clearTimeout(leaveTimer);
-    if (index === 1 && previous !== 1) {
+    if (id === 'everywhere' && previousId !== 'everywhere') {
       grids.forEach((grid) => unfill(grid));
       grids.forEach((grid) => play(grid, 180));
-    } else if (previous === 1 && index !== 1) {
+    } else if (previousId === 'everywhere' && id !== 'everywhere') {
       leaveTimer = setTimeout(() => grids.forEach((grid) => unfill(grid)), MOVE_MS + 60);
     }
   });

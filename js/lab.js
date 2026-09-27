@@ -1,7 +1,7 @@
 // The trust lab: 80 coworkers vouching for each other, drawn as a dot plot that moves round by
 // round. The model lives in lab-model.js; this file draws it and wires up its controls.
 //
-// Scenes 3 and 4 share this one lab. Scene 3 plays the worst rules from round 0. Scene 4's big
+// Scenes 4 and 5 share this one lab. Scene 4 plays the worst rules from round 0. Scene 5's big
 // switch ties every rating to real work, and the dots move to the new run's end at once, so the
 // gold stars can be seen finding the black dots. "Try other rules" opens a frosted panel over
 // the scene's text, beside the chart on desktop and above it on a phone, so the chart stays in
@@ -49,7 +49,7 @@ const EXPLAIN = {
   },
   feed: {
     count: () => 'The people with the most vouches get shown the most, so they get even more.',
-    reputation: () => 'Vouches from people with a good track record count more.',
+    reputation: () => 'Now a vouch counts by who gave it: a yes from someone with a good record weighs more.',
     plain: () => 'Everyone gets shown the same, so no one runs away with it.',
   },
   preset: {
@@ -193,8 +193,7 @@ function mount(root, panel) {
     axisMax: YES_AXIS[0], // yes scale: the axis end, which only grows during a run
     lastFinished: null, // { key, scale, metrics, history } of the most recent finished run
     reference: null, // the finished run before the current one, for the dashed line
-    scene: -1, // the stage's current scene
-    flipped: false, // the big switch has been used since the reader arrived
+    scene: null, // the stage's current scene, by id
     resumeOnShow: false,
   };
 
@@ -309,36 +308,37 @@ function mount(root, panel) {
     announce(`After ${state.run.rounds} rounds, the gold stars found ${m.hits} of the 10 best.${second}`);
   }
 
-  // The scene text that follows the runs: scene 3's line once the worst rules have played, and
-  // the note under scene 4's switch.
+  // Scene 4's line once the worst rules have played out.
   function narrate(m) {
     const plain = assumptionsUntouched();
     if (plain && sameAs(state.settings, WORST) && m.hits !== null) {
       setLine(
         labBody,
         m.top48 >= 20
-          ? `The scores drifted up toward 5, so the gold stars found only ${m.hits} of the 10 best.`
-          : `The gold stars found ${m.hits} of the 10 best.`,
+          ? `Everyone drifted toward 5, and the stars found only ${m.hits} of the 10 best.`
+          : `The stars found ${m.hits} of the 10 best.`,
       );
     }
-    updateNote(m);
   }
 
-  function updateNote(m = state.snap && state.run.done ? state.snap.metrics : null) {
-    const plain = assumptionsUntouched();
-    const worst = plain && sameAs(state.settings, WORST);
-    const work = plain && sameAs(state.settings, WORK);
-    let text = noteIntro;
-    if (!state.flipped && worst) text = noteIntro;
-    else if (!m) text = noteIntro;
-    else if (work)
-      text =
-        m.top48 <= 10
-          ? `The scores stayed spread out, so the gold stars found ${m.hits} of the 10 best.`
-          : `The gold stars found ${m.hits} of the 10 best.`;
-    else if (worst) text = `Back to one tap: the scores drift up, and the gold stars find only ${m.hits} of the 10 best.`;
-    else text = `With your rules, the gold stars found ${m.hits} of the 10 best.`;
-    setLine(fixNote, text);
+  // Scene 5's line says what the fix does. With the switch off it asks for the flip; with it on
+  // it reads as the result on the chart. The number is the run with every rating tied to work,
+  // under the current assumptions, so it stays true when a reader changes them.
+  const workResult = { key: '', metrics: null };
+  function updateNote() {
+    const key = SLIDERS.map((a) => state.values[a.id]).join('|');
+    if (key !== workResult.key) {
+      const run = createRun(world, WORK, 1, overrides());
+      while (!run.done) run.step();
+      workResult.key = key;
+      workResult.metrics = run.snapshot().metrics;
+    }
+    const m = workResult.metrics;
+    const claim = noteIntro.slice(0, noteIntro.indexOf('.') + 1);
+    const result =
+      m.top48 <= 10 ? `the scores spread out, and the stars find ${m.hits} of the 10 best.` : `the stars find ${m.hits} of the 10 best.`;
+    const on = state.settings.type === 'work';
+    setLine(fixNote, on ? `${claim} ${result.charAt(0).toUpperCase()}${result.slice(1)}` : `${claim} Flip the switch: ${result}`);
   }
 
   // Clear, then fill after a beat, so a repeated summary is still announced.
@@ -670,7 +670,7 @@ function mount(root, panel) {
     settle();
   }
 
-  // Scene 3 always starts from the worst rules and our assumptions.
+  // Scene 4 always starts from the worst rules and our assumptions.
   function resetRules() {
     const redraw = state.settings.scale !== WORST.scale || state.settings.feed !== WORST.feed;
     state.settings = { ...WORST };
@@ -679,7 +679,6 @@ function mount(root, panel) {
       input.value = String(a.initial);
       sync();
     }
-    state.flipped = false;
     syncControls();
     applyScale();
     applyAnchor();
@@ -702,8 +701,8 @@ function mount(root, panel) {
   // The big switch: every rating points at real work, or back to one tap.
   bigSwitch?.addEventListener('click', () => {
     const on = state.settings.type !== 'work';
-    state.flipped = true;
     changeSettings({ ...state.settings, type: on ? 'work' : 'tap' }, { key: 'type', value: on ? 'work' : 'tap' });
+    updateNote();
   });
 
   $('[data-action="replay"]').addEventListener('click', () => {
@@ -782,6 +781,7 @@ function mount(root, panel) {
   }
   function openRules() {
     if (tuning()) return;
+    document.dispatchEvent(new CustomEvent('stage:close-why'));
     clearTimeout(hideTimer);
     panel.hidden = false;
     toggleTuning(true);
@@ -815,28 +815,28 @@ function mount(root, panel) {
 
   /* ---------- The stage ---------- */
 
-  // Scene 3 plays the worst rules from round 0, each time it arrives. Scene 4 keeps whatever
-  // scene 3 was showing; reached straight, it shows the worst rules' finished run, so the
+  // Scene 4 plays the worst rules from round 0, each time it arrives. Scene 5 keeps whatever
+  // scene 4 was showing; reached straight, it shows the worst rules' finished run, so the
   // switch has a before. Leaving the lab pauses it.
-  function onScene({ index, previous }) {
-    state.scene = index;
-    if (index === 2 && previous !== 2) {
+  function onScene({ id, previousId }) {
+    state.scene = id;
+    if (id === 'lab' && previousId !== 'lab') {
       closeRules(false);
       resetRules();
       setLine(labBody, bodyIntro);
       startRun();
       idle();
       if (reduced) finishNow();
-      else startTimer = setTimeout(() => state.scene === 2 && play(), previous < 0 ? 450 : 650);
-    } else if (index === 3 && previous !== 3) {
-      if (previous !== 2) {
+      else startTimer = setTimeout(() => state.scene === 'lab' && play(), previousId ? 650 : 450);
+    } else if (id === 'fix' && previousId !== 'fix') {
+      if (previousId !== 'lab') {
         closeRules(false);
         resetRules();
         startRun();
         finishNow();
       }
       updateNote();
-    } else if (index < 2) {
+    } else if (id !== 'lab' && id !== 'fix') {
       closeRules(false);
       pause();
     }
@@ -851,7 +851,7 @@ function mount(root, panel) {
   });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) pause(true);
-    else if (state.resumeOnShow && (state.scene === 2 || state.scene === 3)) play();
+    else if (state.resumeOnShow && (state.scene === 'lab' || state.scene === 'fix')) play();
   });
 
   // The field's size follows its scene: redraw in the same frame, so it never stretches.
@@ -868,7 +868,7 @@ function mount(root, panel) {
   idle();
   root.classList.add('is-built');
   if (html.classList.contains('stage-ready') && html.dataset.scene !== undefined) {
-    onScene({ index: Number(html.dataset.scene), previous: -1 });
+    onScene({ id: ['start', 'everywhere', 'guess', 'lab', 'fix', 'cosign'][Number(html.dataset.scene)], previousId: null });
   }
 }
 

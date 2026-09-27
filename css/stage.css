@@ -64,30 +64,19 @@ html.stage-on body {
   color: var(--ink);
   text-decoration: none;
 }
-.frame-title a > span {
-  grid-area: 1 / 1;
+.frame-title a {
   white-space: nowrap;
-  transition: opacity var(--fade) var(--ease);
+  transition:
+    opacity var(--fade) var(--ease),
+    visibility 0s linear 0s;
 }
-/* Phones: a narrower title, so the payoff fits beside the rating. */
-@media (max-width: 559.98px) {
-  .frame-title {
-    font-size: 0.6875rem;
-    letter-spacing: 0.04em;
-  }
-  .frame-title-payoff {
-    white-space: normal;
-  }
-}
-/* The payoff: on the last scene the title gives way to what the page's own rating did. */
-.frame-title-payoff {
+/* The opening scene carries the title itself, large, so the frame's copy waits for scene 2. */
+html.stage-on[data-scene="0"] .frame-title a {
   opacity: 0;
-}
-html[data-scene="3"] .frame-title-name {
-  opacity: 0;
-}
-html[data-scene="3"] .frame-title-payoff {
-  opacity: 1;
+  visibility: hidden;
+  transition:
+    opacity var(--fade) var(--ease),
+    visibility 0s linear var(--fade);
 }
 .page-rating {
   display: flex;
@@ -322,7 +311,14 @@ html.stage-on .scene.is-leaving {
 .scene-title:focus {
   outline: none;
 }
-/* Body text: two lines at most, at body strength. */
+/* The opening's title, the page's h1: larger than the other scenes' headlines. */
+.scene-title-big {
+  font-size: clamp(2.5rem, 1.3rem + 4.6vw, 5.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.028em;
+  font-variation-settings: "opsz" 72;
+}
+/* Body text at body strength: one line, or a short paragraph, per scene. */
 .scene-body {
   max-width: 32rem;
   font-size: clamp(1.0625rem, 0.95rem + 0.4vw, 1.25rem);
@@ -331,6 +327,176 @@ html.stage-on .scene.is-leaving {
 }
 .byline {
   margin-top: 4px;
+}
+.scene-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.drift-key.scene-links {
+  display: block;
+}
+.why-button {
+  display: inline-block;
+  padding-block: 12px;
+  margin-block: -12px;
+}
+
+/* ---------- The opening and the close: the page's own rating, large ---------- */
+
+/* The serif role, large: a big number, with its stars under it. The opening shows the 4.8 in
+   the title; the close shows the 5.0 this page has drifted to. */
+.big-rating {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  font-size: clamp(3rem, min(58cqw, 46cqh), 19rem);
+}
+.big-rating-num {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1em;
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: -0.045em;
+  font-variant-numeric: lining-nums;
+  font-variation-settings: "opsz" 72;
+  color: var(--ink);
+}
+.big-rating-stars {
+  width: min(1.9em, 100%);
+  height: auto;
+  margin-top: 0.14em;
+}
+.big-rating-cap {
+  max-width: 22rem;
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+}
+/* The opening's 4.8 takes most of its scene's height. */
+.scene-open .big-rating {
+  font-size: clamp(3rem, min(64cqw, 62cqh), 19rem);
+}
+/* The close's 5.0 leaves room for its caption, and on the shortest screens gives way to it,
+   first the stars, then the number: the frame's rating already shows the 5.0. */
+.scene-close .big-rating {
+  font-size: clamp(2.5rem, min(58cqw, calc((100cqh - 60px) * 0.74)), 19rem);
+}
+@container (max-height: 150px) {
+  .scene-close .big-rating-stars {
+    display: none;
+  }
+}
+@container (max-height: 104px) {
+  .scene-close .big-rating-num {
+    display: none;
+  }
+}
+.big-rating-stars + .big-rating-cap {
+  margin-top: max(14px, 0.07em);
+}
+
+/* ---------- "Why?" ---------- */
+
+/* On the stage the card is frosted glass over the scene's text, which dims behind it; the
+   visual beside or under it stays as it was. Without the stage it opens in the page. */
+.why-card {
+  margin: 16px 0 0;
+  padding: 0 0 18px;
+  border: 1px solid var(--ink-rule-strong);
+}
+.why-card[hidden] {
+  display: none;
+}
+.why-card:focus {
+  outline: none;
+}
+.why-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--ink-rule);
+}
+.why-card-title {
+  margin: 0;
+  color: var(--ink);
+}
+.why-card-head .text-button {
+  padding-block: 12px;
+}
+.why-card > p:not(.why-card-src) {
+  margin: 14px 16px 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink-body);
+}
+.why-card-src {
+  margin: 12px 16px 0;
+}
+.why-card-src a {
+  display: inline-block;
+  padding-block: 10px;
+  margin-block: -10px;
+}
+html.stage-on .why-card {
+  position: fixed;
+  z-index: 34;
+  top: var(--frame-top);
+  left: 8px;
+  right: 8px;
+  max-height: calc(100% - var(--frame-top) - var(--frame-bottom));
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgb(243 238 227 / 0.74);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  backdrop-filter: blur(10px) saturate(1.05);
+  box-shadow: 0 18px 48px rgb(var(--ink-rgb) / 0.1);
+  opacity: 0;
+  transform: translateY(-12px);
+  transition:
+    opacity var(--move) var(--ease),
+    transform var(--move) var(--ease);
+}
+html.stage-on .why-card.is-open {
+  opacity: 1;
+  transform: none;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html.stage-on .why-card {
+    background: rgb(243 238 227 / 0.96);
+  }
+}
+@media (min-width: 960px) {
+  html.stage-on .why-card {
+    top: 50%;
+    left: calc(max(var(--gutter), (100vw - 1640px) / 2) - 24px);
+    right: auto;
+    width: calc(var(--text-col) + var(--col-gap) / 2 + 24px);
+    max-height: calc(100% - var(--frame-top) - var(--frame-bottom) - 16px);
+    translate: 0 -50%;
+    transform: translateX(-14px);
+  }
+  html.stage-on .why-card.is-open {
+    transform: none;
+  }
+}
+.scene .scene-text {
+  transition: opacity var(--fade) var(--ease);
+}
+.scene.is-why .scene-text {
+  opacity: 0.28;
+  pointer-events: none;
+}
+html:not(.js) .why-button,
+html:not(.js) .why-button + span,
+html:not(.js) [data-why-close] {
+  display: none;
 }
 .byline a,
 .beat-links a,
@@ -430,7 +596,7 @@ html.stage-on .beat.is-current {
   transition-delay: 0s;
 }
 
-/* The big switch, inside scene 4's headline: the track and a star that turns gold. */
+/* The big switch, inside scene 5's headline: the track and a star that turns gold. */
 .scene-switch {
   font-size: clamp(1.625rem, 1rem + 2.5vw, 3.125rem);
 }
@@ -566,6 +732,10 @@ html:not(.stage-on) .beat {
   .frame-cue,
   .frame-cue svg {
     animation: none;
+  }
+  html.stage-on .why-card,
+  html.stage-on .why-card.is-open {
+    transform: none;
   }
   .big-switch-thumb,
   .big-switch:active .big-switch-track {

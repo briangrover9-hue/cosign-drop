@@ -11,7 +11,7 @@
 import { createWorld, createRun, DEFAULTS, WORST, BEST, COSIGN } from '../js/lab-model.js';
 
 const WORLDS = [11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133];
-const PAGE_WORLD = 256; // the world the lab shows (#lab-root, scenes 3 and 4): of worlds 1 to 600 whose first run keeps every result the text describes, its results sit closest to the 12-world averages
+const PAGE_WORLD = 256; // the world the lab shows (#lab-root, scenes 4 and 5): of worlds 1 to 600 whose first run keeps every result the text describes, its results sit closest to the 12-world averages
 const LINKEDIN = Object.freeze({ scale: 'yes', type: 'tap', vis: 'visible', who: 'anyone', feed: 'count' });
 const COSIGN_COUNT = Object.freeze({ ...COSIGN, feed: 'count' });
 
@@ -178,8 +178,8 @@ console.log('\n3. Checks\n');
   for (const [where, rows] of [['12-world average', averages], [`page world ${PAGE_WORLD}`, pageRows]]) {
     const worst = rows.get(ROWS[0][0]);
     const work = rows.get(ROWS[1][0]);
-    check(worst[4] >= 4 && worst[4] <= 5.5 && worst[1] >= 4.3, `${where}: beat 3, the worst setting drifts to ${worst[1].toFixed(2)} and finds about half of the best (${worst[4].toFixed(2)})`);
-    check(work[4] > 5 && work[1] < 3.6, `${where}: beat 4, tied to work stays spread out (${work[1].toFixed(2)}) and finds most of the best (${work[4].toFixed(2)})`);
+    check(worst[4] >= 4 && worst[4] <= 5.5 && worst[1] >= 4.3, `${where}: scene 4, the worst setting drifts to ${worst[1].toFixed(2)} and finds about half of the best (${worst[4].toFixed(2)})`);
+    check(work[4] > 5 && work[1] < 3.6, `${where}: scene 5, tied to work stays spread out (${work[1].toFixed(2)}) and finds most of the best (${work[4].toFixed(2)})`);
   }
 
   // The text under the lab: on the yes scale, vouches tied to work leave more

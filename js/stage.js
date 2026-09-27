@@ -1,10 +1,11 @@
-// The stage: four full-screen scenes under a fixed frame. One scroll, swipe or arrow key moves
+// The stage: six full-screen scenes under a fixed frame. One scroll, swipe or arrow key moves
 // one scene, and the frame keeps the title, the page's climbing rating, the counter and its dots.
-// Scenes 3 and 4 share one section, the lab: its chart stays put while its text changes.
+// Scenes 4 and 5 share one section, the lab: its chart stays put while its text changes. A
+// "Why?" in a scene opens a few sentences of evidence in a frosted card over the scene's text.
 //
-// Every change is announced as a "stage:scene" event on document, with the scene's index, the
-// one before it and the direction. The charts and the lab use it to play, pause and replay.
-// The current index is also on <html data-scene>, for CSS and for scripts that load later.
+// Every change is announced as a "stage:scene" event on document, with the scene's index and
+// id, the one before it and the direction. The charts and the lab use it to play, pause and
+// replay. The current index is also on <html data-scene>, for CSS and for scripts that load later.
 //
 // On screens under 500px tall the scenes cannot fit, so the page becomes a plain scroll
 // (no .stage-on), and the current scene follows the reader's scroll position instead.
@@ -13,10 +14,12 @@ import { setStarRow } from './stars.js';
 
 const html = document.documentElement;
 const SCENES = [
-  { id: 'guess', section: 0, beat: null, rating: 3.0 },
-  { id: 'everywhere', section: 1, beat: null, rating: 3.6 },
-  { id: 'lab', section: 2, beat: '3', rating: 4.3 },
-  { id: 'fix', section: 2, beat: '4', rating: 5.0 },
+  { id: 'start', section: 0, beat: null, rating: 3.0 },
+  { id: 'everywhere', section: 1, beat: null, rating: 3.4 },
+  { id: 'guess', section: 2, beat: null, rating: 3.8 },
+  { id: 'lab', section: 3, beat: 'lab', rating: 4.2 },
+  { id: 'fix', section: 3, beat: 'fix', rating: 4.6 },
+  { id: 'cosign', section: 4, beat: null, rating: 5.0 },
 ];
 const LAST = SCENES.length - 1;
 const sections = [...document.querySelectorAll('.stage > .scene')];
@@ -119,6 +122,8 @@ function arrive(el) {
 function go(next, { focus = false, from = 'input' } = {}) {
   next = Math.max(0, Math.min(LAST, next));
   if (next === current) return false;
+  const focusInCard = Boolean(openWhy && openWhy.card.contains(document.activeElement));
+  closeWhy(false);
   const prev = current;
   current = next;
   const dir = prev < 0 || next > prev ? 1 : -1;
@@ -158,7 +163,7 @@ function go(next, { focus = false, from = 'input' } = {}) {
       if (newSection) enterUnit(nextSection);
       if (nextUnit !== nextSection) enterUnit(nextUnit);
     });
-    if (focus || hadFocus) {
+    if (focus || hadFocus || focusInCard) {
       nextUnit.querySelector('.scene-title')?.focus({ preventScroll: true });
     }
   }
@@ -168,9 +173,18 @@ function go(next, { focus = false, from = 'input' } = {}) {
     const url = next === 0 ? location.pathname + location.search : `#${nextScene.id}`;
     history.replaceState(null, '', url);
   }
-  document.dispatchEvent(new CustomEvent('stage:scene', { detail: { index: next, previous: prev, direction: dir, staged: staged() } }));
+  document.dispatchEvent(new CustomEvent('stage:scene', { detail: sceneDetail(next, prev, dir) }));
   return true;
 }
+
+const sceneDetail = (index, previous, direction) => ({
+  index,
+  previous,
+  id: SCENES[index].id,
+  previousId: previous >= 0 ? SCENES[previous].id : null,
+  direction,
+  staged: staged(),
+});
 
 function updateFrame(i) {
   html.dataset.scene = String(i);
@@ -196,6 +210,52 @@ function updateFrame(i) {
   if (!motionAllowed()) show(target);
   else stopRating = animate(MOVE_MS, (e) => show(from + (target - from) * e));
 }
+
+/* ---------- "Why?" ---------- */
+
+// A few plain sentences of evidence, with their sources, in a frosted card over the scene's
+// text, so a curious reader goes deeper without leaving the scene. The chart stays as it was.
+// Without the stage the card simply opens in the page.
+let openWhy = null;
+function openCard(button) {
+  const card = document.getElementById(button.getAttribute('aria-controls'));
+  if (!card) return;
+  closeWhy(false);
+  const section = card.closest('.scene');
+  const text = section.querySelector('.scene-text');
+  card.hidden = false;
+  button.setAttribute('aria-expanded', 'true');
+  if (staged()) {
+    section.classList.add('is-why');
+    if (text) text.inert = true;
+  }
+  requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add('is-open')));
+  card.focus({ preventScroll: true });
+  openWhy = { button, card, section, text };
+}
+function closeWhy(returnFocus = true) {
+  if (!openWhy) return;
+  const { button, card, section, text } = openWhy;
+  openWhy = null;
+  card.classList.remove('is-open');
+  button.setAttribute('aria-expanded', 'false');
+  section.classList.remove('is-why');
+  if (text) text.inert = false;
+  setTimeout(() => {
+    if (!card.classList.contains('is-open')) card.hidden = true;
+  }, MOVE_MS);
+  if (returnFocus) button.focus({ preventScroll: true });
+}
+document.querySelectorAll('.why-button').forEach((button) => {
+  button.addEventListener('click', () => (button.getAttribute('aria-expanded') === 'true' ? closeWhy() : openCard(button)));
+});
+document.querySelectorAll('[data-why-close]').forEach((button) => button.addEventListener('click', () => closeWhy()));
+// A press anywhere outside the open card closes it.
+document.addEventListener('pointerdown', (event) => {
+  if (!openWhy || !(event.target instanceof Element)) return;
+  if (!openWhy.card.contains(event.target) && !event.target.closest('.why-button')) closeWhy(false);
+});
+document.addEventListener('stage:close-why', () => closeWhy(false));
 
 /* ---------- Input ---------- */
 
@@ -284,6 +344,11 @@ document.addEventListener('touchcancel', () => (touch = null));
 // Keys: down, Page Down and space go forward; up, Page Up and shift + space go back; Home and
 // End jump to the ends. A key pressed in a slider or a switch group stays with that control.
 document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && openWhy) {
+    event.preventDefault();
+    closeWhy();
+    return;
+  }
   if (!staged() || tuning() || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
   const target = event.target instanceof Element ? event.target : document.body;
   if (target.closest('input, select, textarea, [contenteditable]')) return;
@@ -398,10 +463,12 @@ function applyMode() {
 }
 stageFits.addEventListener('change', () => {
   applyMode();
-  document.dispatchEvent(new CustomEvent('stage:scene', { detail: { index: current, previous: current, direction: 0, staged: staged() } }));
+  document.dispatchEvent(new CustomEvent('stage:scene', { detail: sceneDetail(current, current, 0) }));
 });
 
 /* ---------- Start ---------- */
+
+document.querySelectorAll('.why-card').forEach((card) => (card.hidden = true));
 
 let words = 0;
 document.querySelectorAll('[data-words]').forEach((el) => {
