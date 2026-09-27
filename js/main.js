@@ -52,15 +52,16 @@ if (reveal && revealBtn) {
     reveal.classList.toggle('is-open', open);
     fronts.forEach((el) => el.setAttribute('aria-hidden', String(open)));
     backs.forEach((el) => el.setAttribute('aria-hidden', String(!open)));
+    // The label names the next action, so the button carries no aria-pressed state:
+    // "Seal them again, pressed" would contradict itself.
     revealBtn.textContent = open ? 'Seal them again' : 'Both are in. Reveal them.';
-    revealBtn.setAttribute('aria-pressed', String(open));
     if (revealNote) {
       revealNote.textContent = open
         ? 'Both opened at the same moment, so neither could be written to match the other.'
         : "An example. Neither person could read the other's before writing.";
     }
   };
-  revealNote?.setAttribute('aria-live', 'polite');
   setOpen(false);
+  revealNote?.setAttribute('aria-live', 'polite'); // after the first setOpen, so load is silent
   revealBtn.addEventListener('click', () => setOpen(!reveal.classList.contains('is-open')));
 }
