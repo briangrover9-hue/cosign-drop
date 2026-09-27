@@ -417,8 +417,7 @@
 }
 .ch-svg .va-sub {
   fill: var(--ink-3);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 .va-grid {
   stroke: var(--rule);

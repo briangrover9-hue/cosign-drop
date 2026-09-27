@@ -1,7 +1,8 @@
 /* Trust lab. Phone first; the controls move beside the field from 880px. */
 
 .lab {
-  margin: 28px 0 12px;
+  /* The bottom margin is the figures', so the prose after the lab gets the same space. */
+  margin: 28px 0 var(--after-figure);
   padding-top: 18px;
   border-top: 1px solid var(--rule-strong);
 }
@@ -31,8 +32,7 @@
   font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1.5;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--ink-3);
 }
 .lab-seg {
@@ -193,8 +193,7 @@
   font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1.4;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--ink-3);
 }
 .lab-readout dd {
@@ -243,8 +242,9 @@
   display: none;
 }
 
-/* Status and legend */
+/* Status and legend. Their prose keeps the article's text measure, even inside the wide lab. */
 .lab-status {
+  max-width: var(--text);
   min-height: calc(1.45em * 2);
   margin: 0;
   font-family: var(--serif);
@@ -253,6 +253,7 @@
   color: var(--ink);
 }
 .lab-legend {
+  max-width: var(--text);
   margin: 0;
   font-family: var(--serif);
   font-size: 0.9375rem;
@@ -347,7 +348,7 @@
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
   color: var(--ink-2);
-  text-align: right;
+  text-align: left; /* each value sits against the end of its own track */
 }
 .lab-slider input[type="range"] {
   flex: 1;
@@ -466,11 +467,7 @@
     height: 15px;
   }
   .lab-status {
-    max-width: 44rem;
     font-size: 1.25rem;
-  }
-  .lab-legend {
-    max-width: 48rem;
   }
   .lab-drawer-body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
