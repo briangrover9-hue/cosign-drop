@@ -23,7 +23,7 @@ Older Inside Airbnb snapshots (2015 to 2023) are no longer served (HTTP 403 on 2
 
 | Number | Value | Source | Status |
 |---|---|---|---|
-| What employers would pay for a proposal one standard deviation more tailored, before and after AI writing tools (Freelancer.com, considered applications) | $25.67 before, $14.85 after | Galdin and Silbert (2025), "Making Talk Cheap: Generative AI and Labor Market Signaling," [arXiv 2511.08785](https://arxiv.org/abs/2511.08785), Table 2, columns 2 and 4 | Confirmed |
+| What employers would pay for a proposal one standard deviation more tailored, before and after Freelancer.com's AI writing tool (introduced April 2023; considered applications) | $25.67 before, $14.85 after | Galdin and Silbert (2025), "Making Talk Cheap: Generative AI and Labor Market Signaling," [arXiv 2511.08785](https://arxiv.org/abs/2511.08785), Table 2, columns 2 and 4 | Confirmed |
 | Same, for a worker's platform reputation score one standard deviation higher | $27.96 before, $46.24 after | same, Table 2 | Confirmed. The authors emphasize the fall in tailoring's value; the rise in reputation's value is our reading of their table, and the page says so. |
 | Structural estimate: top-quintile workers hired less, bottom-quintile more, after AI writing | 19% less, 14% more | same, abstract | Confirmed (model counterfactual, labeled as such) |
 | Job seekers who used AI to write or customize a resume or cover letter | 29.3% in 2025, up from 17.3% in 2024 | iHire, [State of Online Recruiting 2025](https://www.ihire.com/resourcecenter/employer/pages/the-state-of-online-recruiting-2025), n = 1,421 | Confirmed, vendor survey |
@@ -59,10 +59,11 @@ Older Inside Airbnb snapshots (2015 to 2023) are no longer served (HTTP 403 on 2
 | Number | Value | Source | Status |
 |---|---|---|---|
 | Airbnb blind reveal: change in review rates | guests +1.7%, hosts +10% (relative) | Fradkin, Grewal and Holtz (2021), "Reciprocity and Unveiling in Two-Sided Reputation Systems," Marketing Science 40(6), [open access](https://andreyfradkin.com/assets/reviews_paper.pdf), Section 6, Figure 7 | Confirmed |
-| Same: correlation of positive text between guest and host reviews | fell 50% | same | Confirmed |
+| Same: correlation between guest and host ratings, and between their positive text | ratings 48% lower, positive text 50% lower | same, Section 6 | Confirmed |
+| Same: average guest rating | 0.25% lower ("small effects on ratings") | same | Confirmed |
 | Same: guests' five-star share | did not rise; 2 to 4 star reviews rose | same | Confirmed |
 | Airbnb guests who privately would not recommend but still gave a public 5 | more than 6% of the 3% who privately said no | Fradkin, Grewal, Holtz and Pearson (2015), EC '15, [NBER draft](https://conference.nber.org/confer/2015/SI2015/PRIT/Fradkin_Grewal_Holtz_Pearson.pdf), p. 3 | Confirmed |
-| eBay sellers retaliating after negative feedback, before 2007 | 46.8% (vs 0.4% after positive) | Bolton, Greiner and Ockenfels (2013), "Engineering Trust," Management Science 59(2), [author draft](https://ben.orsee.org/papers/engineering_trust.pdf), p. 28 | Confirmed. The paper does not measure the effect of eBay's 2008 change; the page must not imply it does. |
+| eBay sellers answered negative feedback in kind, which kept buyers from leaving it | qualitative, from the timing of mutual feedback | Bolton, Greiner and Ockenfels (2013), "Engineering Trust," Management Science 59(2), [author draft](https://ben.orsee.org/papers/engineering_trust.pdf) | Confirmed. A "46.8% retaliation" figure reported to us could not be found in either draft and is cut. The paper does not measure the effect of eBay's 2008 change; the page must not imply it does. |
 | Lab: blind feedback cut the correlation between the two sides' ratings | 0.680 to 0.411 | same, Table 4 | Confirmed (lab experiment, n = 192) |
 | Employers who privately would definitely not rehire but publicly gave 4+ stars | 28.4% | Filippas, Horton and Golden, NBER w25857 | Confirmed |
 | Private feedback over the same period | fell while public feedback rose, for the same transactions | same | Confirmed |
@@ -98,8 +99,8 @@ Caveats: Sackett et al. (2023, IOP 16(3)) revise cognitive ability again to .23 
 
 | Number | Value | Source | Status |
 |---|---|---|---|
-| Dating site "roses" (2 or 8 per person): acceptance with and without one | offers to men 19.7% to 23.6%; offers to women 12.3% to 12.9% | Lee and Niederle (2015), "Propose with a Rose?", Experimental Economics 18, [PDF](https://web.stanford.edu/~niederle/Lee.Niederle.Rose.ExpEcon.2015.pdf), pp. 742 to 743 | Confirmed |
-| Economics job market: each candidate may send 2 signals; effect of a signal on getting an interview | +6.8 percentage points | Coles, Cawley, Levine, Niederle, Roth and Siegfried (2010), Journal of Economic Perspectives 24(4), [PDF](https://web.stanford.edu/~niederle/JobMarket.JEP2010..pdf), Table 3 | Confirmed |
+| Two dating events at a South Korean dating company, 613 participants, each given 2 or 8 "roses": acceptance with and without one | offers to men 19.7% to 23.6%; offers to women 12.3% to 12.9% | Lee and Niederle (2015), "Propose with a Rose?", Experimental Economics 18, [PDF](https://web.stanford.edu/~niederle/Lee.Niederle.Rose.ExpEcon.2015.pdf), pp. 742 to 743 | Confirmed |
+| Economics job market: each candidate may send 2 signals; a signal was associated with a higher chance of an interview | +6.8 percentage points (significant at 5%) | Coles, Cawley, Levine, Niederle, Roth and Siegfried (2010), Journal of Economic Perspectives 24(4), [PDF](https://web.stanford.edu/~niederle/JobMarket.JEP2010..pdf), Table 3 | Confirmed |
 
 ## Cosign, from its own public pages
 
