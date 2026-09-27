@@ -207,12 +207,12 @@
       </div>
       <div class="wrap-wide">
         <div id="lab-root" class="lab" data-seed="11">
-          <p class="fallback">The trust lab needs JavaScript. In the model's worst setting, the average score climbs to about 4.7 and a top 10 by score includes about 2 of the 10 most skilled people. With every vouch tied to a piece of work, blind until both sides have written, limited to people who worked together and shown in a feed that ranks no one, the average settles near 3.2 and the top 10 includes about 8 of the 10.</p>
+          <p class="fallback">The trust lab needs JavaScript. In the model's worst setting, the average score climbs to about 4.7 and a top 10 by score includes about 2 of the 10 most skilled people. With every vouch tied to a piece of work, blind until both sides have written, limited to people who worked together and shown in a feed that ranks no one, the average settles near 3.2 and the top 10 includes about 9 of the 10.</p>
         </div>
       </div>
       <div class="wrap">
         <p>Now flip the switches one at a time. Tying each vouch to a specific piece of work is the one fix that works on its own: the scores spread out again, and the top 10 by score starts to match the 10 most skilled. It has a cost. A vouch that takes real work gets given less often, so more people end up with no vouches at all. The other three switches do most of their good in combination, and with all four fixed, nobody goes unseen.</p>
-        <p>The lab is a model. Its rules come from the research above, and the sizes of its effects are our assumptions, which you can change under the lab. <a href="#m-lab">The methods</a> list every rule and setting.</p>
+        <p>The lab is a model. Its rules come from the research above, and the sizes of its effects are our assumptions, which you can change under the lab. <a href="#m-lab">The methods</a> list every rule, and the model's code has every setting.</p>
       </div>
     </section>
 
@@ -336,7 +336,7 @@
             <li><strong>Reflexive fives.</strong> Forty percent of one-tap vouches, and ten percent of written ones, are fives given without judging.</li>
             <li><strong>Visible or blind.</strong> A visible vouch is pulled 40 percent toward whatever the other person said about you, and shades up more (0.12 stars) than a blind one (0.05).</li>
             <li><strong>Feed.</strong> A feed ranked by followers shows people more often the more followers they have, each vouch they receive adds followers, and follower counts sway judgment.</li>
-            <li><strong>Measures.</strong> "At 4.8 or above" counts people whose score is at least 4.8. "Top 10 by score" counts how many of the 10 highest scores belong to the 10 most skilled people; chance alone gives about one. People with no vouches rank last.</li>
+            <li><strong>Measures.</strong> "At 4.8 or above" counts people whose score is at least 4.8. "Top 10 by score" counts how many of the 10 highest scores belong to the 10 most skilled people; chance alone gives about one. Ties are broken at random, once per run, and people with no vouches rank last.</li>
           </ul>
         </div>
         <p>The rules follow the research in sections 3 and 6, but every number in them is our assumption. Change them under the lab and the sizes of the effects change with them. What holds across the settings we tried is the direction: scores judged only against each other drift up, and scores anchored to the work do not.</p>

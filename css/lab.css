@@ -1,1 +1,450 @@
-/* Trust lab styles: built in the lab pass. */
+/* Trust lab. Phone first; the controls move beside the field from 880px. */
+
+.lab {
+  margin: 28px 0 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule-strong);
+}
+
+.lab-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+}
+
+/* Switches: native radios drawn as segmented controls */
+.lab-switches {
+  display: grid;
+  gap: 14px;
+}
+.lab-switch {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lab-switch legend {
+  float: left;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.lab-seg {
+  clear: both;
+  display: flex;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+.lab-seg label {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.lab-seg label + label {
+  border-left: 1px solid var(--ink);
+}
+.lab-seg input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.lab-seg span {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 6px;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--ink);
+  pointer-events: none;
+}
+.lab-seg input:hover + span {
+  background: var(--paper-2);
+}
+.lab-seg input:checked + span {
+  background: var(--ink);
+  color: var(--paper);
+}
+.lab-seg input:focus-visible + span {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* The field */
+.lab-stage {
+  min-width: 0;
+}
+.lab-round {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+.lab-field-wrap {
+  width: 100%;
+}
+.lab-field {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.lab-band {
+  fill: var(--paper-3);
+}
+.lab-axis,
+.lab-tick {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.lab-lane-rule {
+  stroke: var(--rule-strong);
+  stroke-width: 1;
+}
+.lab-label,
+.lab-tick-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  fill: var(--ink-3);
+}
+.lab-tick-label {
+  fill: var(--ink-2);
+}
+
+/* People: hollow dots, filled for the 10 most skilled, gold stars for the top 10 by score */
+.lab-p circle {
+  fill: var(--paper);
+  stroke: var(--ink-3);
+  stroke-width: 1;
+}
+.lab-p.is-skilled circle {
+  fill: var(--ink);
+  stroke: var(--ink);
+}
+.lab-star {
+  display: none;
+  fill: var(--gold);
+  stroke: var(--gold-edge);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.lab-p.is-skilled .lab-star {
+  stroke: var(--ink);
+  stroke-width: 1.75;
+}
+.lab-p.is-top circle {
+  display: none;
+}
+.lab-p.is-top .lab-star {
+  display: inline;
+}
+
+/* Playback */
+.lab-playback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.lab-play {
+  min-width: 6.5em;
+}
+
+/* Readouts */
+.lab-readouts {
+  display: grid;
+  /* The left column holds the longest text, "of the 10 most skilled". */
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 18px 12px;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+.lab-readout {
+  min-width: 0;
+}
+.lab-readout dt {
+  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.lab-readout dd {
+  margin: 0;
+  font-family: var(--mono);
+}
+.lab-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 2px;
+}
+.lab-num {
+  font-size: 1.625rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.lab-num:empty {
+  display: none;
+}
+.lab-unit {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+.lab-unit:empty {
+  display: none;
+}
+.lab-avg-stars {
+  width: 77px;
+  height: 13.3px;
+  align-self: center;
+}
+.lab-last {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+.lab-last[hidden] {
+  display: none;
+}
+
+/* Status and legend */
+.lab-status {
+  min-height: calc(1.45em * 2);
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.lab-legend {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.lab-key {
+  display: inline-block;
+  width: 0.95em;
+  height: 0.95em;
+  margin: 0 0.3em 0 0.05em;
+  vertical-align: -0.12em;
+  overflow: visible;
+}
+.lab-key circle {
+  fill: var(--paper);
+  stroke: var(--ink-3);
+  stroke-width: 1;
+}
+.lab-key.is-filled circle {
+  fill: var(--ink);
+  stroke: var(--ink);
+}
+.lab-key path {
+  fill: var(--gold);
+  stroke: var(--gold-edge);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.lab-key.is-edge path {
+  stroke: var(--ink);
+  stroke-width: 1.75;
+}
+
+/* Assumptions drawer */
+.lab-drawer {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.lab-drawer summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.lab-drawer summary::-webkit-details-marker {
+  display: none;
+}
+.lab-drawer summary::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-left: 2px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+}
+.lab-drawer[open] summary::before {
+  transform: translateY(-2px) rotate(45deg);
+}
+.lab-drawer-body {
+  display: grid;
+  gap: 18px;
+  padding: 6px 0 22px;
+}
+.lab-slider label {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.lab-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.lab-slider-value {
+  flex: none;
+  width: 18ch; /* fits "0.30 stars a round", so every track is the same length */
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  text-align: right;
+}
+.lab-slider input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.lab-slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--ink-3);
+}
+.lab-slider input[type="range"]::-webkit-slider-thumb {
+  width: 14px;
+  height: 26px;
+  margin-top: -12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--ink);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.lab-slider input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: var(--ink-3);
+}
+.lab-slider input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 26px;
+  border: 0;
+  border-radius: 0;
+  background: var(--ink);
+}
+.lab-note {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.lab-drawer-body .btn {
+  justify-self: start;
+}
+
+@media (min-width: 600px) and (max-width: 879.98px) {
+  .lab-switches {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+}
+
+@media (min-width: 880px) {
+  .lab {
+    margin-top: 36px;
+    padding-top: 24px;
+  }
+  .lab-grid {
+    grid-template-columns: 21rem minmax(0, 1fr);
+    column-gap: 44px;
+    row-gap: 26px;
+    align-items: start;
+  }
+  .lab-readouts,
+  .lab-status,
+  .lab-legend,
+  .lab-drawer {
+    grid-column: 1 / -1;
+  }
+  .lab-readouts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .lab-unit {
+    font-size: 0.8125rem;
+  }
+  .lab-avg-stars {
+    width: 87px;
+    height: 15px;
+  }
+  .lab-status {
+    max-width: 44rem;
+    font-size: 1.25rem;
+  }
+  .lab-legend {
+    max-width: 48rem;
+  }
+  .lab-drawer-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 44px;
+  }
+  .lab-note,
+  .lab-drawer-body .btn {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-drawer summary::before {
+    transition: none;
+  }
+}
