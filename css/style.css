@@ -247,6 +247,9 @@ strong {
   margin: 0 0 20px;
 }
 .hero-score {
+  /* The numeral's size and the star row's width, shared so the stars can find the baseline. */
+  --num: clamp(6.5rem, 30vw, 13rem);
+  --stars-w: clamp(150px, 42vw, 250px);
   display: flex;
   align-items: flex-end;
   gap: 14px;
@@ -254,18 +257,23 @@ strong {
   margin: 0 0 8px;
 }
 .hero-number {
-  font-size: clamp(6.5rem, 30vw, 13rem);
+  font-size: var(--num);
   line-height: 0.82;
   font-weight: 400;
   letter-spacing: -0.045em;
   font-variant-numeric: lining-nums;
   font-variation-settings: "opsz" 72;
-  margin: 0;
+  /* At this line-height the digits rise 0.086em above their own box. The top margin
+     gives that back, so the kicker's margin is the gap a reader sees. */
+  margin: 0.086em 0 0;
 }
 .hero-stars {
-  width: clamp(150px, 42vw, 250px);
+  width: var(--stars-w);
   height: auto;
-  margin-bottom: 0.55em;
+  /* Stands the star tips on the numeral's baseline at every width: the numeral's box
+     ends 0.179em below its baseline, and the tips sit 0.0217 of the row's width above
+     the row's bottom edge. */
+  margin-bottom: calc(var(--num) * 0.179 - var(--stars-w) * 0.0217);
 }
 .hero h1 {
   font-size: clamp(2.5rem, 10vw, 4.6rem);
@@ -623,16 +631,13 @@ figcaption .src,
   /* On wider screens the number, stars and title stay on one line each and may
      run past the text column to the right; the sizes are capped so they fit. */
   .hero-score {
+    --num: clamp(9rem, 16vw, 14rem);
+    --stars-w: clamp(220px, 22vw, 300px);
     flex-wrap: nowrap;
     gap: 22px;
   }
-  .hero-number {
-    font-size: clamp(9rem, 16vw, 14rem);
-  }
   .hero-stars {
-    width: clamp(220px, 22vw, 300px);
     flex: none;
-    margin-bottom: 0.7em;
   }
   .hero h1 {
     font-size: clamp(3.4rem, 6vw, 5rem);
