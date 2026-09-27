@@ -18,52 +18,52 @@
 @media (scripting: enabled) {
   .lab:not(.is-built) {
     --lab-base: 240px;
-    --lab-rest: 1496.14px;
+    --lab-rest: 1489.14px;
     min-height: calc(var(--lab-rest) - 15px + var(--lab-base)); /* not pinned: no padding or rule */
   }
-  @media (min-width: 325px) {
+  @media (min-width: 326px) {
     .lab:not(.is-built) {
-      --lab-rest: 1444.14px;
+      --lab-rest: 1466.64px;
     }
   }
   @media (min-width: 327px) {
     .lab:not(.is-built) {
-      --lab-rest: 1427.95px;
+      --lab-rest: 1450.45px;
     }
   }
   @media (min-width: 330px) {
     .lab:not(.is-built) {
-      --lab-rest: 1427.45px;
-    }
-  }
-  @media (min-width: 349px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1407.16px;
+      --lab-rest: 1449.95px;
     }
   }
   @media (min-width: 353px) {
     .lab:not(.is-built) {
-      --lab-rest: 1406.66px;
+      --lab-rest: 1449.45px;
     }
   }
-  @media (min-width: 362px) {
+  @media (min-width: 381px) {
     .lab:not(.is-built) {
-      --lab-rest: 1384.16px;
+      --lab-rest: 1426.95px;
     }
   }
   @media (min-width: 426px) {
     .lab:not(.is-built) {
-      --lab-rest: 1361.77px;
+      --lab-rest: 1404.56px;
     }
   }
-  @media (min-width: 443px) {
+  @media (min-width: 432px) {
     .lab:not(.is-built) {
-      --lab-rest: 1339.27px;
+      --lab-rest: 1382.06px;
     }
   }
   @media (min-width: 507px) {
     .lab:not(.is-built) {
-      --lab-rest: 1285.27px;
+      --lab-rest: 1328.06px;
+    }
+  }
+  @media (min-width: 535px) {
+    .lab:not(.is-built) {
+      --lab-rest: 1305.56px;
     }
   }
   @media (min-width: 552px) {
@@ -71,44 +71,39 @@
       --lab-base: 300px;
     }
   }
-  @media (min-width: 570px) {
+  @media (min-width: 577px) {
     .lab:not(.is-built) {
-      --lab-rest: 1262.77px;
+      --lab-rest: 1285.26px;
     }
   }
   @media (min-width: 600px) {
     .lab:not(.is-built) {
-      --lab-rest: 1033.92px;
+      --lab-rest: 1056.42px;
     }
   }
   @media (min-width: 651px) {
     .lab:not(.is-built) {
-      --lab-rest: 1033.42px;
-    }
-  }
-  @media (min-width: 689px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1013.13px;
+      --lab-rest: 1055.92px;
     }
   }
   @media (min-width: 698px) {
     .lab:not(.is-built) {
-      --lab-rest: 1012.63px;
+      --lab-rest: 1055.42px;
     }
   }
   @media (min-width: 720px) {
     .lab:not(.is-built) {
-      --lab-rest: 1013.13px;
+      --lab-rest: 1055.92px;
     }
   }
   @media (min-width: 722px) {
     .lab:not(.is-built) {
-      --lab-rest: 1012.63px;
+      --lab-rest: 1055.42px;
     }
   }
   @media (min-width: 867px) {
     .lab:not(.is-built) {
-      --lab-rest: 990.23px;
+      --lab-rest: 1033.03px;
     }
   }
   @media (max-width: 879.98px) and (min-height: 640px) {
@@ -120,17 +115,17 @@
   /* Short screens from 600px: the switches take one column, or sit beside the field. */
   @media (min-width: 600px) and (max-width: 639.98px) and (max-height: 500px) {
     .lab:not(.is-built) {
-      min-height: 1527.23px;
+      min-height: 1549.73px;
     }
   }
   @media (min-width: 640px) and (max-width: 879.98px) and (max-height: 500px) {
     .lab:not(.is-built) {
-      min-height: 1141.42px;
+      min-height: 1163.92px;
     }
   }
   @media (min-width: 880px) {
     .lab:not(.is-built) {
-      min-height: 985.11px;
+      min-height: 1027.9px;
     }
   }
 }
