@@ -87,30 +87,42 @@ function watchWidth(el, render) {
   return () => check(true);
 }
 
-// Runs fn once, the first time el is well inside the reading area: below the sticky
-// header and above the bottom fifth of the screen, so nothing starts while it is only
-// peeking in at an edge. An element taller than that area counts once it fills most of it.
-function onceInView(el, fn, share = 0.9) {
+// Calls enter each time el comes well into the reading area, and leave once it has gone
+// off the screen entirely, so a chart can refill every time the reader scrolls back to it.
+function eachTimeInView(el, { enter, leave }, share = 0.9) {
   if (!('IntersectionObserver' in window)) {
-    fn();
+    enter();
     return;
   }
   const headerHeight = document.querySelector('.site-header')?.offsetHeight ?? 0;
-  const io = new IntersectionObserver(
+  let armed = true;
+  new IntersectionObserver(
     (entries) => {
       const seen = entries.some((e) => {
         const tall = e.rootBounds && e.intersectionRect.height >= e.rootBounds.height * share;
         return e.isIntersecting && (e.intersectionRatio >= share || tall);
       });
-      if (seen) {
-        io.disconnect();
-        fn();
+      if (seen && armed) {
+        armed = false;
+        enter();
       }
     },
-    // Fine steps, so a tall element reports in before it has filled the whole area.
     { rootMargin: `-${headerHeight}px 0px -20% 0px`, threshold: Array.from({ length: 21 }, (_, i) => i / 20) }
-  );
-  io.observe(el);
+  ).observe(el);
+  new IntersectionObserver((entries) => {
+    if (!entries[entries.length - 1].isIntersecting && !armed) {
+      armed = true;
+      leave();
+    }
+  }).observe(el);
+}
+
+// Puts a chart back to its empty state at once, out of sight, ready to fill again.
+function unfill(el) {
+  if (!el) return;
+  el.classList.add('is-resetting', 'is-pending');
+  void el.getBoundingClientRect(); // lands the empty state before transitions come back
+  el.classList.remove('is-resetting');
 }
 
 // Removes the pending class after the first state has painted, so CSS transitions run.
@@ -171,9 +183,15 @@ async function buildWhyNow(root) {
     plot.innerHTML = whyNowSVG(rows, width, pending, label);
   });
   if (pending) {
-    onceInView(root, () => {
-      pending = false;
-      play(plot.firstElementChild);
+    eachTimeInView(root, {
+      enter: () => {
+        pending = false;
+        play(plot.firstElementChild);
+      },
+      leave: () => {
+        pending = true;
+        unfill(plot.firstElementChild);
+      },
     });
   }
 }
@@ -307,12 +325,7 @@ async function buildGuess(root) {
   const answer = document.getElementById('guess-answer');
   const start = Number(g.defaultGuess ?? 3);
   const medianText = Number(g.median).toFixed(2);
-  const stats = [
-    `${oneDecimal(m.ge45)}% at 4.5 or above`,
-    `${oneDecimal(m.ge48)}% at 4.8 or above`,
-    `${oneDecimal(m.lt40)}% below 4.0`,
-  ];
-  const statsHTML = stats.map((s, i) => `<span>${s}${i < stats.length - 1 ? ' ·' : ''}</span>`).join(' ');
+  const stats = [`${oneDecimal(m.ge45)}% at 4.5 or above`];
   const ticks = [1, 2, 3, 4, 5].map((v) => `<span style="left:${(v - 1) * 25}%">${v}</span>`).join('');
 
   root.insertAdjacentHTML(
@@ -333,7 +346,7 @@ async function buildGuess(root) {
       `<button class="btn btn-quiet" type="button" data-act="skip">Skip the guess</button>` +
       `</div>` +
       `</div>` +
-      `<div class="gs-result" hidden><div class="gs-hist"></div><p class="gs-stats">${statsHTML}</p></div>` +
+      `<div class="gs-result" hidden><div class="gs-hist"></div></div>` +
       `<p class="gs-message" aria-live="polite"></p>` +
       `<div class="gs-again" hidden><button class="btn btn-quiet" type="button" data-act="again">Guess again</button></div>`
   );
@@ -350,7 +363,7 @@ async function buildGuess(root) {
   const stars = q('.gs-stars');
   addThumbStyle();
 
-  const state = { revealed: false, guess: null, played: false };
+  const state = { revealed: false, guess: null, played: false, pending: false };
 
   const showGuess = () => {
     const v = Number(range.value);
@@ -361,25 +374,26 @@ async function buildGuess(root) {
   range.addEventListener('input', showGuess);
   showGuess();
 
-  // Share of listings rated below the guess, as the end of a sentence.
+  // How many places are rated below the guess, as one short sentence.
   const belowSentence = (guess) => {
     const share = m.shareBelow(guess);
-    if (share === 0) return 'none of the listings are rated below your guess.';
-    const pct = share < 0.05 ? 'less than 0.1%' : `${oneDecimal(share)}%`;
-    return `${pct} of listings are rated below your guess.`;
+    if (share === 0) return 'None are rated below your guess.';
+    if (share < 1) return 'Fewer than 1 in 100 are rated below your guess.';
+    return `About ${Math.round(share)} in 100 are rated below your guess.`;
   };
 
   const labelFor = (guess) =>
     `Histogram of ${m.n.toLocaleString('en-US')} listings on the full scale from 1 to 5: ` +
-    `${stats[0]}, the median is ${medianText}` +
+    `${stats[0]}, and half are rated ${medianText} or higher` +
     (guess == null ? '.' : `, and your guess of ${guess.toFixed(2)} is marked on the axis.`);
 
   // The first reveal always starts pending: charts.css grows the bars, or fades them in when
-  // motion is reduced. The reader asked for this one, so it is not autoplay.
+  // motion is reduced. The reader asked for this one, so it is not autoplay. After that the
+  // bars empty once the chart is off the screen and grow again when the reader comes back.
   const renderHist = (width) => {
-    const pending = !state.played;
+    const pending = !state.played || state.pending;
     hist.innerHTML = histogramSVG(m, width, state.guess, pending, labelFor(state.guess));
-    if (pending) {
+    if (!state.played) {
       state.played = true;
       play(hist.firstElementChild);
     }
@@ -387,6 +401,20 @@ async function buildGuess(root) {
   watchWidth(root, (width) => {
     if (state.revealed) renderHist(width);
   });
+  if (motionAllowed()) {
+    eachTimeInView(hist, {
+      enter: () => {
+        if (!state.pending) return;
+        state.pending = false;
+        play(hist.firstElementChild);
+      },
+      leave: () => {
+        if (!state.revealed) return;
+        state.pending = true;
+        unfill(hist.firstElementChild);
+      },
+    });
+  }
 
   const scrollBehavior = () => (motionAllowed() ? 'smooth' : 'auto');
 
@@ -411,9 +439,8 @@ async function buildGuess(root) {
     renderHist(Math.floor(root.clientWidth));
     message.textContent =
       guess == null
-        ? `The median listing is rated ${medianText}.`
-        : `You guessed ${guess.toFixed(2)}. The median listing is rated ${medianText}, and ` +
-          belowSentence(guess);
+        ? `The typical place is rated ${medianText}.`
+        : `You guessed ${guess.toFixed(2)}. The typical place is rated ${medianText}. ${belowSentence(guess)}`;
     if (answer) answer.hidden = false;
     againBtn.focus({ preventScroll: true });
     // The histogram, the sentence about the reader's guess and the focused button,
@@ -482,7 +509,7 @@ function histogramSVG(m, W, guess, pending, label) {
   let anno = '';
   const xm = crisp(x(m.median) - 0.5);
   anno += `<line class="gs-median" x1="${xm}" x2="${xm}" y1="3" y2="${yAxis}"/>`;
-  anno += `<text class="gs-median-label" x="${xm - 5}" y="14" text-anchor="end">Median ${m.median.toFixed(2)}</text>`;
+  anno += `<text class="gs-median-label" x="${xm - 5}" y="14" text-anchor="end">Typical ${m.median.toFixed(2)}</text>`;
   anno += `<text class="gs-band-label" x="${r2(bx0 - 5)}" y="${bandTop + 12}" text-anchor="end">4.8+</text>`;
 
   // Share of listings in the tallest bar: beside it when it is the last bin, else above it.
@@ -567,7 +594,7 @@ async function buildDrift(root) {
   if (animate) {
     // Watch the grid itself, where the fill happens, not the whole block around it.
     root.querySelectorAll('.dr-pair .dr-stars').forEach((grid) => {
-      onceInView(grid, () => play(grid));
+      eachTimeInView(grid, { enter: () => play(grid), leave: () => unfill(grid) });
     });
   }
 }

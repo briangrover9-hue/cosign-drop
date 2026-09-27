@@ -127,7 +127,7 @@ Caveats: Sackett et al. (2023, IOP 16(3)) revise cognitive ability again to .23 
 
 ## Numbers that didn't survive
 
-These appear on the page only in the box of repeated statistics that fell apart when traced.
+These widely repeated hiring statistics fell apart when traced. None of them is on the page; they are kept here as a record of what was checked and cut.
 
 | Claim as usually repeated | What the source says | Source | Status |
 |---|---|---|---|

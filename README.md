@@ -6,13 +6,14 @@ By [Brian Grover](https://www.linkedin.com/in/briantgrover) ([@briantgrover](htt
 
 ## What's on the page
 
-1. **Why now.** Freelancer.com data showing that once ChatGPT, and then the site's own AI tool, made tailored proposals cheap, employers would pay less for them and more for a worker's reputation score.
-2. **The drift.** A guess-then-reveal chart of our own measurement: the median San Francisco and New York Airbnb listing with 10 or more reviews is rated 4.84. Then college grades, Harvard, an online labor market, eBay, Airbnb against TripAdvisor hotels, LinkedIn endorsements and GitHub stars, each drawn as a grid of 100 stars.
-3. **The trust lab.** A simulation of 80 coworkers with five switches: stars or a named yes; one tap, written or tied to a piece of work; seen right away or only after both people write; whether a vouch says how the giver knows you; and a feed ranked by count, by the track record of who vouched, or not at all. It starts in the worst setting and has a Cosign-style preset. The methods set out its rules, and `js/lab-model.js` lists every number with a note on what it does.
-4. **Why it happens.** Four forces, each backed by research: giving is free, the other person sees what you said, honesty costs you, and unhappy people go quiet. Then a ranked feed sends more attention to whoever is already ahead.
-5. **What predicts the job.** Schmidt and Hunter's 1998 ranking of hiring methods against Sackett and colleagues' 2022 revision.
-6. **What holds up.** Four rules for a vouch that the research supports, with the versions Cosign already ships.
-7. **Methods and caveats**, including a box of widely repeated hiring statistics that fell apart when traced.
+Four beats, each one screen, one visual and a sentence or two:
+
+1. **Everyone's a 4.8.** Guess how guests rate the typical Airbnb in San Francisco and New York, then see the answer from our own measurement: 4.84.
+2. **It happens wherever people rate each other.** Harvard grades, eBay sellers, LinkedIn endorsements and GitHub stars, each drawn as a grid of 100 stars, all crowded at the top.
+3. **So the stars stop telling you who's good.** A simulated company of 80 coworkers rating each other with one-click stars. The scores drift up toward 5, and the top 10 by score finds only half of the 10 most skilled.
+4. **Praise tied to real work fixes it.** The same company with every rating pointing at real work, then what this means for a cosign and the open question. "Try other rules" opens every switch and assumption, with the chart pinned in view.
+
+Two collapsed sections hold the support: "Why this happens" (four ordinary forces, and the feed) and "The research" (Freelancer.com after ChatGPT, what predicts job performance, and four rules for a vouch that keeps its value, with the versions Cosign already ships). The methods list every source and the lab's rules, with the exact result for each setting.
 
 ## Data and sources
 

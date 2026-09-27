@@ -34,23 +34,6 @@
   },
   "drift": [
     {
-      "id": "grades",
-      "title": "US college grades",
-      "measure": "Grades that are A’s",
-      "then": {
-        "label": "1960",
-        "value": 15
-      },
-      "now": {
-        "label": "Late 2000s",
-        "value": 43
-      },
-      "source": {
-        "label": "Rojstaczer and Healy (2012)",
-        "url": "https://www.gradeinflation.com/tcr2012grading.pdf"
-      }
-    },
-    {
       "id": "harvard",
       "title": "Harvard College",
       "measure": "Grades that are A’s",
@@ -68,23 +51,6 @@
       }
     },
     {
-      "id": "labor",
-      "title": "An online labor market",
-      "measure": "Workers rated 5 stars",
-      "then": {
-        "label": "Start",
-        "value": 33
-      },
-      "now": {
-        "label": "Six years later",
-        "value": 85
-      },
-      "source": {
-        "label": "Filippas, Horton and Golden (2022)",
-        "url": "https://www.nber.org/system/files/working_papers/w25857/w25857.pdf"
-      }
-    },
-    {
       "id": "ebay",
       "title": "eBay sellers",
       "measure": "Feedback that is positive",
@@ -95,32 +61,6 @@
       "source": {
         "label": "Nosko and Tadelis (2015)",
         "url": "https://www.nber.org/system/files/working_papers/w20830/w20830.pdf"
-      }
-    },
-    {
-      "id": "airbnb2015",
-      "title": "Airbnb",
-      "measure": "Listings rated 4.5 or higher",
-      "now": {
-        "label": "2015",
-        "value": 94
-      },
-      "source": {
-        "label": "Zervas, Proserpio and Byers",
-        "url": "https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf"
-      }
-    },
-    {
-      "id": "tripadvisor",
-      "title": "TripAdvisor hotels",
-      "measure": "Hotels rated 4.5 or higher",
-      "now": {
-        "label": "2015",
-        "value": 26
-      },
-      "source": {
-        "label": "Zervas, Proserpio and Byers",
-        "url": "https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf"
       }
     },
     {

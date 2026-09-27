@@ -536,8 +536,66 @@ figcaption .src,
   padding: 18px 0 6px;
   border-top: 1px solid var(--rule);
 }
-.rules h3 {
-  margin-top: 0;
+.rules h3,
+.rules h4 {
+  margin: 0 0 0.5em;
+}
+.rules h4 {
+  font-size: 1.15rem;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* "Why this happens" and "The research": the support for the four beats, closed until a
+   reader asks for it. */
+.support {
+  padding-top: 40px;
+}
+.more {
+  border-top: 1px solid var(--rule-strong);
+}
+.more:last-of-type {
+  border-bottom: 1px solid var(--rule-strong);
+}
+.more > summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 10px 0;
+  cursor: pointer;
+  list-style: none;
+}
+.more > summary::-webkit-details-marker {
+  display: none;
+}
+.more > summary::before {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-left: 2px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 200ms var(--ease-out);
+}
+.more[open] > summary::before {
+  transform: translateY(-3px) rotate(45deg);
+}
+.more > summary:focus-visible::before {
+  transition: none;
+}
+.more > summary h2 {
+  margin: 0;
+  font-size: clamp(1.45rem, 4.6vw, 2rem);
+}
+.more-body {
+  padding: 4px 0 36px;
+}
+.more-body > :first-child {
+  margin-top: 0.5em;
 }
 
 /* Two hidden vouch cards that flip together */
@@ -710,6 +768,21 @@ figcaption .src,
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+/* The lab's results table names each setting in its first column, in the body text face. */
+.methods tbody th {
+  font-family: var(--serif);
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.methods caption {
+  padding-bottom: 6px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 0.75rem;
   color: var(--ink-3);
 }
 .table-scroll {

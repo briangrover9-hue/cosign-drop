@@ -1,6 +1,6 @@
-/* Trust lab. Phone first. On a phone the block with the field stays pinned under the header
-   while the presets, switches and buttons scroll under it; from 880px the controls sit beside
-   the field. */
+/* Trust lab. Phone first. The field comes first, with a line on what the current rules mean
+   and one on how the run went. "Try other rules" opens the switches and the assumptions; while
+   it is open the field stays pinned above them on a phone and beside them from 880px. */
 
 .lab {
   /* The bottom margin is the figures', so the prose after the lab gets the same space. */
@@ -9,123 +9,69 @@
   border-top: 1px solid var(--rule-strong);
 }
 
-/* Before the script builds the lab, hold the room it will take, so the text below does not
-   jump; once built, the lab takes its own height. The numbers are the built lab's measured
-   heights. --lab-rest is everything but the field, stepping where lines wrap and where the
-   controls move; below 880px the field adds its own height, which on screens at least 640px
-   tall is the pinned field: 55% of the small viewport less the header and the 152px of round,
-   line and summary around it, between 120px and its full height (lab.js does the same sum). */
+/* Before the script builds a lab, hold the room it will take, so the text below does not
+   jump; once built, the lab takes its own height. The numbers are each lab's measured height
+   with "Try other rules" closed, stepping where its lines wrap and where the field grows. */
 @media (scripting: enabled) {
-  .lab:not(.is-built) {
-    --lab-base: 240px;
-    --lab-rest: 1489.14px;
-    min-height: calc(var(--lab-rest) - 15px + var(--lab-base)); /* not pinned: no padding or rule */
+  #lab-worst:not(.is-built) {
+    min-height: 690.4px;
   }
-  @media (min-width: 326px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1466.64px;
+  @media (min-width: 344px) {
+    #lab-worst:not(.is-built) {
+      min-height: 664.9px;
     }
   }
-  @media (min-width: 327px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1450.45px;
+  @media (min-width: 418px) {
+    #lab-worst:not(.is-built) {
+      min-height: 641.7px;
     }
   }
-  @media (min-width: 330px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1449.95px;
-    }
-  }
-  @media (min-width: 353px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1449.45px;
-    }
-  }
-  @media (min-width: 381px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1426.95px;
-    }
-  }
-  @media (min-width: 426px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1404.56px;
-    }
-  }
-  @media (min-width: 432px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1382.06px;
-    }
-  }
-  @media (min-width: 507px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1328.06px;
-    }
-  }
-  @media (min-width: 535px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1305.56px;
+  @media (min-width: 493px) {
+    #lab-worst:not(.is-built) {
+      min-height: 616.2px;
     }
   }
   @media (min-width: 552px) {
-    .lab:not(.is-built) {
-      --lab-base: 300px;
-    }
-  }
-  @media (min-width: 577px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1285.26px;
-    }
-  }
-  @media (min-width: 600px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1056.42px;
-    }
-  }
-  @media (min-width: 651px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1055.92px;
-    }
-  }
-  @media (min-width: 698px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1055.42px;
-    }
-  }
-  @media (min-width: 720px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1055.92px;
-    }
-  }
-  @media (min-width: 722px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1055.42px;
-    }
-  }
-  @media (min-width: 867px) {
-    .lab:not(.is-built) {
-      --lab-rest: 1033.03px;
-    }
-  }
-  @media (max-width: 879.98px) and (min-height: 640px) {
-    .lab:not(.is-built) {
-      min-height: calc(var(--lab-rest) + clamp(120px, 55vh - var(--header-h) - 152px, var(--lab-base)));
-      min-height: calc(var(--lab-rest) + clamp(120px, 55svh - var(--header-h) - 152px, var(--lab-base)));
-    }
-  }
-  /* Short screens from 600px: the switches take one column, or sit beside the field. */
-  @media (min-width: 600px) and (max-width: 639.98px) and (max-height: 500px) {
-    .lab:not(.is-built) {
-      min-height: 1549.73px;
-    }
-  }
-  @media (min-width: 640px) and (max-width: 879.98px) and (max-height: 500px) {
-    .lab:not(.is-built) {
-      min-height: 1163.92px;
+    #lab-worst:not(.is-built) {
+      min-height: 676.2px;
     }
   }
   @media (min-width: 880px) {
-    .lab:not(.is-built) {
-      min-height: 1027.9px;
+    #lab-worst:not(.is-built) {
+      min-height: 686.2px;
+    }
+  }
+  #lab-root:not(.is-built) {
+    min-height: 785.6px;
+  }
+  @media (min-width: 321px) {
+    #lab-root:not(.is-built) {
+      min-height: 762.4px;
+    }
+  }
+  @media (min-width: 344px) {
+    #lab-root:not(.is-built) {
+      min-height: 736.9px;
+    }
+  }
+  @media (min-width: 464px) {
+    #lab-root:not(.is-built) {
+      min-height: 713.7px;
+    }
+  }
+  @media (min-width: 493px) {
+    #lab-root:not(.is-built) {
+      min-height: 688.2px;
+    }
+  }
+  @media (min-width: 552px) {
+    #lab-root:not(.is-built) {
+      min-height: 748.2px;
+    }
+  }
+  @media (min-width: 880px) {
+    #lab-root:not(.is-built) {
+      min-height: 758.2px;
     }
   }
 }
@@ -140,6 +86,15 @@
   display: grid;
   gap: 14px;
   min-width: 0;
+}
+/* The one line a first-time reader needs: what the dots and stars mean. */
+.lab-lede {
+  max-width: var(--text);
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: var(--ink);
 }
 
 /* Presets: three quiet buttons, the one that matches the switches marked as pressed */
@@ -319,16 +274,23 @@
   font-size: 12px;
   fill: var(--ink-2);
 }
-/* One line of the readouts, for screens where the full readouts sit below the controls. */
+/* Right under the field: what the last switch means, then how the finished run went. Each
+   holds two lines' room, so a longer sentence never moves the field or the controls. */
+.lab-explain,
 .lab-summary {
-  margin: 6px 0 0;
-  overflow: hidden;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  max-width: var(--text);
+  min-height: calc(1.45em * 2);
+  margin: 10px 0 0;
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.lab-explain {
+  color: var(--ink-2);
+}
+.lab-summary {
+  margin-top: 4px;
+  font-weight: 600;
   color: var(--ink);
 }
 /* Reads the small viewport height, which does not change as a phone's toolbars slide. */
@@ -533,12 +495,15 @@
   stroke-width: 1.75;
 }
 
-/* Assumptions drawer */
-.lab-drawer {
+/* "Try other rules": the switches and the assumptions, closed until a reader asks */
+.lab-rules {
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
 }
-.lab-drawer summary {
+.lab[data-controls="none"] .lab-rules {
+  display: none;
+}
+.lab-rules summary {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -551,10 +516,10 @@
   letter-spacing: 0.04em;
   color: var(--ink);
 }
-.lab-drawer summary::-webkit-details-marker {
+.lab-rules summary::-webkit-details-marker {
   display: none;
 }
-.lab-drawer summary::before {
+.lab-rules summary::before {
   content: "";
   flex: none;
   width: 7px;
@@ -565,17 +530,36 @@
   transform: rotate(-45deg);
   transition: transform 200ms var(--ease-out);
 }
-.lab-drawer[open] summary::before {
+.lab-rules[open] summary::before {
   transform: translateY(-2px) rotate(45deg);
 }
 /* Toggled from the keyboard, the chevron turns without animating. */
-.lab-drawer summary:focus-visible::before {
+.lab-rules summary:focus-visible::before {
   transition: none;
+}
+.lab-rules-body {
+  display: grid;
+  gap: 26px;
+  padding: 6px 0 22px;
 }
 .lab-drawer-body {
   display: grid;
   gap: 18px;
-  padding: 6px 0 22px;
+}
+.lab-drawer-title {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+}
+/* With the rules closed the lab is the field, one line of numbers and the playback; the
+   readouts, the verdict, the key and the extra playback belong to "Try other rules". */
+.lab:not(.is-tuning) .lab-readouts,
+.lab:not(.is-tuning) .lab-status,
+.lab:not(.is-tuning) .lab-legend,
+.lab:not(.is-tuning) [data-action="skip"],
+.lab:not(.is-tuning) [data-action="again"] {
+  display: none;
 }
 .lab-slider label {
   display: block;
@@ -667,7 +651,7 @@
     column-gap: 24px;
   }
   /* "A vouch is" with its slider is the tallest piece, so it takes two rows. */
-  .lab-switch-group {
+  .shows-anchor .lab-switch-group {
     grid-row: span 2;
   }
 }
@@ -678,7 +662,7 @@
    gives each control a scroll margin as tall as the block, so keyboard focus never lands under
    it. Screens shorter than 640px do not pin. */
 @media (max-width: 879.98px) and (min-height: 640px) {
-  .lab-stage {
+  .lab.is-tuning .lab-stage {
     position: sticky;
     top: var(--header-h);
     z-index: 2;
@@ -686,33 +670,42 @@
     background: var(--paper);
     border-bottom: 1px solid var(--rule);
   }
-  .lab-controls input,
-  .lab-controls button,
-  .lab-playback button {
+  .lab-playback button,
+  .lab-rules summary,
+  .lab-rules input,
+  .lab-rules button {
     scroll-margin-top: var(--lab-stuck, 0px);
+  }
+  /* With the rules open, the pinned block shrinks to the round, the field and its two lines,
+     so the controls get most of the screen and every change still shows above them. */
+  .lab.is-tuning .lab-trend {
+    display: none;
   }
 }
 
-/* Landscape phones: a short screen cannot show the switches above the field, so they sit
-   beside it, and the field stays pinned under the header while they scroll. */
+/* Landscape phones: with the rules open, a short screen cannot show them above the field, so
+   they sit beside it, and the field stays pinned under the header while they scroll. */
 @media (min-width: 640px) and (max-width: 879.98px) and (max-height: 500px) {
-  .lab-top {
+  .lab.is-tuning .lab-top {
     grid-template-columns: 19rem minmax(0, 1fr); /* wide enough for "Who vouched" on one line */
-    grid-template-areas: "controls stage" "playback stage";
+    grid-template-areas: "playback stage" "rules stage";
     grid-template-rows: auto 1fr;
     column-gap: 24px;
     align-items: start;
   }
-  .lab-controls {
-    grid-area: controls;
-  }
-  .lab-playback {
+  .lab.is-tuning .lab-playback {
     grid-area: playback;
   }
-  .lab-stage {
+  .lab.is-tuning .lab-rules {
+    grid-area: rules;
+  }
+  .lab.is-tuning .lab-stage {
     grid-area: stage;
     position: sticky;
     top: var(--header-h);
+  }
+  .lab.is-tuning .lab-trend {
+    display: none;
   }
   .lab-switches {
     row-gap: 8px;
@@ -727,26 +720,28 @@
   .lab-grid {
     row-gap: 26px;
   }
-  .lab-top {
+  /* Closed, the lab is one column at a reading width. Open, the playback and the rules share
+     the left column, and the field sits beside them, pinned while they scroll, so a change
+     and its effect are in view together. */
+  .lab:not(.is-tuning) .lab-grid {
+    max-width: 46rem;
+  }
+  .lab.is-tuning .lab-top {
     grid-template-columns: 21rem minmax(0, 1fr);
-    grid-template-areas: "controls stage" "controls playback";
+    grid-template-areas: "playback stage" "rules stage";
     grid-template-rows: auto 1fr;
     column-gap: 44px;
     row-gap: 18px;
     align-items: start;
   }
-  .lab-controls {
-    grid-area: controls;
-  }
-  .lab-stage {
+  .lab.is-tuning .lab-stage {
     grid-area: stage;
   }
-  .lab-playback {
+  .lab.is-tuning .lab-playback {
     grid-area: playback;
   }
-  /* The full readouts sit right under the field here. */
-  .lab-summary {
-    display: none;
+  .lab.is-tuning .lab-rules {
+    grid-area: rules;
   }
   .lab-readouts {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -761,13 +756,12 @@
   .lab-status {
     font-size: 1.25rem;
   }
-  .lab-drawer-body {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 44px;
-  }
-  .lab-note,
-  .lab-drawer-body .btn {
-    grid-column: 1 / -1;
+}
+/* Pinned beside the rules only where the whole field fits under the header. */
+@media (min-width: 880px) and (min-height: 600px) {
+  .lab.is-tuning .lab-stage {
+    position: sticky;
+    top: calc(var(--header-h) + 16px);
   }
 }
 

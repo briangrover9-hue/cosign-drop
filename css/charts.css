@@ -65,70 +65,92 @@
   #validity-root {
     min-height: 698px;
   }
-  #fig-guess {
-    min-height: 458px;
-  }
-  @media (min-width: 363px) {
-    #fig-guess {
-      min-height: 429.5px;
-    }
-  }
-  @media (min-width: 394px) {
-    #fig-guess {
-      min-height: 407.8px;
-    }
-  }
-  @media (min-width: 471px) {
-    #fig-guess {
-      min-height: 389.8px;
-    }
-  }
-  @media (min-width: 491px) {
-    #fig-guess {
-      min-height: 366.4px;
-    }
-  }
   @media (min-width: 720px) {
-    #fig-guess {
-      min-height: 370.8px;
-    }
     #validity-root {
       min-height: 504px;
     }
   }
-  /* Each drift grid is as tall as its column is wide, so the room is the grids' height,
-     worked out from the figure's width (cqi), plus the text around them (--dr-text), which
-     loses a line at each container width listed below as titles and labels stop wrapping. */
-  #drift-root {
-    --dr-text: 829.3px;
-    min-height: calc(min(1040px, 200cqi - 32px) + var(--dr-text));
+  #fig-guess {
+    min-height: 436.3px;
   }
-  @container (min-width: 294px) { #drift-root { --dr-text: 808.5px; } }
-  @container (min-width: 299px) { #drift-root { --dr-text: 790.5px; } }
-  @container (min-width: 359px) { #drift-root { --dr-text: 769.8px; } }
-  @container (min-width: 368px) { #drift-root { --dr-text: 749.2px; } }
-  @container (min-width: 388px) { #drift-root { --dr-text: 731.2px; } }
-  @container (min-width: 420px) { #drift-root { --dr-text: 712.3px; } }
-  @container (min-width: 422px) { #drift-root { --dr-text: 693.5px; } }
-  @container (min-width: 433px) { #drift-root { --dr-text: 675.5px; } }
-  @container (min-width: 478px) { #drift-root { --dr-text: 657.5px; } }
-  @container (min-width: 520px) { #drift-root { --dr-text: 638.5px; } }
-  /* Four across from 720px, two rows of grids; the gap between columns widens at 900px. */
+  @media (min-width: 363px) {
+    #fig-guess {
+      min-height: 407.8px;
+    }
+  }
+  @media (min-width: 369px) {
+    #fig-guess {
+      min-height: 386.1px;
+    }
+  }
+  @media (min-width: 380px) {
+    #fig-guess {
+      min-height: 362.7px;
+    }
+  }
+  @media (min-width: 471px) {
+    #fig-guess {
+      min-height: 344.7px;
+    }
+  }
+  @media (min-width: 720px) {
+    #fig-guess {
+      min-height: 349.1px;
+    }
+  }
+  /* Each drift grid is as tall as its column is wide: two rows of two on phones, capped at
+     260px a grid, and one row of four from 720px, with wider gaps from 900px. The text around
+     the grids (--dr-text) loses a line at each width listed. */
+  #drift-root {
+    min-height: calc(min(520px, 100cqi - 16px) + var(--dr-text));
+  }
   @media (min-width: 720px) {
     #drift-root {
-      --dr-text: 443.8px;
-      min-height: calc(50cqi - 30px + var(--dr-text));
+      min-height: calc(25cqi - 15px + var(--dr-text));
     }
-    @container (min-width: 746px) { #drift-root { --dr-text: 423.1px; } }
-    @container (min-width: 763px) { #drift-root { --dr-text: 402.3px; } }
-    @container (min-width: 804px) { #drift-root { --dr-text: 384.3px; } }
   }
   @media (min-width: 900px) {
     #drift-root {
-      --dr-text: 384.3px;
-      min-height: calc(50cqi - 42px + var(--dr-text));
+      min-height: calc(25cqi - 21px + var(--dr-text));
     }
-    @container (min-width: 891px) { #drift-root { --dr-text: 365.5px; } }
+  }
+  #drift-root {
+    --dr-text: 423.2px;
+  }
+  @media (min-width: 400px) {
+    #drift-root {
+      --dr-text: 402.5px;
+    }
+  }
+  @media (min-width: 420px) {
+    #drift-root {
+      --dr-text: 384.5px;
+    }
+  }
+  @media (min-width: 452px) {
+    #drift-root {
+      --dr-text: 365.6px;
+    }
+  }
+  @media (min-width: 510px) {
+    #drift-root {
+      --dr-text: 347.6px;
+    }
+  }
+  @media (min-width: 552px) {
+    #drift-root {
+      --dr-text: 328.8px;
+    }
+  }
+  @media (min-width: 720px) {
+    #drift-root {
+      --dr-text: 222.0px;
+    }
+  }
+  @media (min-width: 819px) {
+    #drift-root {
+      --dr-text: 201.2px;
+    }
   }
 }
 
@@ -179,6 +201,13 @@
 }
 .ch-svg.is-pending .wn-value {
   opacity: 0;
+}
+
+/* A chart that has gone off the screen empties at once, without its transitions, so it can
+   fill again when the reader comes back. */
+.is-resetting,
+.is-resetting * {
+  transition: none !important;
 }
 
 /* 2. The guess */

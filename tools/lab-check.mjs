@@ -5,13 +5,13 @@
 //    setting, each single switch flipped from it, the best setting, a
 //    LinkedIn-like yes setting, and the Cosign-like settings, next to the
 //    prototype the model was ported from.
-// 2. The same rows for the world the page shows first (seed 102).
+// 2. The same rows for the world the page shows (seed 256).
 // 3. Assertions, which fail loudly: determinism, snapshots that never change
 //    a run, overrides, and the directions the page relies on.
 import { createWorld, createRun, DEFAULTS, WORST, BEST, COSIGN } from '../js/lab-model.js';
 
 const WORLDS = [11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133];
-const PAGE_WORLD = 102; // the world index.html sets on #lab-root: of worlds 1 to 600 whose first run keeps the averages' main results (tied to work finds the most on its own; on the yes scale a track record beats a raw count), its results sit closest to the 12-world averages
+const PAGE_WORLD = 256; // the world both labs on the page show (#lab-worst and #lab-root): of worlds 1 to 600 whose first run keeps every result the text describes, its results sit closest to the 12-world averages
 const LINKEDIN = Object.freeze({ scale: 'yes', type: 'tap', vis: 'visible', who: 'anyone', feed: 'count' });
 const COSIGN_COUNT = Object.freeze({ ...COSIGN, feed: 'count' });
 
@@ -170,6 +170,16 @@ console.log('\n3. Checks\n');
     check(Math.abs(plainYes[4] - reputation[4]) <= 1, `${where}: on the yes scale, ranking no one does about as well as ranking by track record (${plainYes[4].toFixed(1)} against ${reputation[4].toFixed(1)})`);
     check([count[3], reputation[3]].every((u) => u >= 15 && u <= 25), `${where}: a ranked feed on the yes scale leaves about a quarter of the 80 with no yes (${count[3].toFixed(1)} by count, ${reputation[3].toFixed(1)} by track record)`);
     check(plainYes[3] < 10, `${where}: a feed that ranks no one leaves far fewer with no yes (${plainYes[3].toFixed(1)})`);
+  }
+
+  // The four beats' own sentences. Beat 3: with one-tap stars the scores drift up toward 5
+  // and the gold stars land on only half of the best people. Beat 4: with ratings tied to
+  // work the scores stay spread out and the stars find most of the best people.
+  for (const [where, rows] of [['12-world average', averages], [`page world ${PAGE_WORLD}`, pageRows]]) {
+    const worst = rows.get(ROWS[0][0]);
+    const work = rows.get(ROWS[1][0]);
+    check(worst[4] >= 4 && worst[4] <= 5.5 && worst[1] >= 4.3, `${where}: beat 3, the worst setting drifts to ${worst[1].toFixed(2)} and finds about half of the best (${worst[4].toFixed(2)})`);
+    check(work[4] > 5 && work[1] < 3.6, `${where}: beat 4, tied to work stays spread out (${work[1].toFixed(2)}) and finds most of the best (${work[4].toFixed(2)})`);
   }
 
   // The text under the lab: on the yes scale, vouches tied to work leave more

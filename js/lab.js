@@ -14,6 +14,7 @@ const COLUMNS_PER_STAR = [20, 10, 5];
 const LANE_COLUMNS = 4; // the lane for people with nothing to count stacks them four across
 const WIDE_FIELD = 520; // field width in pixels from which dots and the field get bigger
 const MIN_FIELD_H = 120; // the shortest the field gets when it has to fit a pinned block
+const TUNE_SHARE = 0.42; // with "Try other rules" open on a phone, the pinned block's share of the screen
 const TREND_H = 56; // height of the line of the average under the field
 // Yes-scale axis ends. Each divides by 4, so the quarter ticks are whole numbers.
 const YES_AXIS = [4, 8, 12, 16, 20, 24, 40, 60, 80, 100, 120, 160, 200, 240, 300, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 3000, 4000];
@@ -22,6 +23,53 @@ const YES_AXIS = [4, 8, 12, 16, 20, 24, 40, 60, 80, 100, 120, 160, 200, 240, 300
 // match lab.css.
 const PHONE_PIN = '(max-width: 879.98px) and (min-height: 640px)';
 const SIDE_PIN = '(min-width: 640px) and (max-width: 879.98px) and (max-height: 500px)';
+
+// One or two plain sentences under the field for the switch just flipped: what it means and
+// what to watch for. Where a switch works differently on the two scales, each has its own.
+const EXPLAIN = {
+  scale: () => 'Stars give a score from 1 to 5. A named yes is just “I vouch for this person,” like a cosign.',
+  type: {
+    tap: (scale) =>
+      scale === 'yes'
+        ? 'Anyone can say yes with one click. It’s free, so people say yes to most of the people they see.'
+        : 'Anyone can give a rating with one click. It’s free, so people hand out lots of them. Watch the dots pile up at 5.',
+    written: (scale) =>
+      scale === 'yes'
+        ? 'Now people have to write a few words. That takes effort, so they only say yes when they mean it.'
+        : 'Now people have to write a few words. That takes effort, so they give fewer ratings and think a bit more.',
+    work: () => 'Now praise has to point at something real the person made. It’s hard to fake, so watch the gold stars move toward the black dots.',
+  },
+  vis: {
+    visible: () => 'People see what you said about them, so it’s awkward to be honest.',
+    blind: () => 'Nobody sees what the other person said until both are done, so there’s no reason to trade nice words.',
+  },
+  who: {
+    anyone: () => 'Vouches don’t say how people know each other, so a stranger’s counts as much as a coworker’s.',
+    said: () => 'Now each vouch says how they know you. A stranger’s vouch counts for less.',
+  },
+  feed: {
+    count: () => 'The people with the most vouches get shown the most, so they get even more.',
+    reputation: () => 'Vouches from people with a good track record count more.',
+    plain: () => 'Everyone gets shown the same, so no one runs away with it.',
+  },
+  preset: {
+    worst: () => 'The worst rules: one-click stars that people see right away, in a feed that shows off whoever has the most.',
+    cosign: () => 'Cosign-style rules: a named yes with a reason that says how you know the person, in a feed that weighs who gave it.',
+  },
+};
+const explainFor = (why, scale) => {
+  if (why.preset) return EXPLAIN.preset[why.preset](scale);
+  if (why.key === 'scale') return EXPLAIN.scale(scale);
+  return EXPLAIN[why.key][why.value](scale);
+};
+
+// How a finished run went, in one plain line.
+const resultLine = (m) => {
+  if (m.hits === null) return '\u00a0';
+  return m.hits <= 3
+    ? `The gold stars found only ${m.hits} of the 10 best. Guessing would find about 1.`
+    : `The gold stars found ${m.hits} of the 10 best people.`;
+};
 
 // Two starting points: the setting where the drift shows, and the one closest to Cosign's
 // design. There is no "best" preset: the setting that scores highest does so because of
@@ -40,29 +88,29 @@ const SWITCHES = [
 ];
 
 const percent = (v) => `${Math.round(v * 100)}%`;
-// The anchor slider sits under "A vouch is"; the others live in the drawer. A slider with a
+// The anchor slider sits under "A vouch is"; the others live under "Our assumptions". A slider with a
 // scale shows only on that scale.
 const ANCHOR = {
   id: 'anchor', path: ['anchor', 'work'], min: 0, max: 1, step: 0.05, format: percent, scale: 'stars',
-  label: 'How firmly a vouch tied to work is held to a fixed standard',
+  label: 'How strictly a vouch about real work sticks to a fixed bar',
 };
 const ASSUMPTIONS = [
   { id: 'push', path: ['push', 'visible'], min: 0, max: 0.3, step: 0.01, format: (v) => `${v.toFixed(2)} stars a round`, scale: 'stars',
-    label: 'How much people shade up when the other person can see the vouch' },
+    label: 'How much people round up when the other person will see it' },
   { id: 'autofive', path: ['autoFive', 'tap'], min: 0, max: 0.5, step: 0.01, format: percent, scale: 'stars',
-    label: 'Share of one-tap ratings that are a reflexive five' },
+    label: 'One-tap ratings that are an automatic five' },
   { id: 'autoyes', path: ['autoYes', 'tap'], min: 0, max: 0.6, step: 0.01, format: percent, scale: 'yes',
-    label: 'Share of one-tap judgments that are a reflexive yes' },
+    label: 'One-tap judgments that are an automatic yes' },
   { id: 'repstrength', path: ['repStrength'], min: 0, max: 2, step: 0.1, format: (v) => v.toFixed(1), scale: 'yes',
-    label: 'How strongly a track record weights a vouch' },
+    label: 'How much a good track record boosts a vouch' },
   { id: 'known', path: ['knownShare'], min: 0, max: 1, step: 0.05, format: percent,
-    label: 'Share of vouches that go to people they worked with' },
+    label: 'Vouches that go to people they worked with' },
   { id: 'stranger', path: ['strangerWeight'], min: 0, max: 1, step: 0.05, format: percent,
-    label: 'How much a stranger’s vouch counts once they say how they know you' },
+    label: 'How much a stranger’s vouch counts, once vouches say how they know you' },
   { id: 'workvis', path: ['workVis'], min: 0, max: 1, step: 0.05, format: percent,
-    label: 'How much strangers still judge visibility when a vouch points at work' },
+    label: 'How much strangers judge real work by how well known its maker is' },
   { id: 'halo', path: ['halo'], min: 0, max: 1, step: 0.05, format: (v) => v.toFixed(2),
-    label: 'How much a ranked feed sways judgment' },
+    label: 'How much a ranked feed sways people’s judgment' },
 ];
 const SLIDERS = [ANCHOR, ...ASSUMPTIONS];
 for (const a of SLIDERS) a.initial = a.path.reduce((o, k) => o[k], DEFAULTS);
@@ -91,8 +139,8 @@ const TREND = {
   yes: { title: 'Share of judgments that were a yes, round by round', min: 0, max: 1, top: '100%', bottom: '0%', value: (h) => h.yesRate, text: percent },
 };
 
-const root = document.getElementById('lab-root');
-if (root) mount(root);
+// Every lab on the page runs on its own: the worst setting in one, tied to work in the next.
+document.querySelectorAll('.lab[id]').forEach(mount);
 
 function mount(root) {
   const world = createWorld(Number(root.dataset.seed) || 102);
@@ -106,8 +154,9 @@ function mount(root) {
   const sidePin = window.matchMedia(SIDE_PIN);
   const header = document.querySelector('.site-header');
 
+  const start = root.dataset.start === 'work' ? { ...WORST, type: 'work' } : { ...WORST };
   root.querySelector('.fallback')?.remove();
-  root.insertAdjacentHTML('beforeend', template(N));
+  root.insertAdjacentHTML('beforeend', template(N, root.id, start));
   const $ = (selector) => root.querySelector(selector);
   const stage = $('.lab-stage');
   const fieldWrap = $('.lab-field-wrap');
@@ -116,12 +165,15 @@ function mount(root) {
   const trendTitle = $('.lab-trend-title');
   const trendSvg = $('.lab-trend-svg');
   const summary = $('.lab-summary');
+  const explain = $('.lab-explain');
   const playButton = $('[data-action="play"]');
   const statusLine = $('.lab-status');
   const legend = $('.lab-legend');
   const live = $('.lab-live');
   const avgStars = $('.lab-avg-stars');
   const probe = $('.lab-probe');
+  const drawer = $('.lab-rules');
+  const anchorBox = $('[data-slider="anchor"]');
   const slots = [...root.querySelectorAll('.lab-readout')].map((box) => ({
     label: box.querySelector('dt'),
     num: box.querySelector('.lab-num'),
@@ -156,7 +208,7 @@ function mount(root) {
   trendSvg.append(trendStatic, ghostLine, trendLine, trendDot, trendValue);
 
   const state = {
-    settings: { ...WORST },
+    settings: { ...start },
     values: Object.fromEntries(SLIDERS.map((a) => [a.id, a.initial])),
     runSeed: 1,
     run: null,
@@ -165,6 +217,7 @@ function mount(root) {
     playing: false,
     autoplayed: false,
     resumeOnShow: false,
+    replayOnShow: false, // a finished run left view; it replays when it is back in the reading area
     inReadingArea: false,
     axisMax: YES_AXIS[0], // yes scale: the axis end, which only grows during a run
     lastFinished: null, // { key, scale, metrics, history } of the most recent finished run
@@ -208,6 +261,25 @@ function mount(root) {
     startRun();
     if (reduced) finishNow();
     else play();
+  }
+
+  // A changed assumption: the new run is shown finished at once, the dots moving to their
+  // new places (or jumping, with reduced motion), so the slider's effect is seen right away.
+  function retune() {
+    state.playing = false;
+    startRun();
+    settle();
+  }
+
+  // The current run's end, at once: the dots travel there (or jump, with reduced motion).
+  function settle() {
+    state.autoplayed = true;
+    state.resumeOnShow = false;
+    state.playing = false;
+    while (!state.run.done) state.run.step();
+    show(state.run.snapshot(), !reduced);
+    fadeIn();
+    finish();
   }
 
   function play() {
@@ -309,11 +381,9 @@ function mount(root) {
     const sentence = verdict(m, S);
     statusLine.textContent = sentence;
     svg.setAttribute('aria-label', finishedLabel(m, S, state.run.rounds));
-    announce(
-      `Round ${state.run.rounds} of ${state.run.rounds}. ` +
-        READOUTS[S.scale].map(({ key, label }) => `${label}: ${valueText(key, m, N, S.scale)}.`).join(' ') +
-        ` ${sentence}`,
-    );
+    // Spoken once per run, in the page's plain words: the rule in play and how it went.
+    const average = S.scale === 'stars' ? ` The average score is ${m.mean.toFixed(2)}.` : ` People said yes ${percent(m.yesRate)} of the time.`;
+    announce(`${explain.textContent} ${resultLine(m)}${average}`);
     state.lastFinished = { key: state.key, scale: S.scale, metrics: m, history: snap.history };
   }
 
@@ -339,7 +409,9 @@ function mount(root) {
   function show(snap, animate, now = performance.now()) {
     state.snap = snap;
     const S = state.run.settings;
-    roundLabel.textContent = `Round ${snap.round} of ${state.run.rounds}`;
+    const m0 = snap.metrics;
+    const so = snap.round === 0 ? '' : S.scale === 'stars' ? ` · average ${m0.mean.toFixed(2)}` : ` · ${percent(m0.yesRate)} said yes`;
+    roundLabel.textContent = `Round ${snap.round} of ${state.run.rounds}${so}`;
     if (snap.round > 0 && !state.run.done) statusLine.textContent = `Round ${snap.round} of ${state.run.rounds}`;
 
     // Gold stars for the top 10 by score, among people who have a score.
@@ -363,7 +435,7 @@ function mount(root) {
 
     if (geo) moveTo(targets(snap, geo), animate, now);
     updateReadouts(snap.metrics, S);
-    updateSummary(snap.metrics, S);
+    updateSummary(snap.metrics);
     drawTrend();
     if (!state.run.done) for (const slot of slots) slot.last.hidden = true;
   }
@@ -379,11 +451,12 @@ function mount(root) {
     if (stars) setStarRow(avgStars, m.mean);
   }
 
-  function updateSummary(m, S) {
-    let text = ' ';
-    if (m.hits !== null && S.scale === 'stars') text = `Average ${m.mean.toFixed(2)} · top 10 finds ${m.hits} of 10`;
-    if (m.hits !== null && S.scale === 'yes' && m.yesRate !== null) text = `Yes ${percent(m.yesRate)} · top 10 finds ${m.hits} of 10`;
-    setText(summary, text);
+  // Under the field, once a run is over: how it went. Before the first run under reduced
+  // motion, the only case with no autoplay, it asks for a press.
+  function updateSummary(m) {
+    if (state.run.done) setText(summary, resultLine(m));
+    else if (reduced && !state.autoplayed && state.run.round === 0) setText(summary, 'Press play to run 30 rounds.');
+    else setText(summary, '\u00a0');
   }
 
   // Pixel geometry of the field for a width and height, on the current scale.
@@ -601,17 +674,21 @@ function mount(root) {
 
   /* ---------- Size and the pinned block ---------- */
 
-  // How tall the field is. Pinned above the controls, the whole block must leave
-  // at least 45% of the screen for the controls; beside the controls on a short landscape
-  // screen, it must fit below the header. The small viewport height is used, so the field
-  // does not change size when a phone's toolbars slide in and out.
+  // "Try other rules" is open: the field stays in view beside or above the controls.
+  const tuning = () => root.classList.contains('is-tuning');
+
+  // How tall the field is. With "Try other rules" closed it takes its full height. Open on
+  // a phone, it pins above the controls as a small version (the round and the line hide) so
+  // the controls get most of the screen; beside the controls on a short landscape screen, it
+  // must fit below the header. The small viewport height is used, so the field does not
+  // change size when a phone's toolbars slide in and out.
   function fieldHeight(width) {
     const base = width >= WIDE_FIELD ? 300 : 240;
-    if (!phonePin.matches && !sidePin.matches) return base;
+    if (!tuning() || (!phonePin.matches && !sidePin.matches)) return base;
     const small = probe.getBoundingClientRect().height || window.innerHeight;
     const headerH = header ? header.getBoundingClientRect().height : 48;
     const chrome = stage.getBoundingClientRect().height - fieldWrap.getBoundingClientRect().height;
-    const room = phonePin.matches ? 0.55 * small - headerH - chrome : small - headerH - chrome - 8;
+    const room = phonePin.matches ? TUNE_SHARE * small - headerH - chrome : small - headerH - chrome - 8;
     return Math.max(MIN_FIELD_H, Math.min(base, room));
   }
 
@@ -628,14 +705,14 @@ function mount(root) {
 
   // Controls scrolled to by keyboard stop below the pinned block, not under it.
   function pinMargin() {
-    const pinned = phonePin.matches;
+    const pinned = phonePin.matches && tuning();
     root.style.setProperty('--lab-stuck', pinned ? `${Math.ceil(stage.getBoundingClientRect().height) + 8}px` : '0px');
   }
 
   /* ---------- Controls ---------- */
 
   function syncControls() {
-    for (const input of root.querySelectorAll('.lab-seg input')) input.checked = state.settings[input.name.slice(4)] === input.value;
+    for (const input of root.querySelectorAll('.lab-seg input')) input.checked = state.settings[input.dataset.key] === input.value;
     for (const button of root.querySelectorAll('[data-preset]')) {
       const preset = PRESETS.find((p) => p.id === button.dataset.preset).settings;
       button.setAttribute('aria-pressed', String(Object.keys(preset).every((k) => preset[k] === state.settings[k])));
@@ -651,16 +728,25 @@ function mount(root) {
     READOUTS[scale].forEach(({ label }, i) => setText(slots[i].label, label));
     setText(trendTitle, TREND[scale].title);
     legend.innerHTML = legendHtml(scale);
-    for (const a of SLIDERS) {
+    for (const a of ASSUMPTIONS) {
       const box = $(`[data-slider="${a.id}"]`);
       if (box) box.hidden = Boolean(a.scale) && a.scale !== scale;
     }
   }
 
+  // The slider for how firmly a vouch about real work holds a fixed bar only matters when
+  // vouches are tied to work on the stars scale, so it shows only then, next to that switch.
+  function applyAnchor() {
+    const shown = state.settings.scale === 'stars' && state.settings.type === 'work';
+    anchorBox.hidden = !shown;
+    root.classList.toggle('shows-anchor', shown);
+  }
+
   // A new setting of the switches. A change of scale or feed changes the axis too, and on the
   // yes scale so does saying how the giver knows you (it decides whether yeses are weighted),
   // so the field is redrawn first; the dots then travel from where they are to the new run.
-  function changeSettings(next) {
+  function changeSettings(next, why) {
+    if (why) setText(explain, explainFor(why, next.scale));
     const redraw =
       next.scale !== state.settings.scale ||
       next.feed !== state.settings.feed ||
@@ -668,23 +754,23 @@ function mount(root) {
     state.settings = next;
     syncControls();
     applyScale();
+    applyAnchor();
     state.playing = false;
     startRun();
     if (redraw && geo) resize(fieldWrap.getBoundingClientRect().width, true, false);
-    if (reduced) finishNow();
-    else play();
+    settle(); // the switches sit under "Try other rules", beside the field: show the result at once
   }
 
   root.querySelectorAll('.lab-seg input').forEach((input) => {
     input.addEventListener('change', () => {
-      if (input.checked) changeSettings({ ...state.settings, [input.name.slice(4)]: input.value });
+      if (input.checked) changeSettings({ ...state.settings, [input.dataset.key]: input.value }, { key: input.dataset.key, value: input.value });
     });
   });
 
   root.querySelectorAll('[data-preset]').forEach((button) => {
     button.addEventListener('click', () => {
       const preset = PRESETS.find((p) => p.id === button.dataset.preset).settings;
-      changeSettings({ ...preset });
+      changeSettings({ ...preset }, { preset: button.dataset.preset });
     });
   });
 
@@ -697,18 +783,30 @@ function mount(root) {
   });
 
   const sliders = SLIDERS.map((a) => {
-    const input = $(`#lab-a-${a.id}`);
+    const input = $(`[data-slider="${a.id}"] input`);
     const output = $(`[data-value="${a.id}"]`);
     const sync = () => {
       const text = a.format(Number(input.value));
       output.textContent = text;
       input.setAttribute('aria-valuetext', text);
     };
-    input.addEventListener('input', sync);
+    // Each change shows its finished run at once, so a slider's effect is in view while the
+    // thumb is still under the finger; dragging updates after a short pause.
+    let timer = 0;
+    const apply = () => {
+      clearTimeout(timer);
+      if (state.values[a.id] === Number(input.value)) return;
+      state.values[a.id] = Number(input.value);
+      retune();
+    };
+    input.addEventListener('input', () => {
+      sync();
+      clearTimeout(timer);
+      timer = setTimeout(apply, 150);
+    });
     input.addEventListener('change', () => {
       sync();
-      state.values[a.id] = Number(input.value);
-      rerun();
+      apply();
     });
     return { a, input, sync };
   });
@@ -720,7 +818,7 @@ function mount(root) {
       input.value = String(a.initial);
       sync();
     }
-    if (changed) rerun();
+    if (changed) retune();
   });
 
   motion.addEventListener('change', (event) => {
@@ -743,13 +841,19 @@ function mount(root) {
         state.inReadingArea = entry.isIntersecting && (entry.intersectionRatio >= 0.9 || tall);
         if (!state.inReadingArea || document.hidden) return;
         if (!state.autoplayed && !reduced) play();
-        else if (state.resumeOnShow) play();
+        else if (state.replayOnShow && !reduced && !tuning()) {
+          state.replayOnShow = false;
+          restart();
+        } else if (state.resumeOnShow) play();
       },
       { rootMargin: `-${headerHeight}px 0px -20% 0px`, threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
     ).observe(fieldWrap);
     new IntersectionObserver(
       (entries) => {
-        if (!entries[entries.length - 1].isIntersecting) pause(true);
+        if (entries[entries.length - 1].isIntersecting) return;
+        // A finished run replays when the reader comes back to it, like the charts refill.
+        if (!state.playing && state.run.done && !tuning()) state.replayOnShow = true;
+        pause(true);
       },
       { rootMargin: `-${headerHeight}px 0px 0px 0px` },
     ).observe(fieldWrap);
@@ -774,14 +878,22 @@ function mount(root) {
   if ('ResizeObserver' in window) {
     new ResizeObserver(() => {
       pinMargin();
-      if (geo && (phonePin.matches || sidePin.matches)) later();
+      if (geo && tuning() && (phonePin.matches || sidePin.matches)) later();
     }).observe(stage);
   }
   window.addEventListener('resize', later);
   phonePin.addEventListener('change', later);
   sidePin.addEventListener('change', later);
 
+  // With the assumptions open, the field stays in view beside them (desktop) or as a small
+  // pinned version above them (phones), with the average and the top 10 next to the sliders.
+  drawer.addEventListener('toggle', () => {
+    root.classList.toggle('is-tuning', drawer.open);
+    later();
+  });
+
   applyScale();
+  applyAnchor();
   resize(fieldWrap.getBoundingClientRect().width);
   startRun();
   idle();
@@ -808,11 +920,6 @@ function valueParts(key, m, N, scale) {
     default:
       return { num: String(m.unrated), unit: '' };
   }
-}
-
-function valueText(key, m, N, scale) {
-  const { num, unit } = valueParts(key, m, N, scale);
-  return `${num}${unit}`.trim();
 }
 
 function numberText(key, m) {
@@ -869,37 +976,42 @@ function legendHtml(scale) {
   return `Each dot ${dot}is a person, placed by score. Filled dots ${filled}are the 10 most skilled. A gold star ${star}marks the top 10 by score, with a dark edge ${edge}when that person is also one of the 10 most skilled. People nobody has vouched for sit in the lane at the left. Under the field, a dashed line shows the last finished run.`;
 }
 
-function sliderHtml(a, extra = '') {
+function sliderHtml(a, prefix, extra = '') {
+  const id = `${prefix}-a-${a.id}`;
   return (
-    `<div class="lab-slider${a === ANCHOR ? ' lab-anchor' : ''}" data-slider="${a.id}"><label for="lab-a-${a.id}">${a.label}</label><div class="lab-slider-row">` +
-    `<input type="range" id="lab-a-${a.id}" min="${a.min}" max="${a.max}" step="${a.step}" value="${a.initial}" aria-valuetext="${a.format(a.initial)}">` +
+    `<div class="lab-slider${a === ANCHOR ? ' lab-anchor' : ''}" data-slider="${a.id}"><label for="${id}">${a.label}</label><div class="lab-slider-row">` +
+    `<input type="range" id="${id}" min="${a.min}" max="${a.max}" step="${a.step}" value="${a.initial}" aria-valuetext="${a.format(a.initial)}">` +
     `<span class="lab-slider-value" data-value="${a.id}" aria-hidden="true">${a.format(a.initial)}</span></div>${extra}</div>`
   );
 }
 
-function template(N) {
+// The lab's markup. Radio names and slider ids carry the lab's own id, so two labs on one
+// page never share a radio group. Everything but the field and its playback sits behind
+// "Try other rules".
+function template(N, prefix, start) {
   const fieldset = (s) =>
     `<fieldset class="lab-switch"><legend>${s.legend}</legend><div class="lab-seg">` +
     s.options
       .map(
         ([value, text]) =>
-          `<label><input type="radio" name="lab-${s.key}" value="${value}"${WORST[s.key] === value ? ' checked' : ''}><span>${text}</span></label>`,
+          `<label><input type="radio" name="${prefix}-${s.key}" data-key="${s.key}" value="${value}"${start[s.key] === value ? ' checked' : ''}><span>${text}</span></label>`,
       )
       .join('') +
     `</div></fieldset>`;
   const [scale, type, ...rest] = SWITCHES;
   const switches =
     fieldset(scale) +
-    `<div class="lab-switch-group">${fieldset(type)}${sliderHtml(ANCHOR, '<p class="lab-anchor-note">Our assumption. With the other switches at their worst, lowering it brings the drift back.</p>')}</div>` +
+    `<div class="lab-switch-group">${fieldset(type)}${sliderHtml(ANCHOR, prefix, '<p class="lab-anchor-note">This is our assumption. Lower it, leave the other switches where they started, and the scores drift up again.</p>')}</div>` +
     rest.map(fieldset).join('');
 
+  const matches = (settings) => Object.keys(settings).every((k) => settings[k] === start[k]);
   const presets = PRESETS.map(
-    (p) => `<button class="btn btn-quiet lab-preset" type="button" data-preset="${p.id}" aria-pressed="${p.id === 'worst'}">${p.label}</button>`,
+    (p) => `<button class="btn btn-quiet lab-preset" type="button" data-preset="${p.id}" aria-pressed="${matches(p.settings)}">${p.label}</button>`,
   ).join('');
 
   const readouts = READOUTS.stars.map(({ key, label }) => {
     const stars = key === 'mean' ? starRow(0, { size: 15, gap: 3, className: 'stars lab-avg-stars' }) : '';
-    const chance = key === 'hits' ? '<span class="lab-chance">Chance alone: about 1</span>' : '';
+    const chance = key === 'hits' ? '<span class="lab-chance">Picking at random: about 1</span>' : '';
     return (
       `<div class="lab-readout" data-readout="${key}"><dt>${label}</dt><dd>` +
       `<span class="lab-value"><span class="lab-num"></span>${stars}<span class="lab-unit"></span></span>` +
@@ -909,38 +1021,43 @@ function template(N) {
 
   return `
     <div class="lab-grid">
+      <p class="lab-lede">Black dots ${keyGlyph('is-dot is-filled')}are the 10 most skilled people. Gold stars ${keyGlyph('is-star')}are the 10 you’d hire by their scores. You want them on the same people.</p>
       <div class="lab-top">
         <div class="lab-stage">
           <p class="lab-round">Round 0 of 30</p>
           <div class="lab-field-wrap"><svg class="lab-field" role="img" aria-label="A dot plot of ${N} people by score."></svg></div>
+          <p class="lab-explain">${explainFor({ key: 'type', value: start.type }, start.scale)}</p>
+          <p class="lab-summary"> </p>
           <div class="lab-trend">
             <p class="lab-trend-title"></p>
-            <svg class="lab-trend-svg" role="img" aria-label=""></svg>
+            <svg class="lab-trend-svg" role="img" aria-label="" height="${TREND_H}" style="height:${TREND_H}px"></svg>
           </div>
-          <p class="lab-summary"> </p>
-        </div>
-        <div class="lab-controls">
-          <fieldset class="lab-switch lab-presets"><legend>Start from</legend><div class="lab-preset-row">${presets}</div></fieldset>
-          <div class="lab-switches">${switches}</div>
         </div>
         <div class="lab-playback">
           <button class="btn lab-play" type="button" data-action="play">Play</button>
+          <button class="btn btn-quiet" type="button" data-action="restart">Start over</button>
           <button class="btn btn-quiet" type="button" data-action="skip">Skip to the end</button>
-          <button class="btn btn-quiet" type="button" data-action="restart">Restart</button>
           <button class="btn btn-quiet" type="button" data-action="again">Run again</button>
         </div>
+        <details class="lab-rules">
+          <summary>Try other rules</summary>
+          <div class="lab-rules-body">
+            <div class="lab-controls">
+              <fieldset class="lab-switch lab-presets"><legend>Start from</legend><div class="lab-preset-row">${presets}</div></fieldset>
+              <div class="lab-switches">${switches}</div>
+            </div>
+            <div class="lab-drawer-body">
+              <p class="lab-drawer-title">Our assumptions</p>
+              ${ASSUMPTIONS.map((a) => sliderHtml(a, prefix)).join('')}
+              <p class="lab-note">These are our guesses at how big each effect is. The research shows which way each one pushes. Push them to the ends and some results flip.</p>
+              <button class="btn btn-quiet" type="button" data-action="reset">Reset assumptions</button>
+            </div>
+          </div>
+        </details>
       </div>
       <dl class="lab-readouts">${readouts}</dl>
       <p class="lab-status"></p>
       <p class="lab-legend"></p>
-      <details class="lab-drawer">
-        <summary>Change the assumptions</summary>
-        <div class="lab-drawer-body">
-          ${ASSUMPTIONS.map((a) => sliderHtml(a)).join('')}
-          <p class="lab-note">These change the size of each effect, and at the extremes some effects reverse. The directions at the defaults come from the research; the sizes are ours.</p>
-          <button class="btn btn-quiet" type="button" data-action="reset">Reset assumptions</button>
-        </div>
-      </details>
       <div class="lab-live visually-hidden" aria-live="polite"></div>
       <div class="lab-probe" aria-hidden="true"></div>
     </div>`;
