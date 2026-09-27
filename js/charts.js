@@ -384,6 +384,18 @@ async function buildGuess(root) {
 
   const scrollBehavior = () => (motionAllowed() ? 'smooth' : 'auto');
 
+  // Scrolls just far enough to show first through last, but never so far that first
+  // goes behind the sticky header. Smooth only when motion is allowed.
+  const bringIntoView = (first, last) => {
+    const top = first.getBoundingClientRect().top;
+    const bottom = last.getBoundingClientRect().bottom;
+    const clear = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    const room = window.innerHeight - 16;
+    let dy = bottom > room ? bottom - room : 0;
+    if (top - dy < clear) dy = top - clear;
+    if (Math.abs(dy) >= 1) window.scrollBy({ top: dy, behavior: scrollBehavior() });
+  };
+
   const reveal = (guess) => {
     state.revealed = true;
     state.guess = guess;
@@ -398,7 +410,9 @@ async function buildGuess(root) {
           belowSentence(guess);
     if (answer) answer.hidden = false;
     againBtn.focus({ preventScroll: true });
-    result.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
+    // The histogram, the sentence about the reader's guess and the focused button,
+    // measured two frames on so every style change on the new content has landed.
+    requestAnimationFrame(() => requestAnimationFrame(() => bringIntoView(result, again)));
   };
 
   const reset = () => {
