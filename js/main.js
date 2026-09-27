@@ -42,6 +42,8 @@ function onScroll() {
 
 window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', onScroll);
+// The page also changes height with no scroll event: charts arriving, the lab's drawer opening.
+if ('ResizeObserver' in window) new ResizeObserver(onScroll).observe(document.body);
 update();
 
 // Blind reveal: both cards stay face down until both vouches are in, then flip together.
