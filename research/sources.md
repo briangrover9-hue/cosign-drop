@@ -23,7 +23,7 @@ Older Inside Airbnb snapshots (2015 to 2023) are no longer served (HTTP 403 on 2
 
 | Number | Value | Source | Status |
 |---|---|---|---|
-| What employers would pay for a proposal one standard deviation more tailored, before and after Freelancer.com's AI writing tool (introduced April 2023; considered applications) | $25.67 before, $14.85 after | Galdin and Silbert (2025), "Making Talk Cheap: Generative AI and Labor Market Signaling," [arXiv 2511.08785](https://arxiv.org/abs/2511.08785), Table 2, columns 2 and 4 | Confirmed |
+| What employers would pay for a proposal one standard deviation more tailored, before and after Freelancer.com's AI writing tool (introduced April 2023 for workers on paid plans; considered applications) | $25.67 before, $14.85 after | Galdin and Silbert (2025), "Making Talk Cheap: Generative AI and Labor Market Signaling," [arXiv 2511.08785](https://arxiv.org/abs/2511.08785), Table 2, columns 2 and 4 | Confirmed |
 | Same, for a worker's platform reputation score one standard deviation higher | $27.96 before, $46.24 after | same, Table 2 | Confirmed. The authors emphasize the fall in tailoring's value; the rise in reputation's value is our reading of their table, and the page says so. |
 | Structural estimate: top-quintile workers hired less, bottom-quintile more, after AI writing | 19% less, 14% more | same, abstract | Confirmed (model counterfactual, labeled as such) |
 | Job seekers who used AI to write or customize a resume or cover letter | 29.3% in 2025, up from 17.3% in 2024 | iHire, [State of Online Recruiting 2025](https://www.ihire.com/resourcecenter/employer/pages/the-state-of-online-recruiting-2025), n = 1,421 | Confirmed, vendor survey |
@@ -83,6 +83,7 @@ Operational validity for overall job performance. 1998 values from Schmidt and H
 |---|---|---|
 | Structured interviews | .51 | .42 |
 | Job knowledge tests | .48 | .40 |
+| Biographical data (1998) / empirically keyed biodata (2022) | .35 | .38 |
 | Work sample tests | .54 | .33 |
 | Cognitive ability tests | .51 | .31 |
 | Integrity tests | .41 | .31 |
@@ -99,7 +100,7 @@ Caveats: Sackett et al. (2023, IOP 16(3)) revise cognitive ability again to .23 
 
 | Number | Value | Source | Status |
 |---|---|---|---|
-| Two dating events at a South Korean dating company, 613 participants, each given 2 or 8 "roses": acceptance with and without one | offers to men 19.7% to 23.6%; offers to women 12.3% to 12.9% | Lee and Niederle (2015), "Propose with a Rose?", Experimental Economics 18, [PDF](https://web.stanford.edu/~niederle/Lee.Niederle.Rose.ExpEcon.2015.pdf), pp. 742 to 743 | Confirmed |
+| Two dating events at a South Korean dating company, 613 participants, each given 2 or 8 "roses": effect of attaching a rose on acceptance, all else equal | +3.3 percentage points, about a 20% increase (raw rates were 19.7% vs 23.6% for proposals to men and 12.3% vs 12.9% for proposals to women, which the authors call small) | Lee and Niederle (2015), "Propose with a Rose?", Experimental Economics 18, [PDF](https://web.stanford.edu/~niederle/Lee.Niederle.Rose.ExpEcon.2015.pdf), Section 4.3 | Confirmed. The page uses the 3.3 point estimate. |
 | Economics job market: each candidate may send 2 signals; a signal was associated with a higher chance of an interview | +6.8 percentage points (significant at 5%) | Coles, Cawley, Levine, Niederle, Roth and Siegfried (2010), Journal of Economic Perspectives 24(4), [PDF](https://web.stanford.edu/~niederle/JobMarket.JEP2010..pdf), Table 3 | Confirmed |
 
 ## Cosign, from its own public pages
