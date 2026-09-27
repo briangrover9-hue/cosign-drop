@@ -346,9 +346,16 @@
   fill: var(--paper-3);
   stroke: transparent;
 }
-@media (min-width: 900px) {
+/* Four across from 720px, so tablets get the desktop arrangement instead of two sparse
+   columns; the gap is tighter until 900px so every value line still fits its column. */
+@media (min-width: 720px) {
   .dr-list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 20px;
+  }
+}
+@media (min-width: 900px) {
+  .dr-list {
     column-gap: 28px;
   }
 }
