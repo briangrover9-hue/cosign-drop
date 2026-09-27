@@ -73,8 +73,10 @@
   color: var(--ink);
   pointer-events: none;
 }
-.lab-seg input:hover + span {
-  background: var(--paper-2);
+@media (hover: hover) and (pointer: fine) {
+  .lab-seg input:hover + span {
+    background: var(--paper-2);
+  }
 }
 .lab-seg input:checked + span {
   background: var(--ink);

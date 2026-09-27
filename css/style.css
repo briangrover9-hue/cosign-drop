@@ -85,8 +85,11 @@ a {
   text-underline-offset: 0.16em;
   text-decoration-color: var(--rule-strong);
 }
-a:hover {
-  text-decoration-color: currentColor;
+/* Hover only where a pointer can hover; on touch screens a tap would leave it stuck on. */
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    text-decoration-color: currentColor;
+  }
 }
 
 :focus-visible {
@@ -524,8 +527,10 @@ figcaption .src,
   padding: 10px 16px;
   cursor: pointer;
 }
-.btn:hover {
-  background: #37312a;
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background: #37312a;
+  }
 }
 .btn[disabled] {
   opacity: 0.45;
@@ -536,8 +541,14 @@ figcaption .src,
   background: transparent;
   border-color: var(--rule-strong);
 }
-.btn-quiet:hover {
-  background: var(--paper-2);
+@media (hover: hover) and (pointer: fine) {
+  .btn-quiet:hover {
+    background: var(--paper-2);
+  }
+}
+/* Touch: quick repeat taps on a button never zoom the page. */
+.btn {
+  touch-action: manipulation;
 }
 
 /* "Numbers that didn't survive" box */
