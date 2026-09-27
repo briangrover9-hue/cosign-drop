@@ -45,6 +45,8 @@
   --gutter: 16px;
   /* The text column's inner width, so prose inside wide blocks keeps the same measure. */
   --text: calc(var(--measure) - 2 * var(--gutter));
+  /* Space under a figure, which the trust lab shares. */
+  --after-figure: 36px;
   --header-h: 48px;
   color-scheme: light;
 }
@@ -100,7 +102,7 @@ a:hover {
 p {
   margin: 0 0 1em;
 }
-/* No paragraph, list item or caption ends on a line holding one word. */
+/* Avoids one-word last lines in paragraphs, list items and captions. */
 p,
 li,
 figcaption {
@@ -259,17 +261,16 @@ strong {
   margin: 0 0 20px;
 }
 .hero-score {
-  /* The numeral's size and the star row's width, shared so the stars can find the baseline. */
-  --num: clamp(6.5rem, 30vw, 13rem);
   --stars-w: clamp(150px, 42vw, 250px);
   display: flex;
-  align-items: flex-end;
+  /* The star row's bottom edge sits on the numeral's baseline, whatever font has loaded. */
+  align-items: baseline;
   gap: 14px;
   flex-wrap: wrap;
   margin: 0 0 8px;
 }
 .hero-number {
-  font-size: var(--num);
+  font-size: clamp(6.5rem, 30vw, 13rem);
   line-height: 0.82;
   font-weight: 400;
   letter-spacing: -0.045em;
@@ -282,10 +283,11 @@ strong {
 .hero-stars {
   width: var(--stars-w);
   height: auto;
-  /* Stands the star tips on the numeral's baseline at every width: the numeral's box
-     ends 0.179em below its baseline, and the tips sit 0.0217 of the row's width above
-     the row's bottom edge. */
-  margin-bottom: calc(var(--num) * 0.179 - var(--stars-w) * 0.0217);
+  margin-bottom: 0.55em;
+  /* The star tips sit 0.0217 of the row's width above its bottom edge, so dropping the
+     row by that much stands the tips on the baseline. */
+  position: relative;
+  top: calc(var(--stars-w) * 0.0217);
 }
 .hero h1 {
   font-size: clamp(2.5rem, 10vw, 4.6rem);
@@ -357,7 +359,7 @@ h3 {
 
 /* Figures */
 figure {
-  margin: 32px 0 36px;
+  margin: 32px 0 var(--after-figure);
 }
 .figure {
   margin-inline: auto;
@@ -634,6 +636,7 @@ figcaption .src,
 @media (min-width: 720px) {
   :root {
     --gutter: 28px;
+    --after-figure: 44px;
     --header-h: 52px;
   }
   body {
@@ -648,10 +651,12 @@ figcaption .src,
   /* On wider screens the number, stars and title stay on one line each and may
      run past the text column to the right; the sizes are capped so they fit. */
   .hero-score {
-    --num: clamp(9rem, 16vw, 14rem);
     --stars-w: clamp(220px, 22vw, 300px);
     flex-wrap: nowrap;
     gap: 22px;
+  }
+  .hero-number {
+    font-size: clamp(9rem, 16vw, 14rem);
   }
   .hero-stars {
     flex: none;
@@ -664,7 +669,7 @@ figcaption .src,
     padding-block: 80px 32px;
   }
   figure {
-    margin: 40px 0 44px;
+    margin: 40px 0 var(--after-figure);
   }
   .stat .n {
     font-size: 3.2rem;

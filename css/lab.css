@@ -1,8 +1,8 @@
 /* Trust lab. Phone first; the controls move beside the field from 880px. */
 
 .lab {
-  /* The bottom margin matches the figures', so the prose after the lab gets the same space. */
-  margin: 28px 0 36px;
+  /* The bottom margin is the figures', so the prose after the lab gets the same space. */
+  margin: 28px 0 var(--after-figure);
   padding-top: 18px;
   border-top: 1px solid var(--rule-strong);
 }
@@ -403,7 +403,6 @@
 @media (min-width: 880px) {
   .lab {
     margin-top: 36px;
-    margin-bottom: 44px;
     padding-top: 24px;
   }
   .lab-grid {
