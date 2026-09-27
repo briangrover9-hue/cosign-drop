@@ -1,4 +1,13 @@
-/* Everyone's a 4.8: base styles. Phone first; wider layouts from 720px. */
+/* Everyone's a 4.8: the shared base for both pages.
+
+   Color: paper, ink and gold, and nothing else. Ink shows hierarchy by its strength: full for
+   headlines and big numbers, 74% for body text and 64% for labels. Labels would read lighter at
+   45%, but that is 2.8:1 on the paper, under the 4.5:1 small text needs; 64% holds 4.7:1 even
+   on the grain's darkest speck. Gold is only ever a star.
+   Type: the serif, large, for headlines and big numbers only; the mono, small and uppercase,
+   for labels and counters; body text in the serif at reading size, short.
+   Motion: one easing for everything. Anything that moves takes 500ms, hover and press changes
+   200ms, text fades 600ms. js/motion.js gives scripts the same curve. */
 
 @font-face {
   font-family: "Newsreader";
@@ -57,47 +66,39 @@
   descent-override: 31.9%;
   line-gap-override: 0%;
 }
-/* At the hero's display size Newsreader and Georgia are the same width, so the 4.8 gets
-   its own face and the stars beside it stay put when the font swaps in. */
-@font-face {
-  font-family: "Newsreader Numeral Fallback";
-  src: local("Georgia");
-  size-adjust: 100.2%;
-  ascent-override: 73.4%;
-  descent-override: 26.4%;
-  line-gap-override: 0%;
-}
-.hero-number {
-  font-family: "Newsreader", "Newsreader Numeral Fallback", var(--serif);
-}
 
 :root {
   --paper: #f3eee3;
-  --paper-2: #ebe4d5;
-  --paper-3: #e0d7c3;
-  --ink: #1d1a16;
-  --ink-2: #4a4238;
-  --ink-3: #6b6154;
-  --rule: rgba(29, 26, 22, 0.16);
-  --rule-strong: rgba(29, 26, 22, 0.34);
+  --ink-rgb: 29 26 22;
+  --ink: rgb(var(--ink-rgb));
+  --ink-body: rgb(var(--ink-rgb) / 0.74);
+  --ink-label: rgb(var(--ink-rgb) / 0.64);
+  /* Lines and fills, all ink: hairlines, stronger rules and a faint wash for bands. */
+  --ink-rule: rgb(var(--ink-rgb) / 0.16);
+  --ink-rule-strong: rgb(var(--ink-rgb) / 0.34);
+  --ink-wash: rgb(var(--ink-rgb) / 0.06);
+  --ink-star: rgb(var(--ink-rgb) / 0.1); /* an empty star */
   --gold: #dca320;
-  --gold-edge: #93650a;
+  --gold-edge: #936f1c; /* gold darkened with ink (62 to 38), the star's outline */
+  --gold-light: rgb(220 163 32 / 0.42); /* gold at 42% on the paper */
   --serif: "Newsreader", "Newsreader Fallback", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --measure: 38rem;
-  --wide: 66rem;
-  --gutter: 16px;
-  /* The text column's inner width, so prose inside wide blocks keeps the same measure. */
-  --text: calc(var(--measure) - 2 * var(--gutter));
-  /* Space under a figure, which the trust lab shares. */
-  --after-figure: 36px;
-  --header-h: 3rem; /* 48px at the default text size; grows with the reader's text size */
-  /* Motion: ease-out for things entering, leaving or answering a press; ease-in-out for anything
-     CSS moves across the screen, which nothing does yet (the lab's dots are tweened in lab.js,
-     which says why they keep a cubic ease-out). Color changes keep plain ease. */
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --move: 500ms;
+  --press: 200ms;
+  --fade: 600ms;
+  --gutter: 20px;
   color-scheme: light;
+}
+@media (min-width: 720px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+@media (min-width: 1200px) {
+  :root {
+    --gutter: clamp(40px, 4vw, 64px);
+  }
 }
 
 *,
@@ -109,7 +110,6 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  scroll-padding-top: calc(var(--header-h) + 12px);
 }
 
 body {
@@ -117,12 +117,11 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--serif);
-  font-size: 1.125rem;
-  line-height: 1.58;
+  font-size: 1.0625rem;
+  line-height: 1.5;
   font-optical-sizing: auto;
   font-kerning: normal;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
 img,
@@ -131,12 +130,25 @@ svg {
   max-width: 100%;
 }
 
+p {
+  margin: 0;
+}
+p,
+li,
+figcaption {
+  text-wrap: pretty;
+}
+strong {
+  font-weight: 600;
+}
+
 a {
   color: inherit;
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.16em;
-  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 0.18em;
+  text-decoration-color: var(--ink-rule-strong);
+  transition: text-decoration-color var(--press) var(--ease);
 }
 /* Hover only where a pointer can hover; on touch screens a tap would leave it stuck on. */
 @media (hover: hover) and (pointer: fine) {
@@ -148,31 +160,6 @@ a {
 :focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 3px;
-  border-radius: 2px;
-}
-
-/* Readers who ask for more contrast get hairlines, link underlines and quiet button borders
-   at 3:1 or better, and the lightest ink one step darker. The default look is unchanged. */
-@media (prefers-contrast: more) {
-  :root {
-    --rule: rgba(29, 26, 22, 0.5);
-    --rule-strong: rgba(29, 26, 22, 0.7);
-    --ink-3: var(--ink-2);
-  }
-}
-
-p {
-  margin: 0 0 1em;
-}
-/* Avoids one-word last lines in paragraphs, list items and captions. */
-p,
-li,
-figcaption {
-  text-wrap: pretty;
-}
-
-strong {
-  font-weight: 600;
 }
 
 .visually-hidden {
@@ -187,131 +174,18 @@ strong {
   border: 0;
 }
 
-.skip-link {
-  position: absolute;
-  left: var(--gutter);
-  top: -100px;
-  z-index: 20;
-  background: var(--ink);
-  color: var(--paper);
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 14px;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-}
-.skip-link:focus {
-  top: 8px;
-}
-
-/* Labels, kickers and small print share one monospace voice. */
-.label,
-.kicker,
-.src,
-.meta {
+/* The mono role: labels and counters, small and uppercase, at label strength. */
+.label {
   font-family: var(--mono);
   font-size: 0.75rem;
+  font-weight: 400;
   line-height: 1.5;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
-}
-/* Only wayfinding keeps capitals: the kicker, the section numbers and the header's
-   rating. Every other label reads in sentence case. */
-.kicker,
-.section-head .label,
-.page-rating .label {
-  text-transform: uppercase;
   letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-label);
 }
-
-.wrap {
-  max-width: var(--measure);
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-}
-.wrap-wide {
-  max-width: var(--wide);
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-}
-
-/* Header: a slim bar whose rating climbs as you read. It is solid paper, because
-   without a blur a see-through bar only ghosts the text behind it. The hairline
-   shows once anything scrolls under the bar. */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  height: var(--header-h);
-  background: var(--paper);
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s ease;
-}
-.site-header.is-scrolled {
-  border-bottom-color: var(--rule);
-}
-.site-header .bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  height: 100%;
-  max-width: var(--wide);
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-}
-.site-title {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  white-space: nowrap;
-  opacity: 0;
-  /* Rises in as the headline scrolls away and sinks out as it comes back; leaving is quicker. */
-  transform: translateY(0.25em);
-  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
-}
-/* The bar's title takes over once the headline has gone behind the bar. */
-.site-header.is-titled .site-title {
-  opacity: 1;
-  transform: none;
-  transition-duration: 200ms;
-}
-/* Keyboard focus never lands on an invisible link: the title shows at once. */
-.site-title:focus-visible {
-  opacity: 1;
-  transform: none;
-  transition: none;
-}
-.page-rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-.page-rating .stars {
-  width: 76px;
-  height: 14px;
-}
-.page-rating .num {
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  min-width: 2.2em;
-  color: var(--ink);
-}
-.page-rating .label {
-  display: none;
-}
-@media (min-width: 520px) {
-  .page-rating .label {
-    display: inline;
-  }
+.label a {
+  color: inherit;
 }
 
 /* Stars, used everywhere. */
@@ -319,7 +193,7 @@ strong {
   fill: var(--gold);
 }
 .star-empty {
-  fill: var(--paper-3);
+  fill: var(--ink-star);
 }
 .star-edge {
   fill: none;
@@ -328,381 +202,38 @@ strong {
   stroke-linejoin: round;
 }
 
-/* Hero: the answer on the first screen. */
-.hero {
-  padding-block: 28px 56px;
-}
-.hero .kicker {
-  margin: 0 0 20px;
-}
-.hero-score {
-  /* The 128px floor keeps the stars beside the number down to a 320px screen. */
-  --stars-w: clamp(128px, 42vw, 250px);
-  display: flex;
-  /* The star row's bottom edge sits on the numeral's baseline, whatever font has loaded. */
-  align-items: baseline;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin: 0 0 8px;
-}
-.hero-number {
-  font-size: clamp(6.5rem, 30vw, 13rem);
-  line-height: 0.82;
-  font-weight: 400;
-  letter-spacing: -0.045em;
-  font-variant-numeric: lining-nums;
-  font-variation-settings: "opsz" 72;
-  /* At this line-height the digits rise 0.086em above their own box. The top margin
-     gives that back, so the kicker's margin is the gap a reader sees. */
-  margin: 0.086em 0 0;
-}
-.hero-stars {
-  width: var(--stars-w);
-  height: auto;
-  margin-bottom: 0.55em;
-  /* The star tips sit 0.0217 of the row's width above its bottom edge, so dropping the
-     row by that much stands the tips on the baseline. */
-  position: relative;
-  top: calc(var(--stars-w) * 0.0217);
-}
-.hero h1 {
-  font-size: clamp(2.5rem, 10vw, 4.6rem);
-  line-height: 0.98;
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  font-variation-settings: "opsz" 72;
-  margin: 18px 0 22px;
-}
-.hero .dek {
-  font-size: clamp(1.2rem, 4.6vw, 1.45rem);
-  line-height: 1.42;
-  color: var(--ink);
-  margin: 0 0 1em;
-  max-width: 34rem;
-}
-.hero .dek + .dek {
-  color: var(--ink-2);
-}
-.byline {
-  margin-top: 26px;
-  padding-top: 2px;
-  border-top: 1px solid var(--rule);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 18px;
-}
-.byline a {
-  color: var(--ink);
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-/* Sections */
-.section {
-  padding-block: 56px 24px;
-}
-.section-head {
-  border-top: 1px solid var(--rule-strong);
-  padding-top: 12px;
-  margin-bottom: 24px;
-}
-.section-head .label {
-  display: block;
-  margin-bottom: 18px;
-}
-h2 {
-  font-size: clamp(1.9rem, 6.4vw, 2.75rem);
-  line-height: 1.06;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variation-settings: "opsz" 60;
-  margin: 0 0 20px;
-  text-wrap: balance;
-}
-h3 {
-  font-size: 1.3rem;
-  line-height: 1.2;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  margin: 2em 0 0.5em;
-}
-.lede {
-  font-size: 1.25rem;
-  line-height: 1.5;
-}
-
-/* Figures */
-figure {
-  margin: 32px 0 var(--after-figure);
-}
-.figure {
-  margin-inline: auto;
-}
-/* Sections, figures and the lab each paint as a separate group, so motion in one of them,
-   such as the lab's dots, repaints that block alone instead of the whole article, with its
-   800 drift stars, on every frame. */
-main > section,
-.figure,
-.lab {
-  isolation: isolate;
-}
-figcaption,
-.caption {
-  font-size: 0.9375rem;
-  line-height: 1.45;
-  color: var(--ink-2);
-  margin-top: 12px;
-}
-figcaption .src,
-.caption .src {
-  display: block;
-  margin-top: 6px;
-}
-/* A caption under a wide figure keeps the text measure instead of running its full width. */
-.wrap-wide figcaption {
-  max-width: var(--text);
-}
-/* A chart's title is its headline: the body face at body size in semibold, so it
-   outranks the chart's own mono labels. */
-.fig-title {
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  margin: 0 0 12px;
-  text-wrap: balance;
-}
-.fallback {
-  font-size: 0.9375rem;
-  color: var(--ink-2);
-}
-
-/* Big pull numbers inside prose */
-.stat {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 16px;
-  align-items: baseline;
-  margin: 22px 0;
-  padding: 14px 0;
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-}
-.stat .n {
-  font-size: 2.6rem;
-  line-height: 1;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: lining-nums tabular-nums;
-  font-variation-settings: "opsz" 60;
-}
-.stat .t {
-  font-size: 1rem;
-  line-height: 1.4;
-  color: var(--ink-2);
-}
-
-/* Forces list in "Why it happens" */
-.forces {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.forces > li {
-  position: relative;
-  padding: 18px 0 8px;
-  border-top: 1px solid var(--rule);
-}
-.forces > li > h3 {
-  margin-top: 0;
-}
-/* The number sits in the heading itself, so screen readers say it too. */
-.forces .force-n {
-  font-family: var(--mono);
-  font-size: 0.8em;
-  font-weight: 500;
-  color: var(--ink-3);
-}
-
-/* Rules in "What holds up" */
-.rules {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.rules > li {
-  padding: 18px 0 6px;
-  border-top: 1px solid var(--rule);
-}
-.rules h3,
-.rules h4 {
-  margin: 0 0 0.5em;
-}
-.rules h4 {
-  font-size: 1.15rem;
-  line-height: 1.25;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-/* "Why this happens" and "The research": the support for the four beats, closed until a
-   reader asks for it. */
-.support {
-  padding-top: 40px;
-}
-.more {
-  border-top: 1px solid var(--rule-strong);
-}
-.more:last-of-type {
-  border-bottom: 1px solid var(--rule-strong);
-}
-.more > summary {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 64px;
-  padding: 10px 0;
-  cursor: pointer;
-  list-style: none;
-}
-.more > summary::-webkit-details-marker {
-  display: none;
-}
-.more > summary::before {
-  content: "";
-  flex: none;
-  width: 9px;
-  height: 9px;
-  margin-left: 2px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(-45deg);
-  transition: transform 200ms var(--ease-out);
-}
-.more[open] > summary::before {
-  transform: translateY(-3px) rotate(45deg);
-}
-.more > summary:focus-visible::before {
-  transition: none;
-}
-.more > summary h2 {
-  margin: 0;
-  font-size: clamp(1.45rem, 4.6vw, 2rem);
-}
-.more-body {
-  padding: 4px 0 36px;
-}
-.more-body > :first-child {
-  margin-top: 0.5em;
-}
-
-/* Two hidden vouch cards that flip together */
-.reveal {
-  margin: 20px 0 28px;
-}
-.cards {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-@media (min-width: 560px) {
-  .cards {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-/* Heights in rem, so the faces grow with the reader's text size (188px at the default). */
-.card {
-  perspective: 900px;
-  min-height: 11.75rem;
-}
-.card-inner {
-  position: relative;
-  /* Both faces share one grid cell, so a card grows with its longer face at any text size. */
-  display: grid;
-  width: 100%;
-  height: 100%;
-  min-height: 11.75rem;
-  transform-style: preserve-3d;
-  /* Both cards turn at once. Ease-out starts the turn on the press and swaps faces by about
-     80ms; the settle is visible until about 370ms. */
-  transition: transform 600ms var(--ease-out);
-}
-.reveal.is-open .card-inner {
-  transform: rotateY(180deg);
-}
-.card-face {
-  grid-area: 1 / 1;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border: 1px solid var(--rule-strong);
-  background: var(--paper-2);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.card-front {
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      var(--paper-2) 0 10px,
-      var(--paper-3) 10px 11px
-    );
-  justify-content: space-between;
-}
-.card-back {
-  transform: rotateY(180deg);
-  background: var(--paper);
-}
-.card-face .who {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
-  color: var(--ink-2); /* ink-3 falls to 4.2:1 on the darker stripes of the sealed face */
-}
-.card-face .sealed {
-  font-size: 1.05rem;
-  color: var(--ink-2);
-}
-.card-face blockquote {
-  margin: 0;
-  font-size: 1.02rem;
-  line-height: 1.45;
-}
-.reveal-controls {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px 16px;
-  margin-top: 14px;
-}
-
-/* Buttons and segmented controls, shared by the lab and the charts */
+/* Buttons: labels you can press, in the mono role. */
 .btn {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
   font-family: var(--mono);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.04em;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--paper);
   background: var(--ink);
   border: 1px solid var(--ink);
-  border-radius: 2px;
-  min-height: 44px;
-  padding: 10px 16px;
+  border-radius: 0;
   cursor: pointer;
-  transition: transform 160ms var(--ease-out);
+  touch-action: manipulation;
+  transition:
+    transform var(--press) var(--ease),
+    background-color var(--press) var(--ease),
+    border-color var(--press) var(--ease);
 }
-/* Press feedback for a pointer press. A key press gets none, and neither does a disabled button. */
-.btn:not([disabled]):active:not(:focus-visible) {
+.btn:not([disabled]):active {
   transform: scale(0.97);
 }
-/* Hover only where a pointer can hover, so a tapped button does not stay tinted on a phone. */
 @media (hover: hover) and (pointer: fine) {
   .btn:hover {
-    background: #37312a;
+    background: rgb(var(--ink-rgb) / 0.84);
   }
 }
 .btn[disabled] {
@@ -712,220 +243,116 @@ figcaption .src,
 .btn-quiet {
   color: var(--ink);
   background: transparent;
-  border-color: var(--rule-strong);
+  border-color: var(--ink-rule-strong);
 }
 @media (hover: hover) and (pointer: fine) {
   .btn-quiet:hover {
-    background: var(--paper-2);
+    background: var(--ink-wash);
+    border-color: var(--ink);
   }
 }
-/* Touch: quick repeat taps on a button never zoom the page. */
-.btn {
+/* A button that reads like a link inside a label line. */
+.text-button {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: var(--ink-rule-strong);
+  cursor: pointer;
   touch-action: manipulation;
+  transition: text-decoration-color var(--press) var(--ease);
 }
-
-/* "Numbers that didn't survive" box */
-.box {
-  border: 1px solid var(--rule-strong);
-  background: var(--paper-2);
-  padding: 18px 16px 6px;
-  margin: 28px 0;
-}
-.box h3 {
-  margin-top: 0;
-}
-.box ul {
-  padding-left: 1.1em;
-  margin: 0 0 1em;
-}
-.box li {
-  margin-bottom: 0.7em;
-}
-
-/* Methods: smaller, denser type */
-.methods {
-  font-size: 1rem;
-  line-height: 1.55;
-}
-.methods h3 {
-  font-size: 1.1rem;
-}
-.methods table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-  margin: 12px 0 20px;
-}
-.methods th,
-.methods td {
-  text-align: left;
-  vertical-align: top;
-  padding: 7px 8px 7px 0;
-  border-bottom: 1px solid var(--rule);
-}
-.methods th {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: var(--ink-3);
-}
-/* The lab's results table names each setting in its first column, in the body text face. */
-.methods tbody th {
-  font-family: var(--serif);
-  font-size: 0.875rem;
-  font-weight: 400;
-  letter-spacing: 0;
-  color: var(--ink);
-}
-.methods caption {
-  padding-bottom: 6px;
-  text-align: left;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--ink-3);
-}
-.table-scroll {
-  overflow-x: auto;
-  /* A sideways swipe that reaches the table's edge stops there instead of going Back. */
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-}
-/* Phones: hyphenated cells let all four columns fit from 360px. Narrower than that the table
-   still scrolls, so the scroller runs to the screen edges and the clipped column shows. */
-@media (max-width: 479.98px) {
-  .methods td {
-    -webkit-hyphens: auto;
-    hyphens: auto;
-  }
-  .table-scroll {
-    margin-inline: calc(-1 * var(--gutter));
-    padding-inline: var(--gutter);
+@media (hover: hover) and (pointer: fine) {
+  .text-button:hover {
+    text-decoration-color: currentColor;
   }
 }
-/* Touch: a table cell holds at most one link, so the whole cell is that link's hit area, at
-   least 58px tall, without moving the text. */
-.table-scroll td {
-  position: relative;
+/* A text button that is also a label keeps the label's mono voice. */
+.text-button.label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
-.table-scroll td a::after {
-  content: "";
-  position: absolute;
+
+/* A line whose words change by crossfading in place (js/motion.js setLine). */
+.line {
+  display: grid;
+}
+.line > .line-copy {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity var(--fade) var(--ease);
+}
+.line > .line-copy.is-shown {
+  opacity: 1;
+}
+
+/* The paper's grain: a speckle of ink over everything, its darkest specks at about 5%, that
+   shifts a few times a second. It is one small tile, redrawn in place, so it costs no large
+   layer. */
+.grain {
+  position: fixed;
   inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .114 0 0 0 0 .102 0 0 0 0 .086 1 0 0 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 .02 .06 .1 .14'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  animation: grain 1.1s steps(1, end) infinite;
 }
-.methods ol,
-.methods ul {
-  padding-left: 1.2em;
-}
-.methods li {
-  margin-bottom: 0.5em;
-}
-
-.site-footer {
-  margin-top: 64px;
-  padding-block: 28px 48px;
-  border-top: 1px solid var(--rule-strong);
-}
-/* The payoff for the header's rating, which reaches 5.0 at the end of the page. */
-.site-footer .payoff {
-  font-size: 1.05rem;
-  line-height: 1.45;
-  color: var(--ink-2);
-  margin-bottom: 1em;
-}
-.site-footer p {
-  margin-bottom: 0.4em;
-}
-/* Touch: each footer link gets a 44px tall target, reaching down into the footer's padding,
-   without moving the line. */
-.site-footer a {
-  position: relative;
-}
-.site-footer a::after {
-  content: "";
-  position: absolute;
-  top: -6px;
-  right: -9px;
-  left: -9px;
-  height: 44px;
+@keyframes grain {
+  0%,
+  100% {
+    background-position: 0 0;
+  }
+  20% {
+    background-position: -63px 41px;
+  }
+  40% {
+    background-position: 37px -89px;
+  }
+  60% {
+    background-position: -91px -23px;
+  }
+  80% {
+    background-position: 71px 83px;
+  }
 }
 
-@media (min-width: 720px) {
+/* Readers who ask for more contrast get firmer lines and labels. */
+@media (prefers-contrast: more) {
   :root {
-    --gutter: 28px;
-    --after-figure: 44px;
-    --header-h: 3.25rem; /* 52px */
+    --ink-rule: rgb(var(--ink-rgb) / 0.5);
+    --ink-rule-strong: rgb(var(--ink-rgb) / 0.7);
+    --ink-label: rgb(var(--ink-rgb) / 0.8);
+    --ink-body: rgb(var(--ink-rgb) / 0.86);
   }
-  body {
-    font-size: 1.1875rem;
+  .grain {
+    display: none;
   }
-  .hero {
-    padding-block: 48px 88px;
-  }
-  .hero .kicker {
-    margin-bottom: 30px;
-  }
-  /* On wider screens the number, stars and title stay on one line each and may
-     run past the text column to the right; the sizes are capped so they fit. */
-  .hero-score {
-    --stars-w: clamp(220px, 22vw, 300px);
-    flex-wrap: nowrap;
-    gap: 22px;
-  }
-  .hero-number {
-    font-size: clamp(9rem, 16vw, 14rem);
-  }
-  .hero-stars {
-    flex: none;
-  }
-  .hero h1 {
-    font-size: clamp(3.4rem, 6vw, 5rem);
-    white-space: nowrap;
-  }
-  .section {
-    padding-block: 80px 32px;
-  }
-  figure {
-    margin: 40px 0 var(--after-figure);
-  }
-  .stat .n {
-    font-size: 3.2rem;
+}
+@media (forced-colors: active) {
+  .grain {
+    display: none;
   }
 }
 
-/* Reduced motion: nothing moves, turns or grows. Short fades and color changes stay, because
-   they still show that something changed. charts.css and lab.css carry the rest. */
+/* Reduced motion: nothing moves. Fades stay, because they still show that something changed,
+   and the grain holds still. */
 @media (prefers-reduced-motion: reduce) {
-  /* Nothing sets smooth scrolling today; this keeps it off here if something later does. */
-  html {
-    scroll-behavior: auto;
+  .grain {
+    animation: none;
   }
-  .site-title {
+  .btn,
+  .btn:not([disabled]):active {
     transform: none;
-  }
-  .btn {
-    transition: opacity 160ms var(--ease-out);
-  }
-  .btn:not([disabled]):active:not(:focus-visible) {
-    transform: none;
-    opacity: 0.8;
-  }
-  /* The answers fade in over the sealed cards instead of turning them over. */
-  .card-inner,
-  .reveal.is-open .card-inner {
-    transform: none;
-    transform-style: flat;
-    transition: none;
-  }
-  .card-back {
-    transform: none;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms;
-  }
-  .reveal.is-open .card-back {
-    opacity: 1;
-    visibility: visible;
-    transition-delay: 0s;
   }
 }

@@ -1,103 +1,373 @@
-/* Trust lab. Phone first. The field comes first, with a line on what the current rules mean
-   and one on how the run went. "Try other rules" opens the switches and the assumptions; while
-   it is open the field stays pinned above them on a phone and beside them from 880px. */
+/* The trust lab, shared by scenes 3 and 4: two big numbers, a one-line key, the field with its
+   round under it and, while "Try other rules" is open, a line on the last rule changed. The lab
+   fills its scene's visual area; the field takes whatever height is left.
+
+   "Try other rules" is a frosted panel over the scene's text: beside the chart from 960px, and
+   across the top on phones, where the chart moves down under it. Either way the chart stays in
+   full view while its switches change. */
 
 .lab {
-  /* The bottom margin is the figures', so the prose after the lab gets the same space. */
-  margin: 28px 0 var(--after-figure);
-  padding-top: 18px;
-  border-top: 1px solid var(--rule-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
 }
-
-/* Before the script builds a lab, hold the room it will take, so the text below does not
-   jump; once built, the lab takes its own height. The numbers are each lab's measured height
-   with "Try other rules" closed, stepping where its lines wrap and where the field grows. */
-@media (scripting: enabled) {
-  #lab-worst:not(.is-built) {
-    min-height: 690.4px;
-  }
-  @media (min-width: 344px) {
-    #lab-worst:not(.is-built) {
-      min-height: 664.9px;
-    }
-  }
-  @media (min-width: 418px) {
-    #lab-worst:not(.is-built) {
-      min-height: 641.7px;
-    }
-  }
-  @media (min-width: 493px) {
-    #lab-worst:not(.is-built) {
-      min-height: 616.2px;
-    }
-  }
-  @media (min-width: 552px) {
-    #lab-worst:not(.is-built) {
-      min-height: 676.2px;
-    }
-  }
-  @media (min-width: 880px) {
-    #lab-worst:not(.is-built) {
-      min-height: 686.2px;
-    }
-  }
-  #lab-root:not(.is-built) {
-    min-height: 785.6px;
-  }
-  @media (min-width: 321px) {
-    #lab-root:not(.is-built) {
-      min-height: 762.4px;
-    }
-  }
-  @media (min-width: 344px) {
-    #lab-root:not(.is-built) {
-      min-height: 736.9px;
-    }
-  }
-  @media (min-width: 464px) {
-    #lab-root:not(.is-built) {
-      min-height: 713.7px;
-    }
-  }
-  @media (min-width: 493px) {
-    #lab-root:not(.is-built) {
-      min-height: 688.2px;
-    }
-  }
-  @media (min-width: 552px) {
-    #lab-root:not(.is-built) {
-      min-height: 748.2px;
-    }
-  }
-  @media (min-width: 880px) {
-    #lab-root:not(.is-built) {
-      min-height: 758.2px;
-    }
+@media (min-width: 960px) {
+  /* Beside the text, the lab sits in the middle of its space, the field's spare room split
+     above and below it. */
+  .lab {
+    position: absolute;
+    inset: 0;
+    justify-content: center;
+    height: min(100%, 620px);
+    margin: auto 0;
+    gap: 14px;
   }
 }
 
-.lab-grid,
-.lab-top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 22px;
+/* The two big numbers */
+.lab-head {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px clamp(24px, 4vw, 56px);
 }
-.lab-controls {
-  display: grid;
-  gap: 14px;
-  min-width: 0;
+.lab-readout-label {
+  margin: 0 0 4px;
 }
-/* The one line a first-time reader needs: what the dots and stars mean. */
-.lab-lede {
-  max-width: var(--text);
+.lab-readout-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin: 0;
+}
+/* The serif role, large: big numbers. */
+.lab-big {
+  min-width: 1ch;
   font-family: var(--serif);
-  font-size: 1.0625rem;
-  line-height: 1.5;
+  font-size: clamp(2.125rem, 1.25rem + 2.8vw, 4.25rem);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-variation-settings: "opsz" 60;
   color: var(--ink);
 }
+.lab-spark {
+  align-self: center;
+  width: 72px;
+  height: 24px;
+  overflow: visible;
+}
+@media (min-width: 960px) {
+  .lab-spark {
+    width: 96px;
+    height: 30px;
+  }
+}
+.lab-spark-line,
+.lab-spark-ghost {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.lab-spark-line {
+  stroke: var(--ink);
+}
+/* The last finished run: dashed, so it reads as the earlier line by its pattern. */
+.lab-spark-ghost {
+  stroke: var(--ink-label);
+  stroke-width: 1.25;
+  stroke-dasharray: 2 3;
+}
+.lab-spark-dot {
+  fill: var(--ink);
+}
 
-/* Presets: three quiet buttons, the one that matches the switches marked as pressed */
+/* The key: black dots and gold stars. */
+.lab-legend {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 2px 18px;
+  margin: 0;
+}
+.lab-legend-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.lab-key {
+  display: inline-block;
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.45em;
+  overflow: visible;
+}
+.lab-key circle {
+  fill: var(--paper);
+  stroke: var(--ink-label);
+  stroke-width: 1;
+}
+.lab-key.is-filled circle {
+  fill: var(--ink);
+  stroke: var(--ink);
+}
+.lab-key path {
+  fill: var(--gold);
+  stroke: var(--gold-edge);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* The field takes what is left. */
+/* A field much taller than its tallest stack would leave the dots at the bottom of an empty
+   box, so it stops growing at 380px; a phone's lab then sits under its text with the spare
+   room below. */
+.lab-field-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 110px;
+  max-height: 380px;
+}
+.lab-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.lab-band {
+  fill: var(--ink-wash);
+}
+.lab-axis,
+.lab-tick {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+/* The rule separates people with no score from people scored 1, so it needs 3:1. */
+.lab-lane-rule {
+  stroke: var(--ink-label);
+  stroke-width: 1;
+}
+.lab-label,
+.lab-tick-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  fill: var(--ink-label);
+}
+
+/* People: hollow dots, filled for the 10 most skilled, gold stars for the top 10 by score */
+.lab-p circle {
+  fill: var(--paper);
+  stroke: var(--ink-label);
+  stroke-width: 1;
+}
+.lab-p.is-skilled circle {
+  fill: var(--ink);
+  stroke: var(--ink);
+}
+.lab-star {
+  display: none;
+  fill: var(--gold);
+  stroke: var(--gold-edge);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.lab-p.is-skilled .lab-star {
+  stroke: var(--ink);
+  stroke-width: 1.75;
+}
+.lab-p.is-top circle {
+  display: none;
+}
+.lab-p.is-top .lab-star {
+  display: inline;
+}
+
+.lab-foot {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 16px;
+}
+.lab-round {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.lab-replay {
+  padding-block: 12px;
+  margin-block: -12px;
+}
+
+/* The line on the last rule changed, under the field while "Try other rules" is open. */
+.lab-explain {
+  display: none;
+  flex: none;
+  min-height: calc(1.42em * 2);
+  max-width: 36rem;
+  font-size: 1rem;
+  line-height: 1.42;
+  color: var(--ink-body);
+}
+.is-tuning .lab-explain {
+  display: grid;
+}
+
+/* ---------- "Try other rules" ---------- */
+
+:root {
+  --panel-h: min(44vh, 440px);
+}
+@supports (height: 1dvh) {
+  :root {
+    --panel-h: min(44dvh, 440px);
+  }
+}
+@media (max-height: 620px) {
+  :root {
+    --panel-h: 38vh;
+  }
+  @supports (height: 1dvh) {
+    :root {
+      --panel-h: 38dvh;
+    }
+  }
+  .lab-field-wrap {
+    min-height: 96px;
+  }
+}
+.lab-panel {
+  position: fixed;
+  z-index: 35;
+  top: var(--frame-top);
+  left: 8px;
+  right: 8px;
+  height: var(--panel-h);
+  display: flex;
+  flex-direction: column;
+  background: rgb(243 238 227 / 0.72);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  backdrop-filter: blur(10px) saturate(1.05);
+  border: 1px solid var(--ink-rule-strong);
+  box-shadow: 0 18px 48px rgb(var(--ink-rgb) / 0.1);
+  opacity: 0;
+  transform: translateY(-14px);
+  transition:
+    opacity var(--move) var(--ease),
+    transform var(--move) var(--ease);
+}
+.lab-panel:focus {
+  outline: none;
+}
+.lab-panel[hidden] {
+  display: none;
+}
+.lab-panel.is-open {
+  opacity: 1;
+  transform: none;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lab-panel {
+    background: rgb(243 238 227 / 0.96);
+  }
+}
+@media (min-width: 960px) {
+  .lab-panel {
+    top: calc(var(--frame-top) + 4px);
+    bottom: calc(var(--frame-bottom) + 4px);
+    left: calc(max(var(--gutter), (100vw - 1640px) / 2) - 24px);
+    right: auto;
+    width: calc(var(--text-col) + var(--col-gap) / 2 + 24px);
+    height: auto;
+    transform: translateX(-14px);
+  }
+}
+.lab-panel-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--ink-rule);
+}
+.lab-panel-title {
+  margin: 0;
+  color: var(--ink);
+}
+.lab-panel-close {
+  padding-block: 12px;
+}
+.lab-panel-body {
+  flex: 1 1 auto;
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  min-height: 0;
+  padding: 16px 16px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pinch-zoom;
+}
+.lab-panel-lede,
+.lab-note,
+.lab-anchor-note {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--ink-body);
+}
+.lab-anchor-note {
+  font-size: 0.875rem;
+}
+
+/* The scene under the panel: its text dims behind the frost and takes no clicks. */
+.scene-lab .scene-text {
+  transition: opacity var(--fade) var(--ease);
+}
+.scene-lab.is-tuning .scene-text {
+  opacity: 0.28;
+  pointer-events: none;
+}
+/* Phones: the panel spans the top, so the chart moves down to start under it, without its key,
+   and the counter makes way. */
+@media (max-width: 959.98px) {
+  html.stage-on .scene-lab.is-tuning .scene-text {
+    flex: 0 0 calc(var(--panel-h) - 2px);
+    overflow: hidden;
+  }
+  html.stage-on .scene-lab.is-tuning {
+    padding-bottom: 12px;
+  }
+  .scene-lab.is-tuning .lab-legend {
+    display: none;
+  }
+  html.is-tuning .frame-bottom {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.frame-bottom {
+  transition:
+    opacity var(--fade) var(--ease),
+    visibility 0s linear 0s;
+}
+
+/* Presets: two quiet buttons, the one that matches the switches marked as pressed */
 .lab-preset-row {
   clear: both;
   display: flex;
@@ -106,13 +376,13 @@
 }
 .lab-preset[aria-pressed="true"] {
   border-color: var(--ink);
-  background: var(--paper-2);
+  background: var(--ink-wash);
 }
 
 /* Switches: native radios drawn as segmented controls */
 .lab-switches {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 .lab-switch {
   min-width: 0;
@@ -120,43 +390,26 @@
   padding: 0;
   border: 0;
 }
-/* "A vouch is" and the anchor slider under it move as one piece. The column is capped at the
-   group's width: left to size itself, Firefox grew it past a narrow column at 600 to 640px. */
+.lab-switch legend {
+  float: left;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 0;
+}
+/* "A vouch is" and the anchor slider under it move as one piece. */
 .lab-switch-group {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   min-width: 0;
 }
-.lab-anchor label {
-  font-size: 0.9375rem;
-}
-.lab-anchor-note {
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--ink-2);
-}
 .lab-slider[hidden] {
   display: none;
-}
-.lab-switch legend {
-  float: left;
-  width: 100%;
-  margin: 0 0 6px;
-  padding: 0;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
 }
 .lab-seg {
   clear: both;
   display: flex;
   border: 1px solid var(--ink);
-  background: var(--paper);
 }
 .lab-seg label {
   position: relative;
@@ -184,21 +437,26 @@
   min-height: 44px;
   padding: 6px;
   font-family: var(--mono);
-  font-size: 0.8125rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
   line-height: 1.25;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   text-align: center;
   color: var(--ink);
   pointer-events: none;
-  transition: transform 160ms var(--ease-out);
+  transition:
+    background-color var(--press) var(--ease),
+    color var(--press) var(--ease),
+    transform var(--press) var(--ease);
 }
-/* Press feedback for a pointer press on an option that will change something. A key press gets
-   none, and neither does the option already chosen, since pressing it does nothing. */
+/* Press feedback for a pointer press on an option that will change something. */
 .lab-seg input:not(:checked):active:not(:focus-visible) + span {
   transform: scale(0.97);
 }
 @media (hover: hover) and (pointer: fine) {
-  .lab-seg input:hover + span {
-    background: var(--paper-2);
+  .lab-seg input:not(:checked):hover + span {
+    background: var(--ink-wash);
   }
 }
 .lab-seg input:checked + span {
@@ -212,378 +470,38 @@
   outline-offset: 2px;
 }
 
-/* The field */
-.lab-stage {
-  min-width: 0;
-}
-.lab-round {
-  margin: 0 0 8px;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-2);
-}
-.lab-field-wrap {
-  width: 100%;
-}
-/* The line of the average under the field. The last run's line stays behind it, dashed. */
-.lab-trend {
-  margin-top: 8px;
-}
-.lab-trend-title {
-  margin: 0 0 2px;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
-}
-.lab-trend-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-.lab-trend-rule {
-  stroke: var(--rule);
-  stroke-width: 1;
-}
-.lab-trend-ghost,
-.lab-trend-line {
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-/* The last finished run: dashed, so it reads as the earlier line by its pattern and still
-   clears 3:1 against the paper. */
-.lab-trend-ghost {
-  stroke: var(--ink-3);
-  stroke-width: 1.25;
-  stroke-dasharray: 3 3;
-}
-.lab-trend-line {
-  stroke: var(--ink);
-}
-.lab-trend-dot {
-  fill: var(--ink);
-}
-.lab-trend-value {
-  font-family: var(--mono);
-  font-size: 12px;
-  fill: var(--ink-2);
-}
-/* Right under the field: what the last switch means, then how the finished run went. Each
-   holds two lines' room, so a longer sentence never moves the field or the controls. */
-.lab-explain,
-.lab-summary {
-  max-width: var(--text);
-  min-height: calc(1.45em * 2);
-  margin: 10px 0 0;
-  font-family: var(--serif);
-  font-size: 1rem;
-  line-height: 1.45;
-}
-.lab-explain {
-  color: var(--ink-2);
-}
-.lab-summary {
-  margin-top: 4px;
-  font-weight: 600;
-  color: var(--ink);
-}
-/* Reads the small viewport height, which does not change as a phone's toolbars slide. */
-.lab-probe {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 100vh;
-  height: 100svh;
-  visibility: hidden;
-  pointer-events: none;
-}
-.lab-field {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-  -webkit-user-select: none;
-  user-select: none;
-}
-.lab-band {
-  fill: var(--paper-3);
-}
-.lab-axis,
-.lab-tick {
-  stroke: var(--ink);
-  stroke-width: 1;
-}
-/* The rule separates people with no score from people scored 1, so it needs 3:1 (5.2:1 here). */
-.lab-lane-rule {
-  stroke: var(--ink-3);
-  stroke-width: 1;
-}
-.lab-label,
-.lab-tick-label {
-  font-family: var(--mono);
-  font-size: 12px;
-  fill: var(--ink-3);
-}
-.lab-tick-label {
-  fill: var(--ink-2);
-}
-
-/* People: hollow dots, filled for the 10 most skilled, gold stars for the top 10 by score */
-.lab-p circle {
-  fill: var(--paper);
-  stroke: var(--ink-3);
-  stroke-width: 1;
-}
-.lab-p.is-skilled circle {
-  fill: var(--ink);
-  stroke: var(--ink);
-}
-.lab-star {
-  display: none;
-  fill: var(--gold);
-  stroke: var(--gold-edge);
-  stroke-width: 1;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-.lab-p.is-skilled .lab-star {
-  stroke: var(--ink);
-  stroke-width: 1.75;
-}
-.lab-p.is-top circle {
-  display: none;
-}
-.lab-p.is-top .lab-star {
-  display: inline;
-}
-
-/* Playback */
-.lab-playback {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.lab-play {
-  min-width: 6.5em;
-}
-
-/* Readouts */
-.lab-readouts {
-  display: grid;
-  /* The left column holds the longest text, "of the 10 most skilled". */
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: 18px 12px;
-  margin: 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--rule);
-}
-.lab-readout {
-  min-width: 0;
-}
-.lab-readout dt {
-  margin-bottom: 4px;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  line-height: 1.4;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
-}
-.lab-readout dd {
-  margin: 0;
-  font-family: var(--mono);
-}
-.lab-value {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: 8px;
-  row-gap: 2px;
-}
-.lab-num {
-  font-size: 1.625rem;
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-.lab-num:empty {
-  display: none;
-}
-.lab-unit {
-  font-size: 0.75rem;
-  line-height: 1.35;
-  color: var(--ink-2);
-}
-.lab-unit:empty {
-  display: none;
-}
-.lab-avg-stars {
-  width: 77px;
-  height: 13.3px;
-  align-self: center;
-}
-.lab-last {
-  display: block;
-  margin-top: 6px;
-  font-size: 0.75rem;
-  line-height: 1.35;
-  color: var(--ink-3);
-}
-.lab-last[hidden] {
-  display: none;
-}
-.lab-chance {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.75rem;
-  line-height: 1.35;
-  color: var(--ink-3);
-}
-
-/* Status and legend. Their prose keeps the article's text measure, even inside the wide lab. */
-.lab-status {
-  max-width: var(--text);
-  min-height: calc(1.45em * 2);
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 1.125rem;
-  line-height: 1.45;
-  color: var(--ink);
-}
-.lab-legend {
-  max-width: var(--text);
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--ink-2);
-}
-.lab-key {
-  display: inline-block;
-  width: 0.95em;
-  height: 0.95em;
-  margin: 0 0.3em 0 0.05em;
-  vertical-align: -0.12em;
-  overflow: visible;
-}
-.lab-key circle {
-  fill: var(--paper);
-  stroke: var(--ink-3);
-  stroke-width: 1;
-}
-.lab-key.is-filled circle {
-  fill: var(--ink);
-  stroke: var(--ink);
-}
-.lab-key path {
-  fill: var(--gold);
-  stroke: var(--gold-edge);
-  stroke-width: 1;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-.lab-key.is-edge path {
-  stroke: var(--ink);
-  stroke-width: 1.75;
-}
-
-/* "Try other rules": the switches and the assumptions, closed until a reader asks */
-.lab-rules {
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-}
-.lab[data-controls="none"] .lab-rules {
-  display: none;
-}
-.lab-rules summary {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 48px;
-  list-style: none;
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-}
-.lab-rules summary::-webkit-details-marker {
-  display: none;
-}
-.lab-rules summary::before {
-  content: "";
-  flex: none;
-  width: 7px;
-  height: 7px;
-  margin-left: 2px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: rotate(-45deg);
-  transition: transform 200ms var(--ease-out);
-}
-.lab-rules[open] summary::before {
-  transform: translateY(-2px) rotate(45deg);
-}
-/* Toggled from the keyboard, the chevron turns without animating. */
-.lab-rules summary:focus-visible::before {
-  transition: none;
-}
-.lab-rules-body {
-  display: grid;
-  gap: 26px;
-  padding: 6px 0 22px;
-}
+/* Our assumptions */
 .lab-drawer-body {
   display: grid;
   gap: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ink-rule);
 }
 .lab-drawer-title {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  color: var(--ink-3);
-}
-/* With the rules closed the lab is the field, one line of numbers and the playback; the
-   readouts, the verdict, the key and the extra playback belong to "Try other rules". */
-.lab:not(.is-tuning) .lab-readouts,
-.lab:not(.is-tuning) .lab-status,
-.lab:not(.is-tuning) .lab-legend,
-.lab:not(.is-tuning) [data-action="skip"],
-.lab:not(.is-tuning) [data-action="again"] {
-  display: none;
 }
 .lab-slider label {
   display: block;
-  font-family: var(--serif);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   line-height: 1.4;
   color: var(--ink);
 }
 .lab-slider-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  column-gap: 14px;
+  -webkit-user-select: none;
+  user-select: none;
 }
+/* The value sits above its track, where a finger on the thumb cannot cover it. */
 .lab-slider-value {
-  flex: none;
-  width: 18ch; /* fits "0.30 stars a round", so every track is the same length */
-  font-family: var(--mono);
-  font-size: 0.8125rem;
+  order: -1;
+  width: 100%;
   font-variant-numeric: tabular-nums;
-  color: var(--ink-2);
-  text-align: left; /* each value sits against the end of its own track */
 }
 .lab-slider input[type="range"] {
-  flex: 1;
+  flex: 1 1 100%;
   min-width: 0;
   height: 44px;
   margin: 0;
@@ -594,7 +512,7 @@
 }
 .lab-slider input[type="range"]::-webkit-slider-runnable-track {
   height: 2px;
-  background: var(--ink-3);
+  background: var(--ink-label);
 }
 .lab-slider input[type="range"]::-webkit-slider-thumb {
   width: 14px;
@@ -608,7 +526,7 @@
 }
 .lab-slider input[type="range"]::-moz-range-track {
   height: 2px;
-  background: var(--ink-3);
+  background: var(--ink-label);
 }
 .lab-slider input[type="range"]::-moz-range-thumb {
   width: 14px;
@@ -617,151 +535,45 @@
   border-radius: 0;
   background: var(--ink);
 }
-.lab-note {
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--ink-2);
-}
 .lab-drawer-body .btn {
   justify-self: start;
 }
 
-/* Phones: each value sits above its track, where a finger on the thumb cannot cover it,
-   and every track takes the full width. */
-@media (max-width: 599.98px) {
-  .lab-slider-row {
-    flex-wrap: wrap;
-    row-gap: 0;
-  }
-  .lab-slider-value {
-    order: -1;
-    width: 100%;
-    text-align: left;
-  }
+/* Touch: only the thumb takes a touch, so a scroll that starts on a track cannot change an
+   assumption, and the thumb gets a 44px square to grab while the bar is still drawn 14 by 26. */
+.lab-seg label,
+.lab-panel .btn {
+  touch-action: manipulation;
+}
+@media (pointer: coarse) {
   .lab-slider input[type="range"] {
-    flex-basis: 100%; /* its own line, even with the wider touch box below */
+    margin: 0 -15px;
+    pointer-events: none;
   }
-}
-
-@media (min-width: 600px) and (max-width: 879.98px) and (min-height: 500.02px) {
-  .lab-switches {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 24px;
+  .lab-slider input[type="range"]::-webkit-slider-runnable-track {
+    background: linear-gradient(var(--ink-label), var(--ink-label)) center / calc(100% - 30px) 100% no-repeat;
   }
-  /* "A vouch is" with its slider is the tallest piece, so it takes two rows. */
-  .shows-anchor .lab-switch-group {
-    grid-row: span 2;
+  .lab-slider input[type="range"]::-webkit-slider-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    margin-top: -21px;
+    border: solid transparent;
+    border-width: 9px 15px;
+    background-clip: content-box;
+    pointer-events: auto;
   }
-}
-
-/* One column (phones and small tablets): the round, the field, the line and a one-line summary
-   stay pinned under the header while the controls scroll under them, so a switch and the dots
-   it moves are in view together. lab.js keeps the pinned block to at most 55% of the screen and
-   gives each control a scroll margin as tall as the block, so keyboard focus never lands under
-   it. Screens shorter than 640px do not pin. */
-@media (max-width: 879.98px) and (min-height: 640px) {
-  .lab.is-tuning .lab-stage {
-    position: sticky;
-    top: var(--header-h);
-    z-index: 2;
-    padding: 6px 0 8px;
-    background: var(--paper);
-    border-bottom: 1px solid var(--rule);
+  .lab-slider input[type="range"]::-moz-range-track {
+    background: linear-gradient(var(--ink-label), var(--ink-label)) center / calc(100% - 30px) 100% no-repeat;
   }
-  .lab-playback button,
-  .lab-rules summary,
-  .lab-rules input,
-  .lab-rules button {
-    scroll-margin-top: var(--lab-stuck, 0px);
-  }
-  /* With the rules open, the pinned block shrinks to the round, the field and its two lines,
-     so the controls get most of the screen and every change still shows above them. */
-  .lab.is-tuning .lab-trend {
-    display: none;
-  }
-}
-
-/* Landscape phones: with the rules open, a short screen cannot show them above the field, so
-   they sit beside it, and the field stays pinned under the header while they scroll. */
-@media (min-width: 640px) and (max-width: 879.98px) and (max-height: 500px) {
-  .lab.is-tuning .lab-top {
-    grid-template-columns: 19rem minmax(0, 1fr); /* wide enough for "Who vouched" on one line */
-    grid-template-areas: "playback stage" "rules stage";
-    grid-template-rows: auto 1fr;
-    column-gap: 24px;
-    align-items: start;
-  }
-  .lab.is-tuning .lab-playback {
-    grid-area: playback;
-  }
-  .lab.is-tuning .lab-rules {
-    grid-area: rules;
-  }
-  .lab.is-tuning .lab-stage {
-    grid-area: stage;
-    position: sticky;
-    top: var(--header-h);
-  }
-  .lab.is-tuning .lab-trend {
-    display: none;
-  }
-  .lab-switches {
-    row-gap: 8px;
-  }
-}
-
-@media (min-width: 880px) {
-  .lab {
-    margin-top: 36px;
-    padding-top: 24px;
-  }
-  .lab-grid {
-    row-gap: 26px;
-  }
-  /* Closed, the lab is one column at a reading width. Open, the playback and the rules share
-     the left column, and the field sits beside them, pinned while they scroll, so a change
-     and its effect are in view together. */
-  .lab:not(.is-tuning) .lab-grid {
-    max-width: 46rem;
-  }
-  .lab.is-tuning .lab-top {
-    grid-template-columns: 21rem minmax(0, 1fr);
-    grid-template-areas: "playback stage" "rules stage";
-    grid-template-rows: auto 1fr;
-    column-gap: 44px;
-    row-gap: 18px;
-    align-items: start;
-  }
-  .lab.is-tuning .lab-stage {
-    grid-area: stage;
-  }
-  .lab.is-tuning .lab-playback {
-    grid-area: playback;
-  }
-  .lab.is-tuning .lab-rules {
-    grid-area: rules;
-  }
-  .lab-readouts {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .lab-unit {
-    font-size: 0.8125rem;
-  }
-  .lab-avg-stars {
-    width: 87px;
-    height: 15px;
-  }
-  .lab-status {
-    font-size: 1.25rem;
-  }
-}
-/* Pinned beside the rules only where the whole field fits under the header. */
-@media (min-width: 880px) and (min-height: 600px) {
-  .lab.is-tuning .lab-stage {
-    position: sticky;
-    top: calc(var(--header-h) + 16px);
+  .lab-slider input[type="range"]::-moz-range-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    border: solid transparent;
+    border-width: 9px 15px;
+    background-clip: content-box;
+    pointer-events: auto;
   }
 }
 
@@ -790,59 +602,13 @@
   }
 }
 
-/* Touch */
-.lab-seg label,
-.lab-drawer summary {
-  touch-action: manipulation;
-}
-.lab-slider-row {
-  -webkit-user-select: none;
-  user-select: none;
-}
-/* On touch screens only the thumb takes a touch, so a scroll that starts on a track cannot
-   change an assumption, and the thumb gets a 44px square to grab while the bar is still
-   drawn 14 by 26. The input grows 15px on each side, which keeps the bar's path, and the
-   track is drawn inset by the same 15px, a flat line of the same length. */
-@media (pointer: coarse) {
-  .lab-slider input[type="range"] {
-    margin: 0 -15px;
-    pointer-events: none;
-  }
-  .lab-slider input[type="range"]::-webkit-slider-runnable-track {
-    background: linear-gradient(var(--ink-3), var(--ink-3)) center / calc(100% - 30px) 100% no-repeat;
-  }
-  .lab-slider input[type="range"]::-webkit-slider-thumb {
-    box-sizing: border-box;
-    width: 44px;
-    height: 44px;
-    margin-top: -21px;
-    border: solid transparent;
-    border-width: 9px 15px;
-    background-clip: content-box;
-    pointer-events: auto;
-  }
-  .lab-slider input[type="range"]::-moz-range-track {
-    background: linear-gradient(var(--ink-3), var(--ink-3)) center / calc(100% - 30px) 100% no-repeat;
-  }
-  .lab-slider input[type="range"]::-moz-range-thumb {
-    box-sizing: border-box;
-    width: 44px;
-    height: 44px;
-    border: solid transparent;
-    border-width: 9px 15px;
-    background-clip: content-box;
-    pointer-events: auto;
-  }
-}
-
-/* Reduced motion: no autoplay or tweening (lab.js jumps to the end and fades the dots in),
-   and a press dims the segment instead of shrinking it. */
+/* Reduced motion: the panel fades in without sliding, and a press dims a segment instead of
+   shrinking it. The dots jump and fade (lab.js). */
 @media (prefers-reduced-motion: reduce) {
-  .lab-drawer summary::before {
-    transition: none;
-  }
-  .lab-seg span {
-    transition: opacity 160ms var(--ease-out);
+  .lab-panel,
+  .lab-panel.is-open {
+    transform: none;
+    transition: opacity var(--move) var(--ease);
   }
   .lab-seg input:not(:checked):active:not(:focus-visible) + span {
     transform: none;

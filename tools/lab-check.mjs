@@ -11,7 +11,7 @@
 import { createWorld, createRun, DEFAULTS, WORST, BEST, COSIGN } from '../js/lab-model.js';
 
 const WORLDS = [11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133];
-const PAGE_WORLD = 256; // the world both labs on the page show (#lab-worst and #lab-root): of worlds 1 to 600 whose first run keeps every result the text describes, its results sit closest to the 12-world averages
+const PAGE_WORLD = 256; // the world the lab shows (#lab-root, scenes 3 and 4): of worlds 1 to 600 whose first run keeps every result the text describes, its results sit closest to the 12-world averages
 const LINKEDIN = Object.freeze({ scale: 'yes', type: 'tap', vis: 'visible', who: 'anyone', feed: 'count' });
 const COSIGN_COUNT = Object.freeze({ ...COSIGN, feed: 'count' });
 

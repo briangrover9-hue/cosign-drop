@@ -1,9 +1,7 @@
-/* Charts: paired bars, the guess and reveal, star grids and the dot plot.
-   Class prefixes: ch (shared), wn (why now), gs (guess), dr (drift), va (validity). */
-
-:root {
-  --gold-soft: #f0d27f;
-}
+/* Charts: the guess and the drift grids on the stage, the paired bars and the dot plot on the
+   methods page. Class prefixes: ch (shared), gs (guess), dr (drift), wn (why now), va (validity).
+   The stage's charts size themselves from their scene's visual area (.scene-visual, a size
+   container), so each one fills the room its scene gives it. */
 
 /* Shared */
 .ch-svg {
@@ -14,232 +12,157 @@
 .ch-svg text {
   font-family: var(--mono);
   font-size: 12px;
+  letter-spacing: 0.04em;
   fill: var(--ink);
 }
-/* The axis carries the scale (the histogram's nearly empty low end is drawn by it alone),
-   so it needs 3:1 on paper: ink-3 gives 5.2:1 where the hairline rule gave 1.4:1. */
 .ch-axis,
 .ch-tick {
-  stroke: var(--ink-3);
+  stroke: var(--ink-label);
   stroke-width: 1;
 }
 .ch-svg .ch-tick-label {
-  fill: var(--ink-3);
+  fill: var(--ink-label);
 }
 .ch-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 22px;
   margin: 0 0 16px;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  color: var(--ink-2);
 }
 .ch-key {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
-
-/* Before its script draws a chart, hold the room the chart will take, so the text below
-   does not jump when it appears, for example after a link to a section or a reload partway
-   down. Each value is the drawn chart's measured height, or just under it where the height
-   steps with the width. Without scripting the fallback keeps its own height. */
-@media (scripting: enabled) {
-  /* The why-now bars change size with their own width and the drift grids grow with their
-     columns, so those two figures let the rules below read their width. */
-  #fig-why-now,
-  #fig-drift {
-    container-type: inline-size;
-  }
-  #why-now-root {
-    min-height: 227px;
-  }
-  @container (min-width: 480px) {
-    #why-now-root {
-      min-height: 235px;
-    }
-  }
-  #validity-root {
-    min-height: 698px;
-  }
-  @media (min-width: 720px) {
-    #validity-root {
-      min-height: 504px;
-    }
-  }
-  #fig-guess {
-    min-height: 436.3px;
-  }
-  @media (min-width: 363px) {
-    #fig-guess {
-      min-height: 407.8px;
-    }
-  }
-  @media (min-width: 369px) {
-    #fig-guess {
-      min-height: 386.1px;
-    }
-  }
-  @media (min-width: 380px) {
-    #fig-guess {
-      min-height: 362.7px;
-    }
-  }
-  @media (min-width: 471px) {
-    #fig-guess {
-      min-height: 344.7px;
-    }
-  }
-  @media (min-width: 720px) {
-    #fig-guess {
-      min-height: 349.1px;
-    }
-  }
-  /* Each drift grid is as tall as its column is wide: two rows of two on phones, capped at
-     260px a grid, and one row of four from 720px, with wider gaps from 900px. The text around
-     the grids (--dr-text) loses a line at each width listed. */
-  #drift-root {
-    min-height: calc(min(520px, 100cqi - 16px) + var(--dr-text));
-  }
-  @media (min-width: 720px) {
-    #drift-root {
-      min-height: calc(25cqi - 15px + var(--dr-text));
-    }
-  }
-  @media (min-width: 900px) {
-    #drift-root {
-      min-height: calc(25cqi - 21px + var(--dr-text));
-    }
-  }
-  #drift-root {
-    --dr-text: 423.2px;
-  }
-  @media (min-width: 400px) {
-    #drift-root {
-      --dr-text: 402.5px;
-    }
-  }
-  @media (min-width: 420px) {
-    #drift-root {
-      --dr-text: 384.5px;
-    }
-  }
-  @media (min-width: 452px) {
-    #drift-root {
-      --dr-text: 365.6px;
-    }
-  }
-  @media (min-width: 510px) {
-    #drift-root {
-      --dr-text: 347.6px;
-    }
-  }
-  @media (min-width: 552px) {
-    #drift-root {
-      --dr-text: 328.8px;
-    }
-  }
-  @media (min-width: 720px) {
-    #drift-root {
-      --dr-text: 222.0px;
-    }
-  }
-  @media (min-width: 819px) {
-    #drift-root {
-      --dr-text: 201.2px;
-    }
-  }
-}
-
-/* 1. Why now */
-.wn-swatch {
-  display: inline-block;
-  flex: none;
-  width: 18px;
-  height: 12px;
-}
-.wn-swatch-before {
-  border: 1.5px solid var(--ink);
-  background: var(--paper);
-}
-.wn-swatch-after {
-  background: var(--ink);
-}
-.ch-svg .wn-label {
-  font-family: var(--serif);
-  font-weight: 500;
-}
-.ch-svg .wn-note {
-  font-size: 13px;
-  font-weight: 500;
-}
-.ch-svg .wn-value {
-  font-size: 13px;
-  /* Fades in as the bars land: at 250ms they are 96% grown. */
-  transition: opacity 200ms var(--ease-out) 250ms;
-}
-.wn-before {
-  fill: var(--paper);
-  stroke: var(--ink);
-  stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
-}
-.wn-after {
-  fill: var(--ink);
-}
-.wn-bar {
-  transform-box: fill-box;
-  transform-origin: 0 50%;
-  /* Bars grow out of the $0 axis, so scaleX(0) is their real starting length. */
-  transition: transform 500ms var(--ease-out);
-}
-.is-pending .wn-bar {
-  transform: scaleX(0);
-}
-.ch-svg.is-pending .wn-value {
-  opacity: 0;
-}
-
-/* A chart that has gone off the screen empties at once, without its transitions, so it can
+/* A chart that has gone out of view empties at once, without its transitions, so it can
    fill again when the reader comes back. */
 .is-resetting,
 .is-resetting * {
   transition: none !important;
 }
+.fallback {
+  color: var(--ink-body);
+}
 
-/* 2. The guess */
-#guess-root [hidden] {
-  display: none !important;
-}
-.gs-prompt {
-  margin: 0 0 18px;
-}
-.gs-readout {
+/* ---------- 1. The guess ---------- */
+
+.guess {
   display: flex;
-  align-items: flex-end;
-  gap: 14px;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  max-height: 660px;
   margin: 0;
 }
+@media (min-width: 960px) {
+  .guess {
+    margin-block: auto;
+    height: min(100%, 660px);
+    position: relative;
+    top: 50%;
+    translate: 0 -50%;
+  }
+}
+.guess-root {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+.guess-root [hidden] {
+  display: none !important;
+}
+.gs {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+/* The plot: the big number up top, and after the reveal, the bars rising from the track. */
+.gs-plot {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 120px;
+}
+/* The big number sits just over the track, next to the star it follows. */
+.gs-number {
+  position: absolute;
+  bottom: 36px;
+  left: 0;
+  z-index: 1;
+  font-size: clamp(3.25rem, min(23cqw, 26cqh), 10.25rem);
+}
+.gs-number-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+}
+/* The serif role, large: a big number. */
 .gs-num {
-  font-size: 3.25rem;
-  line-height: 0.86;
+  margin: 0;
+  /* At this line height the digits rise above their box; the padding gives that back, so the
+     label over the number keeps its gap. */
+  padding-top: 0.1em;
+  font-family: var(--serif);
+  font-size: 1em;
   font-weight: 400;
-  letter-spacing: -0.02em;
+  line-height: 0.84;
+  letter-spacing: -0.035em;
   font-variant-numeric: lining-nums tabular-nums;
-  font-variation-settings: "opsz" 60;
+  font-variation-settings: "opsz" 72;
+  color: var(--ink);
 }
 .gs-stars {
-  width: 136px;
-  height: 24px;
-  margin-bottom: 2px;
+  width: 1.86em;
+  height: auto;
+  margin-top: 0.12em;
 }
+.gs-hist {
+  position: absolute;
+  inset: 0;
+}
+.gs-hist svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.gs-band {
+  fill: var(--ink-wash);
+}
+.gs-bars {
+  fill: var(--ink);
+  transform-box: view-box;
+  transition: transform var(--move) var(--ease);
+}
+.gs-median {
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+.ch-svg .gs-median-label {
+  font-weight: 500;
+}
+.ch-svg .gs-band-label {
+  fill: var(--ink-label);
+}
+.gs-anno {
+  transition: opacity var(--fade) var(--ease) 200ms;
+}
+.is-pending .gs-bars {
+  transform: scaleY(0);
+}
+.is-pending .gs-anno {
+  opacity: 0;
+}
+
+/* The slider: its track is the chart's axis, so it tucks up under the bars. */
 .gs-slider {
-  margin: 14px 0 0;
+  position: relative;
+  z-index: 2;
+  margin-top: -22px;
   -webkit-user-select: none;
-  user-select: none; /* a drag that starts on a tick label moves nothing and selects nothing */
+  user-select: none;
 }
 .gs-range {
   -webkit-appearance: none;
@@ -253,6 +176,10 @@
   padding: 0;
   background: transparent;
   cursor: pointer;
+  touch-action: none;
+}
+.gs-range:disabled {
+  cursor: default;
 }
 .gs-range::-webkit-slider-runnable-track {
   height: 2px;
@@ -267,6 +194,10 @@
   margin-top: -17px;
   border: 0;
   background: transparent center / 100% 100% no-repeat;
+  transition: transform var(--press) var(--ease);
+}
+.gs-range:not(:disabled):active::-webkit-slider-thumb {
+  transform: scale(1.12);
 }
 .gs-range::-moz-range-track {
   height: 2px;
@@ -279,6 +210,10 @@
   border: 0;
   border-radius: 0;
   background: transparent center / 100% 100% no-repeat;
+  transition: transform var(--press) var(--ease);
+}
+.gs-range:not(:disabled):active::-moz-range-thumb {
+  transform: scale(1.12);
 }
 .gs-range:focus {
   outline: none;
@@ -287,20 +222,17 @@
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
-/* Where :has() works, ring the whole slider, ticks included, so the ring never crosses them. */
 @supports selector(:has(*)) {
   .gs-range:focus-visible {
     outline: none;
   }
   .gs-slider:has(.gs-range:focus-visible) {
     outline: 2px solid var(--ink);
-    outline-offset: 6px;
+    outline-offset: 4px;
   }
 }
-/* Touch screens: only the star takes a touch, so a scroll that starts on the track cannot
-   move the guess, and the star gets a 44px square to grab while it is still drawn at 36px.
-   The input grows 4px on each side, which keeps the star's path and the ticks where they
-   were, and the track is drawn inset by the same 4px, a flat line of the same length. */
+/* Touch screens: only the star takes a touch, so a swipe that starts on the track still moves
+   between scenes, and the star gets a 44px square to grab while it is drawn at 36px. */
 @media (pointer: coarse) {
   .gs-range {
     width: calc(100% + 8px);
@@ -333,171 +265,122 @@
     pointer-events: auto;
   }
 }
-/* Tick labels sit under the thumb's center at 1 to 5, so they are inset by half a thumb. */
+/* Tick labels sit under the thumb's center at 1 to 5, inset by half a thumb. */
 .gs-ticks {
   position: relative;
-  height: 28px;
-  margin: -18px 18px 0;
+  height: 22px;
+  margin: -12px 18px 0;
   font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1;
-  color: var(--ink-3);
+  color: var(--ink-label);
 }
 .gs-ticks span {
   position: absolute;
-  top: 14px;
+  top: 10px;
   transform: translateX(-50%);
 }
-.gs-ticks span::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: -12px;
-  width: 1px;
-  height: 6px;
-  background: var(--rule-strong);
-}
-.gs-actions {
+.gs-foot {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 12px;
-  margin-top: 20px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 8px;
 }
-.gs-hist {
-  margin-top: 4px;
+.gs-hint {
+  flex: 1 1 12rem;
+  min-width: 0;
 }
-.gs-band {
-  fill: var(--paper-3);
-}
-.gs-bars {
-  fill: var(--ink);
-  transform-box: view-box;
-  transition: transform 600ms var(--ease-out);
-}
-.gs-median {
-  stroke: var(--ink);
-  stroke-width: 1;
-}
-.ch-svg .gs-median-label,
-.ch-svg .gs-guess-label {
-  font-weight: 500;
-}
-.ch-svg .gs-band-label,
-.ch-svg .gs-top-label {
-  fill: var(--ink-2);
-}
-/* The median and labels arrive once the bars are 96% grown; the reader's own star is drawn
-   outside this group, so it is on the axis from the start. */
-.gs-anno {
-  transition: opacity 250ms var(--ease-out) 300ms;
-}
-.is-pending .gs-bars {
-  transform: scaleY(0);
-}
-.is-pending .gs-anno {
-  opacity: 0;
-}
-.gs-stats {
-  margin: 10px 0 0;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  line-height: 1.6;
-  letter-spacing: 0.02em;
-  color: var(--ink-2);
-}
-.gs-stats span {
-  white-space: nowrap;
-}
-.gs-message {
-  margin: 18px 0 0;
-  font-size: 1.3125rem;
-  line-height: 1.4;
-  text-wrap: pretty;
-}
-.gs-message:empty {
+.guess-cap {
+  flex: none;
   margin: 0;
+  max-width: 44rem;
+  font-size: 0.6875rem;
 }
-.gs-again {
-  margin-top: 14px;
-}
-#guess-root + .guess-answer {
-  margin-top: 22px;
+/* Each source link gets a 32px tall target without moving the line; it reaches up more than
+   down, so it stays clear of the counter below. */
+.guess-cap a {
+  display: inline-block;
+  padding-block: 12px 4px;
+  margin-block: -12px -4px;
 }
 
-/* 3. The drift */
+/* ---------- 2. The drift ---------- */
+
 .dr-sprite {
   position: absolute;
   width: 0;
   height: 0;
   overflow: hidden;
 }
+.drift {
+  display: grid;
+  height: 100%;
+  place-items: center;
+}
+/* Four grids, two by two. charts.js sets --dr-n to the biggest size that fits; this first
+   guess holds until it does. */
 .dr-list {
-  list-style: none;
+  --dr-n: min(calc(50cqw - 12px), calc((100cqh - 140px) / 2.42), 300px);
+  /* A column is never narrower than its labels need, even when the grid in it is small. */
+  --dr-col: max(var(--dr-n), min(10.5rem, calc(50cqw - 12px)));
+  display: grid;
+  grid-template-columns: repeat(2, var(--dr-col));
+  justify-content: center;
+  align-content: center;
+  gap: 16px 24px;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 16px;
+  list-style: none;
 }
-/* Each block spans five shared rows, so titles, grids and values line up across a row. */
 .dr-item {
   display: grid;
-  grid-row: span 5;
-  grid-template-rows: subgrid;
-  row-gap: 0;
   align-content: start;
+  width: var(--dr-col);
   min-width: 0;
-  margin: 0 0 18px;
 }
-.dr-title {
-  margin: 0;
-  font-size: 1.0625rem;
-  font-weight: 600;
-  line-height: 1.22;
-}
-.dr-measure {
-  margin: 4px 0 12px;
+/* The shortest screens keep each grid's number and name, and drop the note under them. */
+@container (max-height: 330px) {
+  .dr-note {
+    display: none;
+  }
 }
 .dr-stars {
-  width: 100%;
-  max-width: 260px;
-  height: auto;
+  width: var(--dr-n);
+  height: var(--dr-n);
 }
-.dr-value {
-  margin: 10px 0 0;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  color: var(--ink-2);
-}
-.dr-value b {
-  font-weight: 500;
+.dr-num {
+  margin: 8px 0 2px;
+  font-family: var(--serif);
+  font-size: max(1.375rem, calc(var(--dr-n) * 0.19));
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums;
+  font-variation-settings: "opsz" 60;
   color: var(--ink);
 }
-/* Kept on one line when it fits; in a column too narrow for it, it wraps inside itself. */
-.dr-nw {
+.dr-name {
+  color: var(--ink);
+}
+.dr-name,
+.dr-note {
+  font-size: 0.6875rem;
+  line-height: 1.45;
+}
+.dr-name a {
   display: inline-block;
+  padding-block: 12px;
+  margin-block: -12px;
+  color: var(--ink);
 }
-.dr-sub {
-  font-size: 0.75rem;
-  color: var(--ink-3);
-}
-.dr-src {
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
-}
-/* Every star gets the page's gold edge (4.4:1 on paper). Empty stars are hollow: with edges on
-   all three kinds, a beige fill would match the lighter gold in lightness (1.03:1). */
+/* Every star gets the gold edge; empty ones are hollow. */
 .dr-stars use {
   stroke: var(--gold-edge);
   stroke-width: 1;
   stroke-linejoin: round;
+  transition: fill var(--move) var(--ease) var(--d, 0ms);
 }
 .dr-s0 {
   fill: var(--paper);
@@ -506,47 +389,93 @@
   fill: var(--gold);
 }
 .dr-s2 {
-  fill: var(--gold-soft);
-  transition: fill 0.2s ease, stroke 0.2s ease;
+  fill: var(--gold-light);
 }
-.is-pending .dr-s2 {
+.dr-stars.is-pending .dr-s1,
+.dr-stars.is-pending .dr-s2 {
   fill: var(--paper);
 }
-/* Four across from 720px, so tablets get the desktop arrangement instead of two sparse
-   columns; the gap is tighter until 900px so every value line still fits its column. */
-@media (min-width: 720px) {
+@media (min-width: 960px) {
   .dr-list {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    column-gap: 20px;
+    gap: 28px 40px;
   }
-}
-@media (min-width: 900px) {
-  .dr-list {
-    column-gap: 28px;
+  .dr-name,
+  .dr-note {
+    font-size: 0.75rem;
   }
 }
 
-/* 4. What predicts the job */
+/* ---------- 3. Why now (methods page) ---------- */
+
+.wn-swatch {
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 12px;
+}
+.wn-swatch-before {
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+}
+.wn-swatch-after {
+  background: var(--ink);
+}
+.ch-svg .wn-label {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.ch-svg .wn-note {
+  font-size: 13px;
+  font-weight: 500;
+}
+.ch-svg .wn-value {
+  font-size: 13px;
+  transition: opacity var(--fade) var(--ease) 250ms;
+}
+.wn-before {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.wn-after {
+  fill: var(--ink);
+}
+.wn-bar {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  transition: transform var(--move) var(--ease);
+}
+.is-pending .wn-bar {
+  transform: scaleX(0);
+}
+.ch-svg.is-pending .wn-value {
+  opacity: 0;
+}
+
+/* ---------- 4. What predicts the job (methods page) ---------- */
+
 .ch-svg .va-label {
   font-family: var(--serif);
   font-size: 16px;
+  letter-spacing: 0;
 }
 .ch-svg .va-label.is-strong {
   font-weight: 600;
 }
 .ch-svg .va-value {
-  fill: var(--ink-2);
+  fill: var(--ink-body);
 }
 .ch-svg .va-sub {
-  fill: var(--ink-3);
-  letter-spacing: 0.02em;
+  fill: var(--ink-label);
 }
 .va-grid {
-  stroke: var(--rule);
+  stroke: var(--ink-rule);
   stroke-width: 1;
 }
 .va-line {
-  stroke: var(--ink-3);
+  stroke: var(--ink-label);
   stroke-width: 1.5;
 }
 .va-1998 {
@@ -572,20 +501,24 @@
   }
 }
 
-/* Reduced motion: the why-now bars and the drift grids start in their final state (charts.js
-   skips the growth), and the histogram fades in when the reader asks for it. */
+/* Reduced motion: bars fade in instead of growing, the grids start full (charts.js skips the
+   fill), and nothing scales under a press. */
 @media (prefers-reduced-motion: reduce) {
   .wn-bar,
-  .dr-s2,
+  .dr-stars use,
   .ch-svg .wn-value {
     transition: none;
   }
   .gs-bars,
   .gs-anno {
-    transition: opacity 200ms var(--ease-out);
+    transition: opacity var(--fade) var(--ease);
   }
   .is-pending .gs-bars {
     transform: none;
     opacity: 0;
+  }
+  .gs-range:not(:disabled):active::-webkit-slider-thumb,
+  .gs-range:not(:disabled):active::-moz-range-thumb {
+    transform: none;
   }
 }

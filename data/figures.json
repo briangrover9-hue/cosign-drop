@@ -48,7 +48,9 @@
       "source": {
         "label": "Harvard OUE (2025)",
         "url": "https://oue.fas.harvard.edu/faculty-resources/report-on-grading/"
-      }
+      },
+      "name": "Harvard A’s",
+      "note": "24% in 2005"
     },
     {
       "id": "ebay",
@@ -61,7 +63,9 @@
       "source": {
         "label": "Nosko and Tadelis (2015)",
         "url": "https://www.nber.org/system/files/working_papers/w20830/w20830.pdf"
-      }
+      },
+      "name": "eBay positive",
+      "note": "Average seller"
     },
     {
       "id": "linkedin",
@@ -74,7 +78,9 @@
       "source": {
         "label": "LinkedIn (2013)",
         "url": "https://web.archive.org/web/20130308140056/http://blog.linkedin.com:80/2013/03/06/1-billion-endorsements-given-on-linkedin-infographic/"
-      }
+      },
+      "name": "LinkedIn endorsements",
+      "note": "A billion by 2013"
     },
     {
       "id": "github",
@@ -87,7 +93,9 @@
       "source": {
         "label": "He et al. (ICSE 2026)",
         "url": "https://cmustrudel.github.io/papers/icse2026fakestars.pdf"
-      }
+      },
+      "name": "GitHub stars",
+      "note": "6.0M suspected fakes"
     }
   ],
   "validity": {

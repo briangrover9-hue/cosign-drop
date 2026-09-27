@@ -1,0 +1,578 @@
+/* The stage: four full-screen scenes that change under a fixed frame. js/stage.js moves one
+   scene per scroll, swipe or arrow key. Phones stack each scene, text over the visual; from
+   960px the text sits beside the visual. In every scene the visual gets the most room.
+
+   Without scripting, or on screens under 500px tall, the scenes are plain sections one after
+   another (html without .stage-on), and the page scrolls. */
+
+:root {
+  --frame-top: 48px;
+  --frame-bottom: 48px;
+  --scene-gap: clamp(12px, 2.4vh, 24px);
+  --text-col: 100%;
+  --col-gap: 0px;
+}
+@media (min-width: 960px) {
+  :root {
+    --frame-top: 68px;
+    --frame-bottom: 64px;
+    --text-col: clamp(348px, 34vw, 480px);
+    --col-gap: clamp(40px, 5vw, 88px);
+  }
+}
+
+html.stage-on,
+html.stage-on body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* ---------- The frame ---------- */
+
+.frame-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: var(--frame-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-inline: var(--gutter);
+  pointer-events: none;
+}
+.frame-top > * {
+  pointer-events: auto;
+}
+.frame-title {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.frame-title a {
+  display: grid;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.frame-title a > span {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  transition: opacity var(--fade) var(--ease);
+}
+/* Phones: a narrower title, so the payoff fits beside the rating. */
+@media (max-width: 559.98px) {
+  .frame-title {
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+  }
+  .frame-title-payoff {
+    white-space: normal;
+  }
+}
+/* The payoff: on the last scene the title gives way to what the page's own rating did. */
+.frame-title-payoff {
+  opacity: 0;
+}
+html[data-scene="3"] .frame-title-name {
+  opacity: 0;
+}
+html[data-scene="3"] .frame-title-payoff {
+  opacity: 1;
+}
+.page-rating {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.page-rating .stars {
+  width: 76px;
+  height: 14px;
+}
+.page-rating-num {
+  min-width: 2.2em;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.page-rating-label {
+  display: none;
+}
+@media (min-width: 600px) {
+  .page-rating-label {
+    display: inline;
+  }
+}
+
+.frame-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: var(--frame-bottom);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline: var(--gutter);
+  pointer-events: none;
+}
+.frame-bottom > * {
+  pointer-events: auto;
+}
+.frame-count {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.frame-now {
+  color: var(--ink);
+}
+.frame-dots {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.frame-dots button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.frame-dots button::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-rule-strong);
+  transition:
+    background-color var(--press) var(--ease),
+    transform var(--move) var(--ease);
+}
+.frame-dots button[aria-current="step"]::before {
+  background: var(--ink);
+  transform: scale(1.35);
+}
+@media (hover: hover) and (pointer: fine) {
+  .frame-dots button:not([aria-current="step"]):hover::before {
+    background: var(--ink-label);
+  }
+}
+/* The cue: a small pulse on the first scene only. */
+.frame-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    opacity var(--fade) var(--ease),
+    visibility 0s linear 0s;
+  animation: cue-pulse 1.8s var(--ease) infinite;
+}
+.frame-cue svg {
+  width: 12px;
+  height: 8px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  animation: cue-nudge 1.8s var(--ease) infinite;
+}
+@keyframes cue-pulse {
+  0%,
+  56%,
+  100% {
+    opacity: 0.55;
+  }
+  28% {
+    opacity: 1;
+  }
+}
+@keyframes cue-nudge {
+  0%,
+  56%,
+  100% {
+    transform: translateY(0);
+  }
+  28% {
+    transform: translateY(4px);
+  }
+}
+html:not([data-scene="0"]) .frame-cue,
+html:not(.stage-on) .frame-cue {
+  opacity: 0;
+  visibility: hidden;
+  animation: none;
+  transition:
+    opacity var(--fade) var(--ease),
+    visibility 0s linear var(--fade);
+}
+@media (min-width: 960px) {
+  .frame-cue {
+    position: absolute;
+    left: 50%;
+    margin-left: 0;
+    translate: -50% 0;
+  }
+}
+
+/* ---------- The stage ---------- */
+
+html.stage-on .stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  /* Swipes belong to the stage; pinch zoom still works. */
+  touch-action: pinch-zoom;
+}
+html.stage-on .scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--move) var(--ease),
+    transform var(--move) var(--ease),
+    visibility 0s linear var(--move);
+}
+html.stage-on .scene.is-current {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+/* The scene on its way out drifts the way the reader is going: up when going forward. */
+html.stage-on .scene.is-leaving {
+  transform: translateY(calc(var(--dir, 1) * -28px));
+}
+
+/* One scene. Phones and narrow tablets: text over the visual, the visual taking what is left. */
+.scene {
+  display: flex;
+  flex-direction: column;
+  gap: var(--scene-gap);
+  padding: calc(var(--frame-top) + 2px) var(--gutter) calc(var(--frame-bottom) + 12px);
+}
+.scene-text {
+  flex: none;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+.scene-visual {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
+}
+@media (min-width: 960px) {
+  .scene {
+    display: grid;
+    grid-template-columns: var(--text-col) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    column-gap: var(--col-gap);
+    align-items: center;
+    padding: var(--frame-top) max(var(--gutter), (100vw - 1640px) / 2) var(--frame-bottom);
+  }
+  .scene-text {
+    gap: 18px;
+  }
+  .scene-visual {
+    height: 100%;
+  }
+}
+
+/* The serif role, large: headlines. */
+.scene-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(1.75rem, 1.1rem + 2.6vw, 3.375rem);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+  font-variation-settings: "opsz" 60;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.scene-title:focus {
+  outline: none;
+}
+/* Body text: two lines at most, at body strength. */
+.scene-body {
+  max-width: 32rem;
+  font-size: clamp(1.0625rem, 0.95rem + 0.4vw, 1.25rem);
+  line-height: 1.42;
+  color: var(--ink-body);
+}
+.byline {
+  margin-top: 4px;
+}
+.byline a,
+.beat-links a,
+.beat-links .text-button,
+.drift-key a {
+  display: inline-block;
+  padding-block: 12px;
+  margin-block: -12px;
+}
+
+/* ---------- Arrivals ---------- */
+
+/* Headlines arrive a word at a time; the rest of a scene rises in after them. stage.js splits
+   each headline into words, gives each its place in --i, and gives every other piece its own
+   delay. A unit (a scene, or one of the lab's two beats) is .is-staged while it waits and
+   .is-in once it has arrived. */
+.w {
+  display: inline-block;
+}
+html.stage-on:not(.stage-ready) [data-words],
+html.stage-on:not(.stage-ready) [data-rise] {
+  opacity: 0;
+  /* If the script never runs, show everything after a moment instead of hiding it. */
+  animation: show-late 0s linear 2.5s forwards;
+}
+@keyframes show-late {
+  to {
+    opacity: 1;
+  }
+}
+[data-rise],
+.w {
+  transition: none;
+}
+.is-staged [data-rise],
+.is-staged .w {
+  opacity: 0;
+  transform: translateY(calc(var(--dir, 1) * 18px));
+}
+.is-staged .w {
+  transform: translateY(calc(var(--dir, 1) * 0.32em));
+}
+.is-in [data-rise],
+.is-in .w {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--fade) var(--ease) var(--delay, 0ms),
+    transform var(--move) var(--ease) var(--delay, 0ms);
+}
+.is-in .w {
+  --delay: calc(100ms + var(--i, 0) * 65ms);
+}
+/* A beat's own state wins over its scene's, so the lab's text can change beat by beat while its
+   chart stays put. */
+.beat.is-staged [data-rise],
+.beat.is-staged .w {
+  opacity: 0;
+  transition: none;
+}
+.beat.is-in [data-rise],
+.beat.is-in .w {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--fade) var(--ease) var(--delay, 0ms),
+    transform var(--move) var(--ease) var(--delay, 0ms);
+}
+
+/* ---------- The lab's two beats ---------- */
+
+.scene-lab .scene-text {
+  display: grid;
+}
+.beat {
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+@media (min-width: 960px) {
+  .beat {
+    gap: 18px;
+  }
+}
+html.stage-on .beat {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--move) var(--ease),
+    visibility 0s linear var(--move);
+}
+html.stage-on .beat.is-current {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* The big switch, inside scene 4's headline: the track and a star that turns gold. */
+.scene-switch {
+  font-size: clamp(1.625rem, 1rem + 2.5vw, 3.125rem);
+}
+.big-switch {
+  appearance: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.42em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.big-switch-track {
+  position: relative;
+  flex: none;
+  width: 1.84em;
+  height: 1em;
+  margin-top: 0.04em;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  transition:
+    background-color var(--move) var(--ease),
+    transform var(--press) var(--ease);
+}
+.big-switch-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0.08em;
+  width: 0.76em;
+  height: 0.76em;
+  margin-top: -0.38em;
+  transition: transform var(--move) var(--ease);
+}
+.big-switch-thumb svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  transition:
+    fill var(--move) var(--ease),
+    stroke var(--move) var(--ease);
+}
+.big-switch[aria-checked="true"] .big-switch-track {
+  background: var(--ink);
+}
+.big-switch[aria-checked="true"] .big-switch-thumb {
+  transform: translateX(0.84em);
+}
+.big-switch[aria-checked="true"] .big-switch-thumb svg {
+  fill: var(--gold);
+  stroke: var(--gold);
+}
+.big-switch:active .big-switch-track {
+  transform: scale(0.96);
+}
+@media (hover: hover) and (pointer: fine) {
+  .big-switch[aria-checked="false"]:hover .big-switch-track {
+    background: var(--ink-wash);
+  }
+}
+.big-switch:focus-visible {
+  outline-offset: 6px;
+}
+.beat-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+/* ---------- Without the stage ---------- */
+
+html:not(.stage-on) .frame-top {
+  position: sticky;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink-rule);
+}
+html:not(.stage-on) .frame-bottom {
+  display: none;
+}
+html:not(.stage-on) .scene {
+  min-height: 100svh;
+  padding: 40px var(--gutter) 56px;
+  border-bottom: 1px solid var(--ink-rule);
+}
+html:not(.stage-on) .scene-visual {
+  flex: none;
+  min-height: 70svh;
+  container-type: inline-size;
+}
+html:not(.stage-on) .scene-lab .scene-text {
+  gap: 40px;
+}
+html:not(.stage-on) .beat {
+  grid-area: auto;
+}
+@media (min-width: 960px) {
+  html:not(.stage-on) .scene {
+    grid-template-rows: auto;
+  }
+  html:not(.stage-on) .scene-visual {
+    height: 70svh;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+/* Scenes swap with plain fades: nothing slides or rises, and headlines arrive whole. */
+@media (prefers-reduced-motion: reduce) {
+  html.stage-on .scene.is-leaving {
+    transform: none;
+  }
+  .is-staged [data-rise],
+  .is-staged .w,
+  .beat.is-staged [data-rise],
+  .beat.is-staged .w {
+    transform: none;
+  }
+  .is-in .w,
+  .beat.is-in .w {
+    --delay: 0ms;
+  }
+  .frame-cue,
+  .frame-cue svg {
+    animation: none;
+  }
+  .big-switch-thumb,
+  .big-switch:active .big-switch-track {
+    transition: none;
+    transform: none;
+  }
+  .big-switch[aria-checked="true"] .big-switch-thumb {
+    transform: translateX(0.84em);
+  }
+}

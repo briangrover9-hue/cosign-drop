@@ -6,14 +6,14 @@ By [Brian Grover](https://www.linkedin.com/in/briantgrover) ([@briantgrover](htt
 
 ## What's on the page
 
-Four beats, each one screen, one visual and a sentence or two:
+Four full-screen scenes under a fixed frame: the title and the page's own rating at the top, a counter with dots at the bottom. One scroll, swipe or arrow key moves one scene.
 
-1. **Everyone's a 4.8.** Guess how guests rate the typical Airbnb in San Francisco and New York, then see the answer from our own measurement: 4.84.
-2. **It happens wherever people rate each other.** Harvard grades, eBay sellers, LinkedIn endorsements and GitHub stars, each drawn as a grid of 100 stars, all crowded at the top.
-3. **So the stars stop telling you who's good.** A simulated company of 80 coworkers rating each other with one-click stars. The scores drift up toward 5, and the top 10 by score finds only half of the 10 most skilled.
-4. **Praise tied to real work fixes it.** The same company with every rating pointing at real work, then what this means for a cosign and the open question. "Try other rules" opens every switch and assumption, with the chart pinned in view.
+1. **The guess.** Drag the star to guess how guests rate the typical Airbnb in San Francisco and New York. The big number counts to the answer from our own measurement, 4.84, as every listing rises from the slider's track.
+2. **Everywhere.** Harvard grades, eBay sellers, LinkedIn endorsements and GitHub stars, each a grid of 100 stars that fills as the scene arrives. All of them crowd at the top.
+3. **The lab.** A simulated company of 80 coworkers rating each other with one-click stars. The scores drift up toward 5, and the top 10 by score finds only half of the 10 most skilled.
+4. **The fix.** One big switch on the same lab: praise has to point at real work. Flip it and the gold stars move onto the most skilled people. "Try other rules" opens a frosted panel with every switch and assumption, beside the chart on desktop and above it on a phone.
 
-Two collapsed sections hold the support: "Why this happens" (four ordinary forces, and the feed) and "The research" (Freelancer.com after ChatGPT, what predicts job performance, and four rules for a vouch that keeps its value, with the versions Cosign already ships). The methods list every source and the lab's rules, with the exact result for each setting.
+The page's rating climbs from 3.0 to 5.0 as you go, and on the last scene the title says so. `methods.html` holds the rest: what the lab means for a cosign, why ratings drift, the research, and every source and rule behind the numbers.
 
 ## Data and sources
 
@@ -27,11 +27,13 @@ Built with [Claude Code](https://claude.com/claude-code). Research agents traced
 
 The page is static HTML, CSS and JavaScript with no framework, no build step, no cookies and no tracking.
 
-- `index.html`: the page and all its copy
-- `css/style.css`: the design system; `css/charts.css` and `css/lab.css` for the interactive parts
-- `js/main.js`: the header rating and the blind-reveal cards
-- `js/charts.js`: the four charts
+- `index.html`: the four scenes and all their copy; `methods.html`: the notes, research and methods
+- `css/style.css`: the design system (paper, ink and gold, the two type roles, the one motion curve, the grain); `css/stage.css` for the scenes and the frame; `css/charts.css` and `css/lab.css` for the interactive parts; `css/methods.css` for the notes page
+- `js/stage.js`: the scenes, the frame and the inputs that move between them
+- `js/motion.js`: the page's one easing curve and timings, for scripts
+- `js/charts.js`: the guess, the drift grids, and the two charts on the notes page
 - `js/lab-model.js`: the trust lab's model, with no DOM code, so it runs in Node too; `js/lab.js` draws it, and `node tools/lab-check.mjs` checks the claims the page makes about it
+- `js/methods.js`: the blind-reveal cards on the notes page
 - `js/stars.js`: the star used everywhere
 - `tools/`: the share card and icon templates, the script that renders them, and the lab check
 

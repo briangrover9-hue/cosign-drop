@@ -1,23 +1,29 @@
-// The four charts in "Everyone's a 4.8":
-//   #why-now-root   paired bars, what employers would pay before ChatGPT and in 2024
-//   #guess-root     guess the typical Airbnb rating, then see every listing on the full scale
-//   #drift-root     100 stars per rating system, gold for the share at the top of its scale
-//   #validity-root  dot plot, how well hiring methods predict the job, 1998 and 2022
+// The charts in "Everyone's a 4.8":
+//   #guess-root     scene 1: guess the typical Airbnb rating, then see every listing
+//   #drift-root     scene 2: 100 stars per rating system, gold for the share at the top
+//   #why-now-root   methods page: what employers would pay before ChatGPT and in 2024
+//   #validity-root  methods page: how well hiring methods predict the job, 1998 and 2022
 //
 // Each container starts with a fallback (a table, list or sentence). Once a chart's data
 // loads, a table fallback moves into a visually hidden wrapper, so screen readers still get
 // the numbers, and the chart renders beside it. The drift list and the guess sentence are
-// removed instead: the drift chart's own text already gives every number, and the guess
-// sentence would tell screen reader users the answer before they guess. If the data cannot
-// load, the fallback stays.
+// removed instead: the drift chart's own text gives every number, and the guess sentence would
+// tell screen reader users the answer before they guess. If the data cannot load, the
+// fallback stays.
+//
+// On the stage the scene charts fill each time their scene arrives ("stage:scene" events from
+// stage.js); on the methods page the charts fill each time they scroll into view.
 
 import { STAR_PATH, starRow, setStarRow } from './stars.js';
+import { MOVE_MS, animate, motionAllowed, setLine } from './motion.js';
 
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const wideLayout = window.matchMedia('(min-width: 720px)');
+const html = document.documentElement;
 
-function loadJSON(path) {
-  const request = fetch(new URL(path, import.meta.url)).then((res) => {
+// The page starts its requests in its head (window.chartData); fetch here only if it didn't.
+function loadJSON(name, path) {
+  const early = window.chartData && window.chartData[name];
+  const request = (early || fetch(new URL(path, import.meta.url))).then((res) => {
     if (!res.ok) throw new Error(`${path} returned HTTP ${res.status}`);
     return res.json();
   });
@@ -25,8 +31,9 @@ function loadJSON(path) {
   return request;
 }
 
-const figuresReady = loadJSON('../data/figures.json');
-const airbnbReady = loadJSON('../data/airbnb.json');
+const has = (id) => Boolean(document.getElementById(id));
+const figuresReady = ['guess-root', 'drift-root', 'why-now-root', 'validity-root'].some(has) ? loadJSON('figures', '../data/figures.json') : null;
+const airbnbReady = has('guess-root') ? loadJSON('airbnb', '../data/airbnb.json') : null;
 
 /* Small helpers */
 
@@ -37,8 +44,15 @@ const crisp = (v) => Math.round(v) + 0.5; // centers a 1px line on a pixel
 const lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
 const oneDecimal = (n) => (Math.round(n * 10) / 10).toFixed(1);
 const dec = (v) => v.toFixed(2).replace(/^0/, ''); // .54 style: two decimals, no leading zero
-const monoWidth = (text, size) => text.length * size * 0.6; // IBM Plex Mono is 0.6em wide
-const motionAllowed = () => !reduceMotion.matches;
+
+// The stage's scene changes: the handler gets each one, and the current scene at once.
+function onScene(handler) {
+  document.addEventListener('stage:scene', (event) => handler(event.detail));
+  if (html.dataset.scene !== undefined && html.classList.contains('stage-ready')) {
+    const index = Number(html.dataset.scene);
+    handler({ index, previous: -1, direction: 1, staged: html.classList.contains('stage-on') });
+  }
+}
 
 // Builds a chart, then moves the fallback out of sight, or removes it when dropFallback
 // is set. On any failure the chart's own nodes are removed and the fallback stays where it was.
@@ -65,21 +79,23 @@ async function mount(id, build, { dropFallback = false } = {}) {
   }
 }
 
-// Calls render(width) now and again whenever the element's width settles on a new value.
-// Returns a function that forces a render at the current width.
-function watchWidth(el, render) {
-  let last = 0;
+// Calls render(width, height) now and again whenever the element's size settles on new values.
+// Returns a function that forces a render at the current size.
+function watchSize(el, render) {
+  let last = '';
   let timer = 0;
   const check = (force) => {
     const width = Math.floor(el.clientWidth);
-    if (width > 0 && (force === true || width !== last)) {
-      last = width;
-      render(width);
+    const height = Math.floor(el.clientHeight);
+    const key = `${width}x${height}`;
+    if (width > 0 && (force === true || key !== last)) {
+      last = key;
+      render(width, height);
     }
   };
   const later = () => {
     clearTimeout(timer);
-    timer = setTimeout(check, 120);
+    timer = setTimeout(check, 90);
   };
   check();
   if ('ResizeObserver' in window) new ResizeObserver(later).observe(el);
@@ -87,8 +103,8 @@ function watchWidth(el, render) {
   return () => check(true);
 }
 
-// Calls enter each time el comes well into the reading area, and leave once it has gone
-// off the screen entirely, so a chart can refill every time the reader scrolls back to it.
+// Calls enter each time el comes well into view, and leave once it has gone off the screen
+// entirely, so a chart can refill every time the reader scrolls back to it (methods page).
 function eachTimeInView(el, { enter, leave }, share = 0.9) {
   if (!('IntersectionObserver' in window)) {
     enter();
@@ -107,7 +123,7 @@ function eachTimeInView(el, { enter, leave }, share = 0.9) {
         enter();
       }
     },
-    { rootMargin: `-${headerHeight}px 0px -20% 0px`, threshold: Array.from({ length: 21 }, (_, i) => i / 20) }
+    { rootMargin: `-${headerHeight}px 0px -20% 0px`, threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
   ).observe(el);
   new IntersectionObserver((entries) => {
     if (!entries[entries.length - 1].isIntersecting && !armed) {
@@ -117,7 +133,7 @@ function eachTimeInView(el, { enter, leave }, share = 0.9) {
   }).observe(el);
 }
 
-// Puts a chart back to its empty state at once, out of sight, ready to fill again.
+// Puts a chart back to its empty state at once, ready to fill again.
 function unfill(el) {
   if (!el) return;
   el.classList.add('is-resetting', 'is-pending');
@@ -126,8 +142,10 @@ function unfill(el) {
 }
 
 // Removes the pending class after the first state has painted, so CSS transitions run.
-function play(el) {
-  requestAnimationFrame(() => requestAnimationFrame(() => el && el.classList.remove('is-pending')));
+function play(el, delay = 0) {
+  const go = () => requestAnimationFrame(() => requestAnimationFrame(() => el && el.classList.remove('is-pending')));
+  if (delay) setTimeout(go, delay);
+  else go();
 }
 
 function svgTag(cls, width, height, label, body, pending) {
@@ -147,7 +165,334 @@ function starGlyph(cx, cy, size, cls = '') {
   );
 }
 
-/* 1. Why now: paired bars on one scale from $0 to $50 */
+/* 1. The guess: drag the star to a rating, then see every listing on the same scale */
+
+// The slider thumb is the page's star, drawn from STAR_PATH. The image goes in as a literal
+// rule, one per engine, because a rule that names both pseudo-elements is dropped everywhere
+// and some engines do not pass custom properties into the thumb.
+function addThumbStyle() {
+  if (document.getElementById('gs-thumb-style')) return;
+  const url = `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${STAR_PATH}" ` +
+      'fill="#dca320" stroke="#936f1c" stroke-width="1" stroke-linejoin="round"/></svg>',
+  )}")`;
+  const style = document.createElement('style');
+  style.id = 'gs-thumb-style';
+  style.textContent = `.gs-range::-webkit-slider-thumb{background-image:${url}}` + `.gs-range::-moz-range-thumb{background-image:${url}}`;
+  document.head.append(style);
+}
+
+// Reads the 0.01-wide histogram and derives everything the reveal shows.
+function histogramModel(air, expected) {
+  const group = expected.group.split('.').reduce((node, key) => (node ? node[key] : undefined), air);
+  const hist = group && group.histogram;
+  const fine = hist && hist.bins_1_00_to_5_00_step_0_01;
+  if (!Array.isArray(fine) || fine.length !== 401) throw new Error('Airbnb histogram not found');
+  const below1 = hist.below_1 || 0;
+  // cum[k] counts listings rated below 1 + k / 100.
+  const cum = [below1];
+  for (let i = 0; i < 401; i++) cum.push(cum[i] + fine[i]);
+  const n = cum[401];
+  const countBelow = (v) => cum[clamp(Math.round((v - 1) * 100), 0, 401)];
+  const valueAtRank = (rank) => {
+    let i = 0;
+    while (i < 401 && cum[i + 1] < rank) i++;
+    return 1 + i / 100;
+  };
+  const median = n % 2 ? valueAtRank((n + 1) / 2) : (valueAtRank(n / 2) + valueAtRank(n / 2 + 1)) / 2;
+
+  // 0.05-wide bins: 1.00 to 1.04, 1.05 to 1.09, and so on; the last, 4.95 to 5.00, includes 5.00.
+  const bins = [];
+  for (let j = 0; j < 80; j++) {
+    let sum = 0;
+    for (let i = 5 * j; i < 5 * j + 5; i++) sum += fine[i];
+    bins.push(sum);
+  }
+  bins[79] += fine[400];
+  const maxCount = Math.max(...bins);
+  const pct = (count) => (count / n) * 100;
+  return {
+    n,
+    bins,
+    maxCount,
+    median,
+    countBelow,
+    shareBelow: (v) => pct(countBelow(v)),
+    ge45: pct(n - countBelow(4.5)),
+    ge48: pct(n - countBelow(4.8)),
+    lt40: pct(countBelow(4.0)),
+  };
+}
+
+function checkGuessFigures(m, g) {
+  const checks = [
+    ['shareAtLeast45', m.ge45],
+    ['shareAtLeast48', m.ge48],
+    ['shareBelow40', m.lt40],
+  ];
+  for (const [key, computed] of checks) {
+    if (oneDecimal(computed) !== Number(g[key]).toFixed(1)) {
+      console.warn(
+        `Airbnb check: ${key} computes to ${oneDecimal(computed)} from the histogram, but figures.json says ` +
+          `${g[key]} (a difference of ${r2(computed - g[key])} points).`,
+      );
+    }
+  }
+  if (m.n !== g.n) console.warn(`Airbnb check: the histogram holds ${m.n} listings, figures.json says ${g.n}.`);
+  if (m.median.toFixed(2) !== Number(g.median).toFixed(2)) {
+    console.warn(`Airbnb check: the histogram median is ${m.median.toFixed(2)}, figures.json says ${g.median}.`);
+  }
+}
+
+// The thumb is 36px wide, so a value sits half a thumb in from each end of the track.
+const THUMB_HALF = 18;
+
+async function buildGuess(root) {
+  const [figures, air] = await Promise.all([figuresReady, airbnbReady]);
+  const g = figures.guess;
+  const m = histogramModel(air, g);
+  checkGuessFigures(m, g);
+
+  const body = document.getElementById('guess-body');
+  const intro = body ? body.textContent.trim() : '';
+  const start = Number(g.defaultGuess ?? 3);
+  const medianText = Number(g.median).toFixed(2);
+  const answer = `Half of these places are rated ${medianText} or higher. Fewer than 1 in 100 falls below 4.`;
+  const ticks = [1, 2, 3, 4, 5].map((v) => `<span style="left:${(v - 1) * 25}%">${v}</span>`).join('');
+
+  root.insertAdjacentHTML(
+    'beforeend',
+    `<div class="gs">` +
+      `<div class="gs-plot">` +
+      `<div class="gs-number" aria-hidden="true">` +
+      `<p class="gs-number-label label line">Your guess</p>` +
+      `<p class="gs-num">${start.toFixed(2)}</p>` +
+      starRow(start, { size: 24, gap: 5, className: 'gs-stars' }) +
+      `</div>` +
+      `<div class="gs-hist"></div>` +
+      `</div>` +
+      `<div class="gs-slider">` +
+      `<label class="visually-hidden" for="gs-range">Your guess, in stars</label>` +
+      `<input class="gs-range" id="gs-range" type="range" min="1" max="5" step="0.05" value="${start}" ` +
+      `autocomplete="off" aria-valuetext="${start.toFixed(2)} stars" aria-describedby="gs-hint">` +
+      `<div class="gs-ticks" aria-hidden="true">${ticks}</div>` +
+      `</div>` +
+      `<div class="gs-foot">` +
+      `<p class="gs-hint label line" id="gs-hint">Drag the star to your guess</p>` +
+      `<button class="btn" type="button" data-act="show">Show me</button>` +
+      `</div>` +
+      `<p class="gs-message visually-hidden" aria-live="polite"></p>` +
+      `</div>`,
+  );
+
+  const q = (sel) => root.querySelector(sel);
+  const plot = q('.gs-plot');
+  const hist = q('.gs-hist');
+  const numberLabel = q('.gs-number-label');
+  const num = q('.gs-num');
+  const stars = q('.gs-stars');
+  const range = q('.gs-range');
+  const hint = q('.gs-hint');
+  const button = q('[data-act]');
+  const message = q('.gs-message');
+  addThumbStyle();
+
+  const state = { revealed: false, guess: null, shown: start, stop: null };
+
+  const showNumber = (v) => {
+    state.shown = v;
+    num.textContent = v.toFixed(2);
+    setStarRow(stars, v);
+  };
+  const showGuess = () => {
+    const v = Number(range.value);
+    showNumber(v);
+    range.setAttribute('aria-valuetext', `${v.toFixed(2)} stars`);
+  };
+  range.addEventListener('input', showGuess);
+  showGuess();
+
+  // How many places are rated below the guess, as one short sentence.
+  const belowSentence = (guess) => {
+    const share = m.shareBelow(guess);
+    if (share === 0) return 'None are rated below your guess.';
+    if (share < 1) return 'Fewer than 1 in 100 are rated below your guess.';
+    return `About ${Math.round(share)} in 100 are rated below your guess.`;
+  };
+
+  const label =
+    `Histogram of ${m.n.toLocaleString('en-US')} listings on the full scale from 1 to 5: ` +
+    `${oneDecimal(m.ge45)}% at 4.5 or above, and half are rated ${medianText} or higher.`;
+
+  let size = { width: 0, height: 0 };
+  const renderHist = (pending) => {
+    if (!state.revealed || !size.width) return;
+    hist.innerHTML = histogramSVG(m, size.width, size.height, pending, label);
+  };
+  watchSize(plot, (width, height) => {
+    size = { width, height };
+    renderHist(false);
+  });
+
+  const reveal = () => {
+    state.revealed = true;
+    state.guess = Number(range.value);
+    range.disabled = true;
+    root.classList.add('is-revealed');
+    renderHist(true);
+    play(hist.firstElementChild);
+    if (state.stop) state.stop();
+    const from = state.shown;
+    const to = m.median;
+    if (motionAllowed()) state.stop = animate(MOVE_MS, (e) => showNumber(from + (to - from) * e));
+    else showNumber(to);
+    setLine(numberLabel, 'The typical rating');
+    setLine(hint, `Your guess ${state.guess.toFixed(2)} · typical ${medianText}`);
+    setLine(body, answer);
+    button.textContent = 'Guess again';
+    button.classList.add('btn-quiet');
+    message.textContent = `You guessed ${state.guess.toFixed(2)}. The typical place is rated ${medianText}. ${belowSentence(state.guess)}`;
+    button.focus({ preventScroll: true });
+  };
+
+  const reset = () => {
+    state.revealed = false;
+    range.disabled = false;
+    root.classList.remove('is-revealed');
+    hist.innerHTML = '';
+    if (state.stop) state.stop();
+    showGuess();
+    setLine(numberLabel, 'Your guess');
+    setLine(hint, 'Drag the star to your guess');
+    setLine(body, intro);
+    button.textContent = 'Show me';
+    button.classList.remove('btn-quiet');
+    message.textContent = '';
+    range.focus({ preventScroll: true });
+  };
+
+  button.addEventListener('click', () => (state.revealed ? reset() : reveal()));
+
+  // Coming back to the guess after the reveal, the bars grow again.
+  onScene(({ index, previous }) => {
+    if (index !== 0 || previous === 0 || !state.revealed || !motionAllowed()) return;
+    const svg = hist.firstElementChild;
+    unfill(svg);
+    play(svg, 160);
+  });
+}
+
+// Bars rise from the slider's track, which is the axis: each value sits where the thumb would
+// sit at that value, half a thumb in from either end.
+function histogramSVG(m, W, H, pending, label) {
+  const inset = THUMB_HALF;
+  const plotW = W - 2 * inset;
+  const x = (v) => inset + ((v - 1) / 4) * plotW;
+  const top = 30; // room above the tallest bar for the labels
+  const plotH = Math.max(40, H - top);
+  const base = H;
+  const pitch = plotW / m.bins.length;
+  const gap = pitch >= 5 ? 1 : 0.5;
+
+  const bx0 = x(4.8);
+  const bx1 = x(5) + pitch / 2;
+  let body = `<rect class="gs-band" x="${r2(bx0)}" y="${top - 12}" width="${r2(bx1 - bx0)}" height="${r2(base - top + 12)}"/>`;
+
+  let d = '';
+  m.bins.forEach((count, i) => {
+    if (!count) return;
+    const h = (count / m.maxCount) * plotH;
+    d += `M${r2(inset + i * pitch + gap / 2)} ${base}v${r2(-h)}h${r2(pitch - gap)}v${r2(h)}z`;
+  });
+  body += `<path class="gs-bars" d="${d}" style="transform-origin:0 ${base}px"/>`;
+
+  let anno = '';
+  const xm = crisp(x(m.median) - 0.5);
+  anno += `<line class="gs-median" x1="${xm}" x2="${xm}" y1="4" y2="${base}"/>`;
+  anno += `<text class="gs-median-label" x="${xm - 6}" y="14" text-anchor="end">${m.median.toFixed(2)}</text>`;
+  anno += `<text class="gs-band-label" x="${r2(bx0 - 6)}" y="${top + 2}" text-anchor="end">4.8+</text>`;
+  return svgTag('gs-svg', W, H, label, `${body}<g class="gs-anno">${anno}</g>`, pending);
+}
+
+/* 2. The drift: a grid of 100 stars per system, filling as the scene arrives */
+
+async function buildDrift(root) {
+  const items = (await figuresReady).drift;
+  const moving = motionAllowed();
+
+  let markup =
+    `<svg class="dr-sprite" aria-hidden="true" focusable="false">` +
+    `<symbol id="dr-star" viewBox="0 0 24 24"><path d="${STAR_PATH}" vector-effect="non-scaling-stroke"/></symbol></svg>` +
+    `<ul class="dr-list" role="list">`;
+
+  items.forEach((it, g) => {
+    const gold = Math.round((it.then || it.now).value);
+    const total = Math.round(it.now.value);
+    const pair = Boolean(it.then);
+    let uses = '';
+    // Fill from the bottom left, left to right, row by row upward, like a rising level.
+    for (let k = 0; k < 100; k++) {
+      const col = k % 10;
+      const row = 9 - Math.floor(k / 10);
+      const cls = k < gold ? 'dr-s1' : k < total ? 'dr-s2' : 'dr-s0';
+      const delay = k < total ? ` style="--d:${Math.round(g * 90 + k * 7)}ms"` : '';
+      uses += `<use href="#dr-star" class="${cls}" x="${col * 24 + 1}" y="${row * 24 + 1}" width="22" height="22"${delay}/>`;
+    }
+    const aria = pair
+      ? `${it.title}, ${lowerFirst(it.measure)}: ${it.then.value}% in ${it.then.label} and ${it.now.value}% in ${it.now.label}. Grid of 100 stars: ${gold} gold and ${total - gold} lighter gold.`
+      : `${it.title}, ${lowerFirst(it.measure)}: ${it.now.value}%. Grid of 100 stars: ${gold} gold.`;
+    markup +=
+      `<li class="dr-item${pair ? ' dr-pair' : ''}">` +
+      `<svg class="dr-stars${moving ? ' is-pending' : ''}" viewBox="0 0 240 240" role="img" aria-label="${esc(aria)}">${uses}</svg>` +
+      `<p class="dr-num" aria-hidden="true">${it.now.value}%</p>` +
+      `<p class="dr-name label"><a href="${esc(it.source.url)}">${esc(it.name)}<span class="visually-hidden">, source: ${esc(it.source.label)}</span></a></p>` +
+      `<p class="dr-note label" aria-hidden="true">${esc(it.note)}</p>` +
+      `</li>`;
+  });
+  root.insertAdjacentHTML('beforeend', `${markup}</ul>`);
+
+  // Each grid is as big as the room allows: half the width, or what the height leaves once
+  // the tallest number and labels in its row are placed under it. The labels wrap with the
+  // grid's width, so the size settles in a pass or two.
+  const list = root.querySelector('.dr-list');
+  const fit = () => {
+    const width = root.clientWidth;
+    // Without the stage the page scrolls, so only the width limits a grid.
+    const height = html.classList.contains('stage-on') ? root.clientHeight : Infinity;
+    if (!width || !height) return;
+    const style = getComputedStyle(list);
+    const gapX = parseFloat(style.columnGap) || 0;
+    const gapY = parseFloat(style.rowGap) || 0;
+    let n = Math.floor(Math.min(300, (width - gapX) / 2));
+    for (let pass = 0; pass < 4; pass++) {
+      list.style.setProperty('--dr-n', `${n}px`);
+      const items = [...list.children];
+      const text = (row) =>
+        Math.max(...items.slice(row * 2, row * 2 + 2).map((it) => it.getBoundingClientRect().height - it.querySelector('.dr-stars').getBoundingClientRect().height));
+      const next = Math.floor(Math.min(300, (width - gapX) / 2, (height - gapY - text(0) - text(1)) / 2));
+      if (!Number.isFinite(next) || Math.abs(next - n) < 1) break;
+      n = Math.max(60, next);
+    }
+  };
+  fit();
+  if ('ResizeObserver' in window) new ResizeObserver(fit).observe(root);
+
+  if (!moving) return;
+  const grids = [...root.querySelectorAll('.dr-stars')];
+  // Each arrival fills the grids from empty; a departure empties them once they are hidden.
+  let leaveTimer = 0;
+  onScene(({ index, previous }) => {
+    clearTimeout(leaveTimer);
+    if (index === 1 && previous !== 1) {
+      grids.forEach((grid) => unfill(grid));
+      grids.forEach((grid) => play(grid, 180));
+    } else if (previous === 1 && index !== 1) {
+      leaveTimer = setTimeout(() => grids.forEach((grid) => unfill(grid)), MOVE_MS + 60);
+    }
+  });
+}
+
+/* 3. Why now (methods page): paired bars on one scale from $0 to $50 */
 
 async function buildWhyNow(root) {
   const data = (await figuresReady).whyNow;
@@ -164,33 +509,33 @@ async function buildWhyNow(root) {
     rows
       .map(
         (r) =>
-          `${lowerFirst(r.label)}, $${r.before.toFixed(2)} ${data.beforeWhen} and $${r.after.toFixed(2)} ${data.afterWhen}, ${r.note}`
+          `${lowerFirst(r.label)}, $${r.before.toFixed(2)} ${data.beforeWhen} and $${r.after.toFixed(2)} ${data.afterWhen}, ${r.note}`,
       )
       .join('; ') +
     '.';
 
   const legend = document.createElement('div');
-  legend.className = 'ch-legend';
+  legend.className = 'ch-legend label';
   legend.setAttribute('aria-hidden', 'true');
   legend.innerHTML =
     `<span class="ch-key"><span class="wn-swatch wn-swatch-before"></span>${esc(data.beforeLabel)}</span>` +
     `<span class="ch-key"><span class="wn-swatch wn-swatch-after"></span>${esc(data.afterLabel)}</span>`;
-  const plot = document.createElement('div');
-  root.append(legend, plot);
+  const plotEl = document.createElement('div');
+  root.append(legend, plotEl);
 
   let pending = motionAllowed();
-  watchWidth(root, (width) => {
-    plot.innerHTML = whyNowSVG(rows, width, pending, label);
+  watchSize(root, (width) => {
+    plotEl.innerHTML = whyNowSVG(rows, width, pending, label);
   });
   if (pending) {
     eachTimeInView(root, {
       enter: () => {
         pending = false;
-        play(plot.firstElementChild);
+        play(plotEl.firstElementChild);
       },
       leave: () => {
         pending = true;
-        unfill(plot.firstElementChild);
+        unfill(plotEl.firstElementChild);
       },
     });
   }
@@ -234,372 +579,7 @@ function whyNowSVG(rows, W, pending, label) {
   return svgTag('wn-svg', W, yAxis + 25, label, body, pending);
 }
 
-/* 2. The guess: pick a rating, then see every listing on the full scale */
-
-// The slider thumb is the page's star, drawn from STAR_PATH. The image goes in as a literal
-// rule, one per engine, because a rule that names both pseudo-elements is dropped everywhere
-// and some engines do not pass custom properties into the thumb.
-function addThumbStyle() {
-  if (document.getElementById('gs-thumb-style')) return;
-  const url = `url("data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="${STAR_PATH}" ` +
-      'fill="#dca320" stroke="#93650a" stroke-width="1" stroke-linejoin="round"/></svg>'
-  )}")`;
-  const style = document.createElement('style');
-  style.id = 'gs-thumb-style';
-  style.textContent =
-    `.gs-range::-webkit-slider-thumb{background-image:${url}}` +
-    `.gs-range::-moz-range-thumb{background-image:${url}}`;
-  document.head.append(style);
-}
-
-// Reads the 0.01-wide histogram and derives everything the reveal shows.
-function histogramModel(air, expected) {
-  const group = expected.group.split('.').reduce((node, key) => (node ? node[key] : undefined), air);
-  const hist = group && group.histogram;
-  const fine = hist && hist.bins_1_00_to_5_00_step_0_01;
-  if (!Array.isArray(fine) || fine.length !== 401) throw new Error('Airbnb histogram not found');
-  const below1 = hist.below_1 || 0;
-  // cum[k] counts listings rated below 1 + k / 100.
-  const cum = [below1];
-  for (let i = 0; i < 401; i++) cum.push(cum[i] + fine[i]);
-  const n = cum[401];
-  const countBelow = (v) => cum[clamp(Math.round((v - 1) * 100), 0, 401)];
-  const valueAtRank = (rank) => {
-    let i = 0;
-    while (i < 401 && cum[i + 1] < rank) i++;
-    return 1 + i / 100;
-  };
-  const median = n % 2 ? valueAtRank((n + 1) / 2) : (valueAtRank(n / 2) + valueAtRank(n / 2 + 1)) / 2;
-
-  // 0.05-wide bins: 1.00 to 1.04, 1.05 to 1.09, and so on; the last, 4.95 to 5.00, includes 5.00.
-  const bins = [];
-  for (let j = 0; j < 80; j++) {
-    let sum = 0;
-    for (let i = 5 * j; i < 5 * j + 5; i++) sum += fine[i];
-    bins.push(sum);
-  }
-  bins[79] += fine[400];
-  const maxCount = Math.max(...bins);
-  const pct = (count) => (count / n) * 100;
-  return {
-    n,
-    bins,
-    maxCount,
-    iMax: bins.indexOf(maxCount),
-    median,
-    countBelow,
-    shareBelow: (v) => pct(countBelow(v)),
-    ge45: pct(n - countBelow(4.5)),
-    ge48: pct(n - countBelow(4.8)),
-    lt40: pct(countBelow(4.0)),
-  };
-}
-
-function checkGuessFigures(m, g) {
-  const checks = [
-    ['shareAtLeast45', m.ge45],
-    ['shareAtLeast48', m.ge48],
-    ['shareBelow40', m.lt40],
-  ];
-  for (const [key, computed] of checks) {
-    if (oneDecimal(computed) !== Number(g[key]).toFixed(1)) {
-      console.warn(
-        `Airbnb check: ${key} computes to ${oneDecimal(computed)} from the histogram, but figures.json says ` +
-          `${g[key]} (a difference of ${r2(computed - g[key])} points).`
-      );
-    }
-  }
-  if (m.n !== g.n) console.warn(`Airbnb check: the histogram holds ${m.n} listings, figures.json says ${g.n}.`);
-  if (m.median.toFixed(2) !== Number(g.median).toFixed(2)) {
-    console.warn(`Airbnb check: the histogram median is ${m.median.toFixed(2)}, figures.json says ${g.median}.`);
-  }
-}
-
-async function buildGuess(root) {
-  const [figures, air] = await Promise.all([figuresReady, airbnbReady]);
-  const g = figures.guess;
-  const m = histogramModel(air, g);
-  checkGuessFigures(m, g);
-
-  const answer = document.getElementById('guess-answer');
-  const start = Number(g.defaultGuess ?? 3);
-  const medianText = Number(g.median).toFixed(2);
-  const stats = [`${oneDecimal(m.ge45)}% at 4.5 or above`];
-  const ticks = [1, 2, 3, 4, 5].map((v) => `<span style="left:${(v - 1) * 25}%">${v}</span>`).join('');
-
-  root.insertAdjacentHTML(
-    'beforeend',
-    `<div class="gs-step">` +
-      `<p class="gs-prompt" id="gs-prompt">Drag the star to where you think the typical Airbnb in San Francisco or New York is rated.</p>` +
-      `<div class="gs-readout" aria-hidden="true"><span class="gs-num">${start.toFixed(2)}</span>` +
-      starRow(start, { size: 24, gap: 4, className: 'gs-stars' }) +
-      `</div>` +
-      `<div class="gs-slider">` +
-      `<label class="visually-hidden" for="gs-range">Your guess, in stars</label>` +
-      `<input class="gs-range" id="gs-range" type="range" min="1" max="5" step="0.05" value="${start}" ` +
-      `autocomplete="off" aria-valuetext="${start.toFixed(2)} stars" aria-describedby="gs-prompt">` +
-      `<div class="gs-ticks" aria-hidden="true">${ticks}</div>` +
-      `</div>` +
-      `<div class="gs-actions">` +
-      `<button class="btn" type="button" data-act="show">Show me</button>` +
-      `<button class="btn btn-quiet" type="button" data-act="skip">Skip the guess</button>` +
-      `</div>` +
-      `</div>` +
-      `<div class="gs-result" hidden><div class="gs-hist"></div></div>` +
-      `<p class="gs-message" aria-live="polite"></p>` +
-      `<div class="gs-again" hidden><button class="btn btn-quiet" type="button" data-act="again">Guess again</button></div>`
-  );
-
-  const q = (sel) => root.querySelector(sel);
-  const step = q('.gs-step');
-  const result = q('.gs-result');
-  const hist = q('.gs-hist');
-  const message = q('.gs-message');
-  const again = q('.gs-again');
-  const againBtn = again.querySelector('button');
-  const range = q('.gs-range');
-  const readout = q('.gs-num');
-  const stars = q('.gs-stars');
-  addThumbStyle();
-
-  const state = { revealed: false, guess: null, played: false, pending: false };
-
-  const showGuess = () => {
-    const v = Number(range.value);
-    readout.textContent = v.toFixed(2);
-    setStarRow(stars, v);
-    range.setAttribute('aria-valuetext', `${v.toFixed(2)} stars`);
-  };
-  range.addEventListener('input', showGuess);
-  showGuess();
-
-  // How many places are rated below the guess, as one short sentence.
-  const belowSentence = (guess) => {
-    const share = m.shareBelow(guess);
-    if (share === 0) return 'None are rated below your guess.';
-    if (share < 1) return 'Fewer than 1 in 100 are rated below your guess.';
-    return `About ${Math.round(share)} in 100 are rated below your guess.`;
-  };
-
-  const labelFor = (guess) =>
-    `Histogram of ${m.n.toLocaleString('en-US')} listings on the full scale from 1 to 5: ` +
-    `${stats[0]}, and half are rated ${medianText} or higher` +
-    (guess == null ? '.' : `, and your guess of ${guess.toFixed(2)} is marked on the axis.`);
-
-  // The first reveal always starts pending: charts.css grows the bars, or fades them in when
-  // motion is reduced. The reader asked for this one, so it is not autoplay. After that the
-  // bars empty once the chart is off the screen and grow again when the reader comes back.
-  const renderHist = (width) => {
-    const pending = !state.played || state.pending;
-    hist.innerHTML = histogramSVG(m, width, state.guess, pending, labelFor(state.guess));
-    if (!state.played) {
-      state.played = true;
-      play(hist.firstElementChild);
-    }
-  };
-  watchWidth(root, (width) => {
-    if (state.revealed) renderHist(width);
-  });
-  if (motionAllowed()) {
-    eachTimeInView(hist, {
-      enter: () => {
-        if (!state.pending) return;
-        state.pending = false;
-        play(hist.firstElementChild);
-      },
-      leave: () => {
-        if (!state.revealed) return;
-        state.pending = true;
-        unfill(hist.firstElementChild);
-      },
-    });
-  }
-
-  const scrollBehavior = () => (motionAllowed() ? 'smooth' : 'auto');
-
-  // Scrolls just far enough to show first through last, but never so far that first
-  // goes behind the sticky header. Smooth only when motion is allowed.
-  const bringIntoView = (first, last) => {
-    const top = first.getBoundingClientRect().top;
-    const bottom = last.getBoundingClientRect().bottom;
-    const clear = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-    const room = window.innerHeight - 16;
-    let dy = bottom > room ? bottom - room : 0;
-    if (top - dy < clear) dy = top - clear;
-    if (Math.abs(dy) >= 1) window.scrollBy({ top: dy, behavior: scrollBehavior() });
-  };
-
-  const reveal = (guess) => {
-    state.revealed = true;
-    state.guess = guess;
-    step.hidden = true;
-    result.hidden = false;
-    again.hidden = false;
-    renderHist(Math.floor(root.clientWidth));
-    message.textContent =
-      guess == null
-        ? `The typical place is rated ${medianText}.`
-        : `You guessed ${guess.toFixed(2)}. The typical place is rated ${medianText}. ${belowSentence(guess)}`;
-    if (answer) answer.hidden = false;
-    againBtn.focus({ preventScroll: true });
-    // The histogram, the sentence about the reader's guess and the focused button,
-    // measured two frames on so every style change on the new content has landed.
-    requestAnimationFrame(() => requestAnimationFrame(() => bringIntoView(result, again)));
-  };
-
-  const reset = () => {
-    state.revealed = false;
-    state.guess = null;
-    step.hidden = false;
-    result.hidden = true;
-    again.hidden = true;
-    message.textContent = '';
-    if (answer) answer.hidden = true;
-    range.focus({ preventScroll: true });
-    step.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
-  };
-
-  root.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-act]');
-    if (!button || !root.contains(button)) return;
-    const act = button.dataset.act;
-    if (act === 'show') reveal(Number(range.value));
-    else if (act === 'skip') reveal(null);
-    else if (act === 'again') reset();
-  });
-
-  if (answer) answer.hidden = true;
-}
-
-function histogramSVG(m, W, guess, pending, label) {
-  const narrow = W < 480;
-  const padL = 12; // room for the "1" tick and a guess star at 1.00
-  const padR = 46; // room beside the tallest bar for its share
-  const plotW = W - padL - padR;
-  const x = (v) => padL + ((v - 1) / 4) * plotW;
-  const bandTop = 22;
-  const plotTop = 46;
-  const plotH = narrow ? 132 : 168;
-  const yAxis = plotTop + plotH;
-  const pitch = plotW / m.bins.length;
-  const gap = pitch >= 5 ? 1 : 0.5;
-
-  // The 4.8+ band sits behind the bars and rises above the tallest one to carry its label.
-  const bx0 = x(4.8);
-  const bx1 = x(5);
-  let body = `<rect class="gs-band" x="${r2(bx0)}" y="${bandTop}" width="${r2(bx1 - bx0)}" height="${yAxis - bandTop}"/>`;
-
-  let d = '';
-  m.bins.forEach((count, i) => {
-    if (!count) return;
-    const h = (count / m.maxCount) * plotH;
-    d += `M${r2(padL + i * pitch + gap / 2)} ${yAxis}v${r2(-h)}h${r2(pitch - gap)}v${r2(h)}z`;
-  });
-  body += `<path class="gs-bars" d="${d}" style="transform-origin:0 ${yAxis}px"/>`;
-
-  body += `<line class="ch-axis" x1="${padL}" x2="${r2(x(5))}" y1="${yAxis + 0.5}" y2="${yAxis + 0.5}"/>`;
-  const tickY = guess == null ? yAxis + 19 : yAxis + 29;
-  for (let v = 1; v <= 5; v++) {
-    const xv = crisp(x(v) - 0.5);
-    body += `<line class="ch-tick" x1="${xv}" x2="${xv}" y1="${yAxis + 1}" y2="${yAxis + 6}"/>`;
-    body += `<text class="ch-tick-label" x="${xv}" y="${tickY}" text-anchor="middle">${v}</text>`;
-  }
-
-  let anno = '';
-  const xm = crisp(x(m.median) - 0.5);
-  anno += `<line class="gs-median" x1="${xm}" x2="${xm}" y1="3" y2="${yAxis}"/>`;
-  anno += `<text class="gs-median-label" x="${xm - 5}" y="14" text-anchor="end">Typical ${m.median.toFixed(2)}</text>`;
-  anno += `<text class="gs-band-label" x="${r2(bx0 - 5)}" y="${bandTop + 12}" text-anchor="end">4.8+</text>`;
-
-  // Share of listings in the tallest bar: beside it when it is the last bin, else above it.
-  const topShare = `${oneDecimal((m.maxCount / m.n) * 100)}%`;
-  if (m.iMax === m.bins.length - 1) {
-    anno += `<text class="gs-top-label" x="${r2(bx1 + 5)}" y="${plotTop + 4}">${topShare}</text>`;
-  } else {
-    const cx = padL + (m.iMax + 0.5) * pitch;
-    const half = monoWidth(topShare, 12) / 2;
-    anno += `<text class="gs-top-label" x="${r2(clamp(cx, half, W - half))}" y="${plotTop - 5}" text-anchor="middle">${topShare}</text>`;
-  }
-
-  // The reader's guess stays outside the fading group, so their star is on the axis from the
-  // first frame, where the slider left it, while the bars grow.
-  let you = '';
-  if (guess != null) {
-    const xg = x(guess);
-    you += starGlyph(xg, yAxis, narrow ? 20 : 22, 'gs-guess');
-    const text = `Your guess ${guess.toFixed(2)}`;
-    const half = monoWidth(text, 12) / 2;
-    you += `<text class="gs-guess-label" x="${r2(clamp(xg, half + 1, W - half - 1))}" y="${yAxis + 47}" text-anchor="middle">${text}</text>`;
-  }
-
-  const H = guess == null ? yAxis + 26 : yAxis + 54;
-  return svgTag('gs-svg', W, H, label, `${body}<g class="gs-anno">${anno}</g>${you}`, pending);
-}
-
-/* 3. The drift: a grid of 100 stars per system */
-
-async function buildDrift(root) {
-  const items = (await figuresReady).drift;
-  const counts = items.map((it) => ({
-    gold: Math.round((it.then || it.now).value),
-    total: Math.round(it.now.value),
-  }));
-  // The added stars fill at one speed everywhere, so the biggest gain takes about 900ms.
-  const fade = 200;
-  const maxAdded = Math.max(1, ...counts.map((c, i) => (items[i].then ? c.total - c.gold : 0)));
-  const stepMs = maxAdded > 1 ? (900 - fade) / (maxAdded - 1) : 0;
-  const animate = motionAllowed();
-
-  let html =
-    `<svg class="dr-sprite" aria-hidden="true" focusable="false">` +
-    `<symbol id="dr-star" viewBox="0 0 24 24"><path d="${STAR_PATH}" vector-effect="non-scaling-stroke"/></symbol></svg>` +
-    `<ul class="dr-list" role="list">`;
-
-  items.forEach((it, i) => {
-    const { gold, total } = counts[i];
-    const pair = Boolean(it.then);
-    let uses = '';
-    // Fill from the bottom left, left to right, row by row upward, like a rising level.
-    for (let k = 0; k < 100; k++) {
-      const col = k % 10;
-      const row = 9 - Math.floor(k / 10);
-      let cls = 'dr-s0';
-      let style = '';
-      if (k < gold) cls = 'dr-s1';
-      else if (k < total) {
-        cls = 'dr-s2';
-        style = ` style="transition-delay:${Math.round((k - gold) * stepMs)}ms"`;
-      }
-      uses += `<use href="#dr-star" class="${cls}" x="${col * 24 + 1}" y="${row * 24 + 1}" width="22" height="22"${style}/>`;
-    }
-    const aria = pair
-      ? `Grid of 100 stars: ${gold} gold and ${total - gold} lighter gold.`
-      : `Grid of 100 stars: ${gold} gold.`;
-    const value = pair
-      ? `<span class="dr-nw">${esc(it.then.label)} <b>${it.then.value}%</b></span> to ` +
-        `<span class="dr-nw">${esc(it.now.label)} <b>${it.now.value}%</b></span>`
-      : `<b>${it.now.value}%</b><br><span class="dr-sub">${esc(it.now.label)}</span>`;
-    html +=
-      `<li class="dr-item${pair ? ' dr-pair' : ''}">` +
-      `<p class="dr-title">${esc(it.title)}</p>` +
-      `<p class="dr-measure label">${esc(it.measure)}</p>` +
-      `<svg class="dr-stars${pair && animate ? ' is-pending' : ''}" viewBox="0 0 240 240" role="img" aria-label="${esc(aria)}">${uses}</svg>` +
-      `<p class="dr-value">${value}</p>` +
-      `<a class="dr-src" href="${esc(it.source.url)}">Source<span class="visually-hidden">: ${esc(it.source.label)}</span></a>` +
-      `</li>`;
-  });
-  root.insertAdjacentHTML('beforeend', `${html}</ul>`);
-
-  if (animate) {
-    // Watch the grid itself, where the fill happens, not the whole block around it.
-    root.querySelectorAll('.dr-pair .dr-stars').forEach((grid) => {
-      eachTimeInView(grid, { enter: () => play(grid), leave: () => unfill(grid) });
-    });
-  }
-}
-
-/* 4. What predicts the job: dot plot, 1998 estimate against 2022 revision */
+/* 4. What predicts the job (methods page): dot plot, 1998 estimate against 2022 revision */
 
 async function buildValidity(root) {
   const rows = (await figuresReady).validity.rows;
@@ -619,16 +599,16 @@ async function buildValidity(root) {
     (kept.length ? `, and ${kept.length} were not re-estimated.` : '.');
 
   const legend = document.createElement('div');
-  legend.className = 'ch-legend';
+  legend.className = 'ch-legend label';
   legend.setAttribute('aria-hidden', 'true');
   legend.innerHTML =
     `<span class="ch-key"><svg class="va-key" width="14" height="14" viewBox="0 0 14 14"><circle class="va-1998" cx="7" cy="7" r="5.25"/></svg>1998 estimate</span>` +
     `<span class="ch-key"><svg class="va-key" width="14" height="14" viewBox="0 0 14 14"><circle class="va-2022" cx="7" cy="7" r="6"/></svg>2022 revision</span>`;
-  const plot = document.createElement('div');
-  root.append(legend, plot);
+  const plotEl = document.createElement('div');
+  root.append(legend, plotEl);
 
-  const redraw = watchWidth(root, (width) => {
-    plot.innerHTML = validitySVG(revised, kept, width, wideLayout.matches, label);
+  const redraw = watchSize(root, (width) => {
+    plotEl.innerHTML = validitySVG(revised, kept, width, wideLayout.matches, label);
   });
   if (wideLayout.addEventListener) wideLayout.addEventListener('change', () => redraw());
   else if (wideLayout.addListener) wideLayout.addListener(() => redraw());
@@ -694,7 +674,7 @@ function validitySVG(revised, kept, W, wide, label) {
   return svgTag('va-svg', W, bottom + 4, label, grid + body, false);
 }
 
-mount('why-now-root', buildWhyNow);
 mount('guess-root', buildGuess, { dropFallback: true });
 mount('drift-root', buildDrift, { dropFallback: true });
+mount('why-now-root', buildWhyNow);
 mount('validity-root', buildValidity);
