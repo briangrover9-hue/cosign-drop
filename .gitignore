@@ -5,3 +5,6 @@ private-notes/
 node_modules/
 .env
 .env.*
+
+# Raw data downloads (see research/airbnb_measure.py)
+.cache/
