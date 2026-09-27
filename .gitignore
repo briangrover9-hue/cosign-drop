@@ -1,0 +1,7 @@
+# Brian's earlier private writing, read for thinking only, never published
+private-notes/
+
+.DS_Store
+node_modules/
+.env
+.env.*
