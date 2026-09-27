@@ -41,6 +41,63 @@
   gap: 8px;
 }
 
+/* Room held for each chart before its script draws it, so the text below does not jump
+   when the chart appears: on a link to a section, a reload partway down, or a slow
+   connection. Each value is the drawn chart's measured height, or just under it where
+   the height steps with the width. Without scripting the fallback keeps its own height. */
+@media (scripting: enabled) {
+  #why-now-root {
+    min-height: 227px;
+  }
+  #fig-guess {
+    min-height: 399px;
+  }
+  #drift-root {
+    min-height: calc(1395px + (100vw - 350px) * 1.067);
+  }
+  #validity-root {
+    min-height: 698px;
+  }
+  @media (min-width: 362px) {
+    #fig-guess {
+      min-height: 371px;
+    }
+  }
+  @media (min-width: 392px) {
+    #fig-guess {
+      min-height: 349px;
+    }
+  }
+  @media (min-width: 498px) {
+    #fig-guess {
+      min-height: 331px;
+    }
+  }
+  @media (min-width: 512px) {
+    #why-now-root {
+      min-height: 235px;
+    }
+  }
+  @media (min-width: 552px) {
+    #drift-root {
+      min-height: min(1679px, calc(1647px + (100vw - 552px) * 2));
+    }
+  }
+  @media (min-width: 720px) {
+    #fig-guess {
+      min-height: 334px;
+    }
+    #validity-root {
+      min-height: 504px;
+    }
+  }
+  @media (min-width: 900px) {
+    #drift-root {
+      min-height: min(824px, calc(770px + (100vw - 948px) * 0.5));
+    }
+  }
+}
+
 /* 1. Why now */
 .wn-swatch {
   display: inline-block;
