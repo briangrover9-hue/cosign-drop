@@ -1,0 +1,103 @@
+{
+  "_note": "Numbers drawn in the charts. Each traces to research/sources.md. The Airbnb histogram is read from data/airbnb.json.",
+  "whyNow": {
+    "unit": "extra dollars an employer would accept on a bid, for one standard deviation more",
+    "rows": [
+      { "label": "A proposal tailored to the job", "before": 25.67, "after": 14.85 },
+      { "label": "A stronger record on the site", "before": 27.96, "after": 46.24 }
+    ],
+    "beforeLabel": "Before the AI tool",
+    "afterLabel": "After",
+    "source": { "label": "Galdin and Silbert (2025), Table 2, columns 2 and 4", "url": "https://arxiv.org/abs/2511.08785" }
+  },
+  "guess": {
+    "group": "both_cities_combined.rated_min10_reviews",
+    "median": 4.84,
+    "n": 15694,
+    "shareAtLeast45": 92.3,
+    "shareAtLeast48": 60.6,
+    "shareBelow40": 0.3,
+    "defaultGuess": 3.0
+  },
+  "drift": [
+    {
+      "id": "grades",
+      "title": "US college grades",
+      "measure": "Grades that are A's",
+      "then": { "label": "1960", "value": 15 },
+      "now": { "label": "Late 2000s", "value": 43 },
+      "source": { "label": "Rojstaczer and Healy (2012)", "url": "https://www.gradeinflation.com/tcr2012grading.pdf" }
+    },
+    {
+      "id": "harvard",
+      "title": "Harvard College",
+      "measure": "Grades that are A's",
+      "then": { "label": "2005", "value": 24 },
+      "now": { "label": "2025", "value": 60.2 },
+      "source": { "label": "Harvard OUE (2025)", "url": "https://oue.fas.harvard.edu/faculty-resources/report-on-grading/" }
+    },
+    {
+      "id": "labor",
+      "title": "An online labor market",
+      "measure": "Workers rated 5 stars",
+      "then": { "label": "Start", "value": 33 },
+      "now": { "label": "Six years later", "value": 85 },
+      "source": { "label": "Filippas, Horton and Golden (2022)", "url": "https://www.nber.org/system/files/working_papers/w25857/w25857.pdf" }
+    },
+    {
+      "id": "ebay",
+      "title": "eBay sellers",
+      "measure": "Feedback that is positive",
+      "now": { "label": "2011 to 2014, average seller", "value": 99.3 },
+      "source": { "label": "Nosko and Tadelis (2015)", "url": "https://www.nber.org/system/files/working_papers/w20830/w20830.pdf" }
+    },
+    {
+      "id": "airbnb2015",
+      "title": "Airbnb",
+      "measure": "Listings rated 4.5 or higher",
+      "now": { "label": "2015", "value": 94 },
+      "source": { "label": "Zervas, Proserpio and Byers", "url": "https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf" }
+    },
+    {
+      "id": "tripadvisor",
+      "title": "TripAdvisor hotels",
+      "measure": "Hotels rated 4.5 or higher",
+      "now": { "label": "2015", "value": 26 },
+      "source": { "label": "Zervas, Proserpio and Byers", "url": "https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf" }
+    },
+    {
+      "id": "linkedin",
+      "title": "LinkedIn endorsements",
+      "measure": "An endorsement can only say yes",
+      "now": { "label": "A billion given in under six months", "value": 100 },
+      "source": { "label": "LinkedIn (2013)", "url": "https://web.archive.org/web/20130308140056/http://blog.linkedin.com:80/2013/03/06/1-billion-endorsements-given-on-linkedin-infographic/" }
+    },
+    {
+      "id": "github",
+      "title": "GitHub stars",
+      "measure": "A star can only say yes",
+      "now": { "label": "6.0 million suspected fakes", "value": 100 },
+      "source": { "label": "He et al. (ICSE 2026)", "url": "https://cmustrudel.github.io/papers/icse2026fakestars.pdf" }
+    }
+  ],
+  "validity": {
+    "note": "Operational validity for overall job performance. null means not re-estimated in 2022.",
+    "rows": [
+      { "method": "Structured interviews", "y1998": 0.51, "y2022": 0.42 },
+      { "method": "Job knowledge tests", "y1998": 0.48, "y2022": 0.40 },
+      { "method": "Work samples", "y1998": 0.54, "y2022": 0.33, "highlight": true },
+      { "method": "Cognitive ability tests", "y1998": 0.51, "y2022": 0.31 },
+      { "method": "Integrity tests", "y1998": 0.41, "y2022": 0.31 },
+      { "method": "Unstructured interviews", "y1998": 0.38, "y2022": 0.19 },
+      { "method": "Conscientiousness", "y1998": 0.31, "y2022": 0.19 },
+      { "method": "Years of experience", "y1998": 0.18, "y2022": 0.07, "highlight": true },
+      { "method": "Peer ratings", "y1998": 0.49, "y2022": null },
+      { "method": "Reference checks", "y1998": 0.26, "y2022": null, "highlight": true },
+      { "method": "Years of education", "y1998": 0.10, "y2022": null, "highlight": true }
+    ],
+    "sources": [
+      { "label": "Schmidt and Hunter (1998), Table 1", "url": "https://doi.org/10.1037/0033-2909.124.2.262" },
+      { "label": "Sackett, Zhang, Berry and Lievens (2022), Table 3", "url": "https://doi.org/10.1037/apl0000994" }
+    ]
+  }
+}
