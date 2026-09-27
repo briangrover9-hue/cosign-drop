@@ -83,7 +83,9 @@ const READOUTS = {
 
 // The line of the average, round by round.
 const TREND = {
-  stars: { title: 'Average score, round by round', min: 1, max: 5, top: '5', bottom: '1', value: (h) => h.mean, text: (v) => v.toFixed(2) },
+  // Every setting and assumption keeps the average between 3 and 5 (2.99 to 4.89 when
+  // measured), so the axis starts at 3 to make the drift visible; the dot field shows the full scale.
+  stars: { title: 'Average score, round by round', min: 3, max: 5, top: '5', bottom: '3', value: (h) => h.mean, text: (v) => v.toFixed(2) },
   yes: { title: 'Share of judgments that were a yes, round by round', min: 0, max: 1, top: '100%', bottom: '0%', value: (h) => h.yesRate, text: percent },
 };
 
@@ -523,7 +525,7 @@ function mount(root) {
     const B = trendBox();
     const rounds = state.run.rounds;
     const x = (round) => B.left + ((round - 1) / (rounds - 1)) * (B.right - B.left);
-    const y = (v) => B.bottom - ((v - T.min) / (T.max - T.min)) * (B.bottom - B.top);
+    const y = (v) => B.bottom - Math.min(1, Math.max(0, (v - T.min) / (T.max - T.min))) * (B.bottom - B.top);
     const points = (history) => history.map((h) => `${x(h.round).toFixed(1)},${y(T.value(h)).toFixed(1)}`).join(' ');
     const history = state.snap ? state.snap.history : [];
     const ghost = sameScaleReference() ? state.reference.history : [];
