@@ -368,7 +368,9 @@ function mount(root) {
 
   function tween(now) {
     const t = Math.min(1, Math.max(0, (now - tweenStart) / TWEEN_MS));
-    const e = 1 - (1 - t) ** 3; // ease out
+    // Cubic ease-out, softer than the page's --ease-out on purpose: the dots leave on the
+    // round's tick, and the gentler curve keeps them visibly traveling long enough to follow.
+    const e = 1 - (1 - t) ** 3;
     for (let i = 0; i < N; i++) {
       const x = 2 * i;
       if (from[x] === to[x] && from[x + 1] === to[x + 1]) continue;

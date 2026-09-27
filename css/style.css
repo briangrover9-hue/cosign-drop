@@ -44,6 +44,10 @@
   --wide: 66rem;
   --gutter: 16px;
   --header-h: 48px;
+  /* Motion: ease-out for things entering, leaving or answering a press; ease-in-out for things
+     crossing the screen. Color changes keep plain ease. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   color-scheme: light;
 }
 
@@ -193,10 +197,14 @@ strong {
   text-decoration: none;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  /* Rises in as the headline scrolls away and sinks out as it comes back; leaving is quicker. */
+  transform: translateY(0.25em);
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
 }
 .site-header.is-scrolled .site-title {
   opacity: 1;
+  transform: none;
+  transition-duration: 200ms;
 }
 .page-rating {
   display: flex;
@@ -454,7 +462,9 @@ figcaption .src,
   height: 100%;
   min-height: 188px;
   transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Both cards turn at once. Ease-out starts the turn on the press and swaps faces by about
+     80ms; the settle is visible until about 370ms. */
+  transition: transform 600ms var(--ease-out);
 }
 .reveal.is-open .card-inner {
   transform: rotateY(180deg);

@@ -315,10 +315,14 @@
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
   transform: rotate(-45deg);
-  transition: transform 0.2s ease;
+  transition: transform 200ms var(--ease-out);
 }
 .lab-drawer[open] summary::before {
   transform: translateY(-2px) rotate(45deg);
+}
+/* Toggled from the keyboard, the chevron turns without animating. */
+.lab-drawer summary:focus-visible::before {
+  transition: none;
 }
 .lab-drawer-body {
   display: grid;
