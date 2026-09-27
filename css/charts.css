@@ -53,14 +53,14 @@
     min-height: 399px;
   }
   #drift-root {
-    min-height: calc(1395px + (100vw - 350px) * 1.067);
+    min-height: calc(1394px + (100vw - 350px) * 1.067);
   }
   #validity-root {
     min-height: 698px;
   }
   @media (min-width: 362px) {
     #fig-guess {
-      min-height: 371px;
+      min-height: 370px;
     }
   }
   @media (min-width: 392px) {
@@ -80,7 +80,7 @@
   }
   @media (min-width: 552px) {
     #drift-root {
-      min-height: min(1679px, calc(1647px + (100vw - 552px) * 2));
+      min-height: min(1678px, calc(1646px + (100vw - 552px) * 2));
     }
   }
   @media (min-width: 720px) {
@@ -93,7 +93,7 @@
   }
   @media (min-width: 900px) {
     #drift-root {
-      min-height: min(824px, calc(770px + (100vw - 948px) * 0.5));
+      min-height: min(823px, calc(769px + (100vw - 948px) * 0.5));
     }
   }
 }

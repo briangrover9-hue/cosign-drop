@@ -15,7 +15,7 @@
   }
   @media (min-width: 360px) {
     .lab {
-      min-height: 1130px;
+      min-height: 1129px;
     }
   }
   @media (min-width: 442px) {
@@ -25,12 +25,12 @@
   }
   @media (min-width: 552px) {
     .lab {
-      min-height: 1145px;
+      min-height: 1144px;
     }
   }
   @media (min-width: 600px) {
     .lab {
-      min-height: 977px;
+      min-height: 976px;
     }
   }
   @media (min-width: 852px) {
@@ -40,12 +40,12 @@
   }
   @media (min-width: 880px) {
     .lab {
-      min-height: 700px;
+      min-height: 699px;
     }
   }
   @media (min-width: 956px) {
     .lab {
-      min-height: 760px;
+      min-height: 759px;
     }
   }
 }
