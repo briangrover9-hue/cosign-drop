@@ -48,55 +48,87 @@
    down. Each value is the drawn chart's measured height, or just under it where the height
    steps with the width. Without scripting the fallback keeps its own height. */
 @media (scripting: enabled) {
+  /* The why-now bars change size with their own width and the drift grids grow with their
+     columns, so those two figures let the rules below read their width. */
+  #fig-why-now,
+  #fig-drift {
+    container-type: inline-size;
+  }
   #why-now-root {
     min-height: 227px;
   }
-  #fig-guess {
-    min-height: 399px;
-  }
-  #drift-root {
-    min-height: calc(1394px + (100vw - 350px) * 1.067);
-  }
-  #validity-root {
-    min-height: 698px;
-  }
-  @media (min-width: 362px) {
-    #fig-guess {
-      min-height: 370px;
-    }
-  }
-  @media (min-width: 392px) {
-    #fig-guess {
-      min-height: 349px;
-    }
-  }
-  @media (min-width: 498px) {
-    #fig-guess {
-      min-height: 331px;
-    }
-  }
-  @media (min-width: 512px) {
+  @container (min-width: 480px) {
     #why-now-root {
       min-height: 235px;
     }
   }
-  @media (min-width: 552px) {
-    #drift-root {
-      min-height: min(1678px, calc(1646px + (100vw - 552px) * 2));
+  #validity-root {
+    min-height: 698px;
+  }
+  #fig-guess {
+    min-height: 458px;
+  }
+  @media (min-width: 363px) {
+    #fig-guess {
+      min-height: 429.5px;
+    }
+  }
+  @media (min-width: 394px) {
+    #fig-guess {
+      min-height: 407.8px;
+    }
+  }
+  @media (min-width: 471px) {
+    #fig-guess {
+      min-height: 389.8px;
+    }
+  }
+  @media (min-width: 491px) {
+    #fig-guess {
+      min-height: 366.4px;
     }
   }
   @media (min-width: 720px) {
     #fig-guess {
-      min-height: 334px;
+      min-height: 370.8px;
     }
     #validity-root {
       min-height: 504px;
     }
   }
+  /* Each drift grid is as tall as its column is wide, so the room is the grids' height,
+     worked out from the figure's width (cqi), plus the text around them (--dr-text), which
+     loses a line at each container width listed below as titles and labels stop wrapping. */
+  #drift-root {
+    --dr-text: 829.3px;
+    min-height: calc(min(1040px, 200cqi - 32px) + var(--dr-text));
+  }
+  @container (min-width: 294px) { #drift-root { --dr-text: 808.5px; } }
+  @container (min-width: 299px) { #drift-root { --dr-text: 790.5px; } }
+  @container (min-width: 359px) { #drift-root { --dr-text: 769.8px; } }
+  @container (min-width: 368px) { #drift-root { --dr-text: 749.2px; } }
+  @container (min-width: 388px) { #drift-root { --dr-text: 731.2px; } }
+  @container (min-width: 420px) { #drift-root { --dr-text: 712.3px; } }
+  @container (min-width: 422px) { #drift-root { --dr-text: 693.5px; } }
+  @container (min-width: 433px) { #drift-root { --dr-text: 675.5px; } }
+  @container (min-width: 478px) { #drift-root { --dr-text: 657.5px; } }
+  @container (min-width: 520px) { #drift-root { --dr-text: 638.5px; } }
+  /* Four across from 720px, two rows of grids; the gap between columns widens at 900px. */
+  @media (min-width: 720px) {
+    #drift-root {
+      --dr-text: 443.8px;
+      min-height: calc(50cqi - 30px + var(--dr-text));
+    }
+    @container (min-width: 746px) { #drift-root { --dr-text: 423.1px; } }
+    @container (min-width: 763px) { #drift-root { --dr-text: 402.3px; } }
+    @container (min-width: 804px) { #drift-root { --dr-text: 384.3px; } }
+  }
   @media (min-width: 900px) {
     #drift-root {
-      min-height: min(823px, calc(769px + (100vw - 948px) * 0.5));
+      --dr-text: 384.3px;
+      min-height: calc(50cqi - 42px + var(--dr-text));
     }
+    @container (min-width: 891px) { #drift-root { --dr-text: 365.5px; } }
   }
 }
 
