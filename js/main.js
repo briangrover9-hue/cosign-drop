@@ -40,6 +40,10 @@ window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', onScroll);
 update();
 
+// iOS Safari has needed a touch listener on the page before it shows :active on a tap, which
+// the buttons use for press feedback. The listener is passive and does nothing else.
+document.addEventListener('touchstart', () => {}, { passive: true });
+
 // Blind reveal: both cards stay face down until both vouches are in, then flip together.
 const reveal = document.getElementById('reveal');
 const revealBtn = document.getElementById('reveal-btn');

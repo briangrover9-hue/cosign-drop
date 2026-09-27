@@ -532,9 +532,17 @@ figcaption .src,
   min-height: 44px;
   padding: 10px 16px;
   cursor: pointer;
+  transition: transform 160ms var(--ease-out);
 }
-.btn:hover {
-  background: #37312a;
+/* Press feedback for a pointer press. A key press gets none, and neither does a disabled button. */
+.btn:not([disabled]):active:not(:focus-visible) {
+  transform: scale(0.97);
+}
+/* Hover only where a pointer can hover, so a tapped button does not stay tinted on a phone. */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background: #37312a;
+  }
 }
 .btn[disabled] {
   opacity: 0.45;
@@ -545,8 +553,10 @@ figcaption .src,
   background: transparent;
   border-color: var(--rule-strong);
 }
-.btn-quiet:hover {
-  background: var(--paper-2);
+@media (hover: hover) and (pointer: fine) {
+  .btn-quiet:hover {
+    background: var(--paper-2);
+  }
 }
 
 /* "Numbers that didn't survive" box */

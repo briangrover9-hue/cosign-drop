@@ -72,6 +72,12 @@
   text-align: center;
   color: var(--ink);
   pointer-events: none;
+  transition: transform 160ms var(--ease-out);
+}
+/* Press feedback for a pointer press on an option that will change something. A key press gets
+   none, and neither does the option already chosen, since pressing it does nothing. */
+.lab-seg input:not(:checked):active:not(:focus-visible) + span {
+  transform: scale(0.97);
 }
 .lab-seg input:hover + span {
   background: var(--paper-2);
