@@ -116,6 +116,8 @@
 }
 .gs-slider {
   margin: 14px 0 0;
+  -webkit-user-select: none;
+  user-select: none; /* a drag that starts on a tick label moves nothing and selects nothing */
 }
 .gs-range {
   -webkit-appearance: none;
@@ -171,6 +173,42 @@
   .gs-slider:has(.gs-range:focus-visible) {
     outline: 2px solid var(--ink);
     outline-offset: 6px;
+  }
+}
+/* Touch screens: only the star takes a touch, so a scroll that starts on the track cannot
+   move the guess, and the star gets a 44px square to grab while it is still drawn at 36px.
+   The input grows 4px on each side, which keeps the star's path and the ticks where they
+   were, and the track is drawn inset by the same 4px, a flat line of the same length. */
+@media (pointer: coarse) {
+  .gs-range {
+    width: calc(100% + 8px);
+    margin: 0 -4px;
+    pointer-events: none;
+  }
+  .gs-range::-webkit-slider-runnable-track {
+    background: linear-gradient(var(--ink), var(--ink)) center / calc(100% - 8px) 100% no-repeat;
+  }
+  .gs-range::-webkit-slider-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    margin-top: -21px;
+    border: 4px solid transparent;
+    background-origin: content-box;
+    background-clip: content-box;
+    pointer-events: auto;
+  }
+  .gs-range::-moz-range-track {
+    background: linear-gradient(var(--ink), var(--ink)) center / calc(100% - 8px) 100% no-repeat;
+  }
+  .gs-range::-moz-range-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    border: 4px solid transparent;
+    background-origin: content-box;
+    background-clip: content-box;
+    pointer-events: auto;
   }
 }
 /* Tick labels sit under the thumb's center at 1 to 5, so they are inset by half a thumb. */

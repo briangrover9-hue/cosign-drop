@@ -481,6 +481,51 @@
   }
 }
 
+/* Touch */
+.lab-seg label,
+.lab-drawer summary {
+  touch-action: manipulation;
+}
+.lab-slider-row {
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* On touch screens only the thumb takes a touch, so a scroll that starts on a track cannot
+   change an assumption, and the thumb gets a 44px square to grab while the bar is still
+   drawn 14 by 26. The input grows 15px on each side, which keeps the bar's path, and the
+   track is drawn inset by the same 15px, a flat line of the same length. */
+@media (pointer: coarse) {
+  .lab-slider input[type="range"] {
+    margin: 0 -15px;
+    pointer-events: none;
+  }
+  .lab-slider input[type="range"]::-webkit-slider-runnable-track {
+    background: linear-gradient(var(--ink-3), var(--ink-3)) center / calc(100% - 30px) 100% no-repeat;
+  }
+  .lab-slider input[type="range"]::-webkit-slider-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    margin-top: -21px;
+    border: solid transparent;
+    border-width: 9px 15px;
+    background-clip: content-box;
+    pointer-events: auto;
+  }
+  .lab-slider input[type="range"]::-moz-range-track {
+    background: linear-gradient(var(--ink-3), var(--ink-3)) center / calc(100% - 30px) 100% no-repeat;
+  }
+  .lab-slider input[type="range"]::-moz-range-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    border: solid transparent;
+    border-width: 9px 15px;
+    background-clip: content-box;
+    pointer-events: auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lab-drawer summary::before {
     transition: none;
