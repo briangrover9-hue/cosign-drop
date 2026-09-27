@@ -353,9 +353,12 @@ async function buildGuess(root) {
   range.addEventListener('input', showGuess);
   showGuess();
 
-  const belowText = (guess) => {
+  // Share of listings rated below the guess, as the end of a sentence.
+  const belowSentence = (guess) => {
     const share = m.shareBelow(guess);
-    return share < 0.05 ? 'less than 0.1%' : `${oneDecimal(share)}%`;
+    if (share === 0) return 'none of the listings are rated below your guess.';
+    const pct = share < 0.05 ? 'less than 0.1%' : `${oneDecimal(share)}%`;
+    return `${pct} of listings are rated below your guess.`;
   };
 
   const labelFor = (guess) =>
@@ -388,7 +391,7 @@ async function buildGuess(root) {
       guess == null
         ? `The median listing is rated ${medianText}.`
         : `You guessed ${guess.toFixed(2)}. The median listing is rated ${medianText}, and ` +
-          `${belowText(guess)} of listings are rated below your guess.`;
+          belowSentence(guess);
     if (answer) answer.hidden = false;
     againBtn.focus({ preventScroll: true });
     result.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
