@@ -34,7 +34,7 @@
     {
       "id": "grades",
       "title": "US college grades",
-      "measure": "Grades that are A's",
+      "measure": "Grades that are A’s",
       "then": {
         "label": "1960",
         "value": 15
@@ -51,7 +51,7 @@
     {
       "id": "harvard",
       "title": "Harvard College",
-      "measure": "Grades that are A's",
+      "measure": "Grades that are A’s",
       "then": {
         "label": "2005",
         "value": 24

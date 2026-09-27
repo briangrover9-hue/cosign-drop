@@ -509,10 +509,8 @@ figcaption .src,
   list-style: none;
   padding: 0;
   margin: 0;
-  counter-reset: force;
 }
 .forces > li {
-  counter-increment: force;
   position: relative;
   padding: 18px 0 8px;
   border-top: 1px solid var(--rule);
@@ -520,8 +518,8 @@ figcaption .src,
 .forces > li > h3 {
   margin-top: 0;
 }
-.forces > li > h3::before {
-  content: counter(force) ". ";
+/* The number sits in the heading itself, so screen readers say it too. */
+.forces .force-n {
   font-family: var(--mono);
   font-size: 0.8em;
   font-weight: 500;
@@ -744,6 +742,13 @@ figcaption .src,
   margin-top: 64px;
   padding-block: 28px 48px;
   border-top: 1px solid var(--rule-strong);
+}
+/* The payoff for the header's rating, which reaches 5.0 at the end of the page. */
+.site-footer .payoff {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin-bottom: 1em;
 }
 .site-footer p {
   margin-bottom: 0.4em;

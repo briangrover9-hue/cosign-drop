@@ -123,7 +123,7 @@ if (reveal && revealBtn) {
     if (revealNote) {
       revealNote.textContent = open
         ? 'Both opened at the same moment, so neither could be written to match the other.'
-        : "An example. Neither person could read the other's before writing.";
+        : 'An example. Neither person could read the other’s before writing.';
     }
   };
   setOpen(false);
