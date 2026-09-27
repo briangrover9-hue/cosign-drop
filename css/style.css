@@ -26,6 +26,50 @@
   font-weight: 500;
   font-display: swap;
 }
+/* Georgia, resized to Newsreader's widths and given its ascent (0.735) and descent
+   (0.265), shows until Newsreader loads, so the text keeps its line breaks when the
+   font swaps in. Newsreader runs narrower at text sizes and wider at display sizes,
+   so body weights, the 500 headings and the 600 headings each get their own size. */
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia");
+  font-weight: 300 450;
+  size-adjust: 92.5%;
+  ascent-override: 79.5%;
+  descent-override: 28.6%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia");
+  font-weight: 451 550;
+  size-adjust: 101%;
+  ascent-override: 72.8%;
+  descent-override: 26.2%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia Bold"), local("Georgia-Bold");
+  font-weight: 551 700;
+  size-adjust: 83%;
+  ascent-override: 88.6%;
+  descent-override: 31.9%;
+  line-gap-override: 0%;
+}
+/* The hero's 4.8 is set at display size, where Newsreader and Georgia are the same
+   width, so the stars beside it stay put when the font swaps in. */
+@font-face {
+  font-family: "Newsreader Numeral Fallback";
+  src: local("Georgia");
+  size-adjust: 100.2%;
+  ascent-override: 73.4%;
+  descent-override: 26.4%;
+  line-gap-override: 0%;
+}
+.hero-number {
+  font-family: "Newsreader", "Newsreader Numeral Fallback", var(--serif);
+}
 
 :root {
   --paper: #f3eee3;
@@ -38,7 +82,7 @@
   --rule-strong: rgba(29, 26, 22, 0.34);
   --gold: #dca320;
   --gold-edge: #93650a;
-  --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --serif: "Newsreader", "Newsreader Fallback", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --measure: 38rem;
   --wide: 66rem;
