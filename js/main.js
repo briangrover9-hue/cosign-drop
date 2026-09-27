@@ -25,8 +25,12 @@ function update() {
     ratingNum.textContent = shown;
     setStarRow(ratingStars, Number(shown));
   }
-  const pastTitle = title ? title.getBoundingClientRect().bottom < 0 : window.scrollY > 200;
-  header?.classList.toggle('is-scrolled', pastTitle);
+  if (!header) return;
+  // The hairline marks the bar as soon as anything is under it. The bar's title
+  // takes over once the headline has gone fully behind the bar.
+  const barBottom = header.offsetHeight;
+  header.classList.toggle('is-scrolled', window.scrollY > 0);
+  header.classList.toggle('is-titled', title ? title.getBoundingClientRect().bottom <= barBottom : window.scrollY > 200);
 }
 
 function onScroll() {
