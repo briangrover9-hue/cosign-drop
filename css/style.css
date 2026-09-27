@@ -595,6 +595,8 @@ figcaption .src,
 }
 .table-scroll {
   overflow-x: auto;
+  /* A sideways swipe that reaches the table's edge stops there instead of going Back. */
+  overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
 }
 .methods ol,
