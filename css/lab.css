@@ -7,6 +7,50 @@
   border-top: 1px solid var(--rule-strong);
 }
 
+/* Before the script builds the lab, hold the room it will take, so the text below does not
+   jump. The values are the built lab's measured heights; the steps at 552, 600, 880 and
+   956px are where the field grows or the controls move, the others are line wraps. */
+@media (scripting: enabled) {
+  .lab {
+    min-height: 1152px;
+  }
+  @media (min-width: 360px) {
+    .lab {
+      min-height: 1129px;
+    }
+  }
+  @media (min-width: 442px) {
+    .lab {
+      min-height: 1107px;
+    }
+  }
+  @media (min-width: 552px) {
+    .lab {
+      min-height: 1144px;
+    }
+  }
+  @media (min-width: 600px) {
+    .lab {
+      min-height: 976px;
+    }
+  }
+  @media (min-width: 852px) {
+    .lab {
+      min-height: 954px;
+    }
+  }
+  @media (min-width: 880px) {
+    .lab {
+      min-height: 699px;
+    }
+  }
+  @media (min-width: 956px) {
+    .lab {
+      min-height: 759px;
+    }
+  }
+}
+
 .lab-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

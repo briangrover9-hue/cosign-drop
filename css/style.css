@@ -26,6 +26,50 @@
   font-weight: 500;
   font-display: swap;
 }
+/* Until Newsreader loads, the page uses Georgia resized to Newsreader's widths and given
+   Newsreader's ascent (0.735) and descent (0.265), so lines break in nearly the same
+   places when the font swaps in. Newsreader is narrower than Georgia at text sizes and
+   wider at display sizes, so each weight range gets its own size. */
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia");
+  font-weight: 300 450;
+  size-adjust: 91.8%;
+  ascent-override: 80.1%;
+  descent-override: 28.9%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia");
+  font-weight: 451 550;
+  size-adjust: 101%;
+  ascent-override: 72.8%;
+  descent-override: 26.2%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia Bold"), local("Georgia-Bold");
+  font-weight: 551 700;
+  size-adjust: 83%;
+  ascent-override: 88.6%;
+  descent-override: 31.9%;
+  line-gap-override: 0%;
+}
+/* At the hero's display size Newsreader and Georgia are the same width, so the 4.8 gets
+   its own face and the stars beside it stay put when the font swaps in. */
+@font-face {
+  font-family: "Newsreader Numeral Fallback";
+  src: local("Georgia");
+  size-adjust: 100.2%;
+  ascent-override: 73.4%;
+  descent-override: 26.4%;
+  line-gap-override: 0%;
+}
+.hero-number {
+  font-family: "Newsreader", "Newsreader Numeral Fallback", var(--serif);
+}
 
 :root {
   --paper: #f3eee3;
@@ -38,7 +82,7 @@
   --rule-strong: rgba(29, 26, 22, 0.34);
   --gold: #dca320;
   --gold-edge: #93650a;
-  --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --serif: "Newsreader", "Newsreader Fallback", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --measure: 38rem;
   --wide: 66rem;
@@ -395,6 +439,14 @@ figure {
 }
 .figure {
   margin-inline: auto;
+}
+/* Sections, figures and the lab each paint as a separate group, so motion in one of them,
+   such as the lab's dots, repaints that block alone instead of the whole article, with its
+   800 drift stars, on every frame. */
+main > section,
+.figure,
+.lab {
+  isolation: isolate;
 }
 figcaption,
 .caption {

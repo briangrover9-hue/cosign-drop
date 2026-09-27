@@ -43,6 +43,63 @@
   gap: 8px;
 }
 
+/* Before its script draws a chart, hold the room the chart will take, so the text below
+   does not jump when it appears, for example after a link to a section or a reload partway
+   down. Each value is the drawn chart's measured height, or just under it where the height
+   steps with the width. Without scripting the fallback keeps its own height. */
+@media (scripting: enabled) {
+  #why-now-root {
+    min-height: 227px;
+  }
+  #fig-guess {
+    min-height: 399px;
+  }
+  #drift-root {
+    min-height: calc(1394px + (100vw - 350px) * 1.067);
+  }
+  #validity-root {
+    min-height: 698px;
+  }
+  @media (min-width: 362px) {
+    #fig-guess {
+      min-height: 370px;
+    }
+  }
+  @media (min-width: 392px) {
+    #fig-guess {
+      min-height: 349px;
+    }
+  }
+  @media (min-width: 498px) {
+    #fig-guess {
+      min-height: 331px;
+    }
+  }
+  @media (min-width: 512px) {
+    #why-now-root {
+      min-height: 235px;
+    }
+  }
+  @media (min-width: 552px) {
+    #drift-root {
+      min-height: min(1678px, calc(1646px + (100vw - 552px) * 2));
+    }
+  }
+  @media (min-width: 720px) {
+    #fig-guess {
+      min-height: 334px;
+    }
+    #validity-root {
+      min-height: 504px;
+    }
+  }
+  @media (min-width: 900px) {
+    #drift-root {
+      min-height: min(823px, calc(769px + (100vw - 948px) * 0.5));
+    }
+  }
+}
+
 /* 1. Why now */
 .wn-swatch {
   display: inline-block;
