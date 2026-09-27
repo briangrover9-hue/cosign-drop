@@ -118,8 +118,9 @@
   stroke: var(--ink);
   stroke-width: 1;
 }
+/* The rule separates people with no score from people scored 1, so it needs 3:1 (5.2:1 here). */
 .lab-lane-rule {
-  stroke: var(--rule-strong);
+  stroke: var(--ink-3);
   stroke-width: 1;
 }
 .lab-label,
