@@ -392,10 +392,46 @@
   justify-self: start;
 }
 
-@media (min-width: 600px) and (max-width: 879.98px) {
+/* Phones: each value sits above its track, where a finger on the thumb cannot cover it,
+   and every track takes the full width. */
+@media (max-width: 599.98px) {
+  .lab-slider-row {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+  .lab-slider-value {
+    order: -1;
+    width: 100%;
+    text-align: left;
+  }
+  .lab-slider input[type="range"] {
+    flex-basis: 100%; /* its own line, even with the wider touch box below */
+  }
+}
+
+@media (min-width: 600px) and (max-width: 879.98px) and (min-height: 500.02px) {
   .lab-switches {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 24px;
+  }
+}
+
+/* Landscape phones: a short screen cannot show the switches above the field, so they sit
+   beside it, where a switch and the dots it moves are in view together. */
+@media (min-width: 640px) and (max-width: 879.98px) and (max-height: 500px) {
+  .lab-grid {
+    grid-template-columns: 18rem minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  .lab-switches {
+    row-gap: 8px; /* four switches fit a 360px tall screen under the header */
+  }
+  .lab-readouts,
+  .lab-status,
+  .lab-legend,
+  .lab-drawer {
+    grid-column: 1 / -1;
   }
 }
 
