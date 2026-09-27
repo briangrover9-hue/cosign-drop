@@ -638,7 +638,10 @@ figcaption .src,
 .site-footer a::after {
   content: "";
   position: absolute;
-  inset: -6px -9px -23px;
+  top: -6px;
+  right: -9px;
+  left: -9px;
+  height: 44px;
 }
 
 @media (min-width: 720px) {
