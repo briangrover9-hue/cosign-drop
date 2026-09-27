@@ -386,6 +386,14 @@ figure {
 .figure {
   margin-inline: auto;
 }
+/* Sections, figures and the lab each paint as their own group, so when the lab's dots
+   move, a chart fills in or the guess slider is dragged, the browser repaints that block
+   instead of walking the whole article, drift grids included, on every frame. */
+main > section,
+.figure,
+.lab {
+  isolation: isolate;
+}
 figcaption,
 .caption {
   font-size: 0.9375rem;
