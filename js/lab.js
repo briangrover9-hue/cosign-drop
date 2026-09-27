@@ -199,9 +199,15 @@ function mount(root) {
   }
 
   // With reduced motion the dots jump straight to their new places, and a short fade marks
-  // the jump so it is not missed. Nothing moves.
+  // the jump so it is not missed. Nothing moves. A jump within 300ms of the last one, as when
+  // clicking or arrowing quickly through a switch, starts no new fade and lets a running one
+  // finish, so the dots never blink.
+  let lastJump = -Infinity;
   function fadeIn() {
-    if (!reduced || !svg.animate) return;
+    const now = performance.now();
+    const quick = now - lastJump < 300;
+    lastJump = now;
+    if (!reduced || quick || !svg.animate) return;
     const easing = getComputedStyle(document.documentElement).getPropertyValue('--ease-out').trim() || 'ease-out';
     for (const layer of peopleLayers) layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing });
   }
@@ -380,8 +386,9 @@ function mount(root) {
 
   function tween(now) {
     const t = Math.min(1, Math.max(0, (now - tweenStart) / TWEEN_MS));
-    // Cubic ease-out, softer than the page's --ease-out on purpose: the dots leave on the
-    // round's tick, and the gentler curve keeps them visibly traveling long enough to follow.
+    // Cubic ease-out. The dots leave on the round's tick and stay visibly in motion long enough
+    // to follow. The page's --ease-out would cut that travel short, and --ease-in-out starts so
+    // slowly (15% of the way after 100ms) that the dots would trail the round counter.
     const e = 1 - (1 - t) ** 3;
     for (let i = 0; i < N; i++) {
       const x = 2 * i;

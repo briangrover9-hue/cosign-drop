@@ -44,8 +44,9 @@
   --wide: 66rem;
   --gutter: 16px;
   --header-h: 48px;
-  /* Motion: ease-out for things entering, leaving or answering a press; ease-in-out for things
-     crossing the screen. Color changes keep plain ease. */
+  /* Motion: ease-out for things entering, leaving or answering a press; ease-in-out for anything
+     CSS moves across the screen, which nothing does yet (the lab's dots are tweened in lab.js,
+     which says why they keep a cubic ease-out). Color changes keep plain ease. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   color-scheme: light;
@@ -672,6 +673,7 @@ figcaption .src,
 /* Reduced motion: nothing moves, turns or grows. Short fades and color changes stay, because
    they still show that something changed. charts.css and lab.css carry the rest. */
 @media (prefers-reduced-motion: reduce) {
+  /* Nothing sets smooth scrolling today; this keeps it off here if something later does. */
   html {
     scroll-behavior: auto;
   }
