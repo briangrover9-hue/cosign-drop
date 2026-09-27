@@ -94,17 +94,95 @@ html {
   font-size: 1.15em;
   line-height: 1.45;
 }
-.notes-toc {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 20px;
-  padding-top: 4px;
-  border-top: 1px solid var(--ink-rule);
+/* Four parts, closed until a reader opens one. Each header says in one line what is inside. */
+.folds {
+  padding-bottom: 24px;
 }
-.notes-toc a {
-  display: inline-flex;
+.fold {
+  border-top: 1px solid var(--ink-rule-strong);
+}
+.fold:last-child {
+  border-bottom: 1px solid var(--ink-rule-strong);
+}
+.fold > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  min-height: 44px;
+  column-gap: 16px;
+  row-gap: 4px;
+  min-height: 72px;
+  padding: 16px 0;
+  cursor: pointer;
+  list-style: none;
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary::after {
+  content: "";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: translateY(-3px) rotate(45deg);
+  transition: transform var(--press) var(--ease);
+}
+.fold[open] > summary::after {
+  transform: translateY(2px) rotate(-135deg);
+}
+.fold-title {
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.125rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 60;
+  color: var(--ink);
+}
+.fold-sum {
+  grid-column: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .fold > summary:hover .fold-title {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.14em;
+    text-decoration-color: var(--ink-rule-strong);
+  }
+}
+.fold-body {
+  padding: 4px 0 36px;
+}
+.fold-body > h3:first-child {
+  margin-top: 0.5em;
+}
+.fold-body h3 {
+  margin: 2em 0 0.5em;
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.fold-body h4 {
+  margin: 0 0 0.5em;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.fold-body p {
+  margin: 0 0 1em;
+}
+/* The lab's rules and the sources read denser, like methods. */
+#lab .fold-body,
+#sources .fold-body,
+#data .fold-body {
+  font-size: 0.9375em;
+  line-height: 1.55;
 }
 
 .notes-section {
@@ -295,28 +373,21 @@ html {
 }
 
 /* Methods: smaller, denser type */
-.methods {
-  font-size: 0.9375em;
-  line-height: 1.55;
-}
-.methods h3 {
-  font-size: 1.15rem;
-}
-.methods table {
+.fold-body table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
   margin: 12px 0 20px;
 }
-.methods th,
-.methods td {
+.fold-body th,
+.fold-body td {
   text-align: left;
   vertical-align: top;
   padding: 7px 8px 7px 0;
   border-bottom: 1px solid var(--ink-rule);
   color: var(--ink-body);
 }
-.methods th {
+.fold-body th {
   font-family: var(--mono);
   font-size: 0.6875rem;
   font-weight: 500;
@@ -325,7 +396,7 @@ html {
   color: var(--ink-label);
 }
 /* The lab's results table names each setting in its first column, in the body face. */
-.methods tbody th {
+.fold-body tbody th {
   font-family: var(--serif);
   font-size: 0.875rem;
   font-weight: 400;
@@ -333,7 +404,7 @@ html {
   text-transform: none;
   color: var(--ink);
 }
-.methods caption {
+.fold-body caption {
   padding-bottom: 6px;
   text-align: left;
   font-family: var(--mono);
@@ -348,7 +419,7 @@ html {
   -webkit-overflow-scrolling: touch;
 }
 @media (max-width: 479.98px) {
-  .methods td {
+  .fold-body td {
     -webkit-hyphens: auto;
     hyphens: auto;
   }
@@ -366,13 +437,13 @@ html {
   position: absolute;
   inset: 0;
 }
-.methods ul {
+.fold-body ul {
   padding-left: 1.2em;
 }
-.methods li {
+.fold-body li {
   margin-bottom: 0.5em;
 }
-.methods li strong {
+.fold-body li strong {
   color: var(--ink);
 }
 

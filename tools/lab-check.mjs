@@ -5,13 +5,14 @@
 //    setting, each single switch flipped from it, the best setting, a
 //    LinkedIn-like yes setting, and the Cosign-like settings, next to the
 //    prototype the model was ported from.
-// 2. The same rows for the world the page shows (seed 256).
+// 2. The same rows for the world the page shows (seed 374).
 // 3. Assertions, which fail loudly: determinism, snapshots that never change
 //    a run, overrides, and the directions the page relies on.
+import { readFileSync } from 'node:fs';
 import { createWorld, createRun, DEFAULTS, WORST, BEST, COSIGN } from '../js/lab-model.js';
 
 const WORLDS = [11, 22, 33, 44, 55, 66, 77, 88, 99, 111, 122, 133];
-const PAGE_WORLD = 256; // the world the lab shows (#lab-root, scenes 4 and 5): of worlds 1 to 600 whose first run keeps every result the text describes, its results sit closest to the 12-world averages
+const PAGE_WORLD = Number(process.env.PAGE_WORLD) || 374; // the world the lab shows (#lab-root, scenes 4 and 5): of worlds 1 to 600 whose first run keeps every result the text describes, one where each of the eight settings in scene 5's bars lands within one of its average, with the jump from one-click likes to work closest to the average jump
 const LINKEDIN = Object.freeze({ scale: 'yes', type: 'tap', vis: 'visible', who: 'anyone', feed: 'count' });
 const COSIGN_COUNT = Object.freeze({ ...COSIGN, feed: 'count' });
 
@@ -229,6 +230,24 @@ console.log('\n3. Checks\n');
     const plain = summarize(WORLDS, { ...COSIGN, type: 'work', feed: 'plain' }, reflexive);
     check(Math.abs(ranked[3] - written[3]) <= 3 && Math.abs(plain[3] - writtenPlain[3]) <= 3, `12-world average: with written's reflexive yeses, tied to work leaves ${ranked[3].toFixed(1)} and ${plain[3].toFixed(1)} with no yes, close to written's ${written[3].toFixed(1)} and ${writtenPlain[3].toFixed(1)}`);
   }
+}
+
+// Scene 5's bars: every average in data/figures.json is the model's, and every cost number too.
+{
+  const rules = JSON.parse(readFileSync(new URL('../data/figures.json', import.meta.url), 'utf8')).rules;
+  for (const r of rules.settings) {
+    const runs = WORLDS.map((w) => runAll(w, r.settings).at(-1).metrics);
+    const mean = (k) => runs.reduce((t, m) => t + (m[k] ?? 0), 0) / runs.length;
+    check(Math.abs(mean('hits') - r.hits) < 0.005, `figures.json rules: ${r.label} finds ${mean('hits').toFixed(2)} on average, as stated (${r.hits})`);
+    if (r.costMetric) {
+      const got = r.costMetric === 'yesRate' ? mean('yesRate') * 100 : mean(r.costMetric);
+      check(Math.abs(got - r.costValue) < 0.5, `figures.json rules: ${r.label}'s cost number is ${got.toFixed(1)}, as stated (${r.costValue})`);
+    }
+    const here = runAll(PAGE_WORLD, r.settings).at(-1).metrics.hits;
+    check(Math.abs(here - Math.round(r.hits)) <= 1, `page world ${PAGE_WORLD}: ${r.label} finds ${here} in its run, within one of about ${Math.round(r.hits)}`);
+  }
+  const chance = (10 * 10) / 80;
+  check(Math.abs(rules.chance - chance) < 1e-9, `figures.json rules: guessing finds ${chance} of the 10 best, as stated`);
 }
 
 console.log(failures ? `\n${failures} check(s) failed` : '\nAll checks passed');

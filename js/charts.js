@@ -20,13 +20,16 @@ import { MOVE_MS, animate, motionAllowed, setLine } from './motion.js';
 const wideLayout = window.matchMedia('(min-width: 720px)');
 const html = document.documentElement;
 
-// The page starts its requests in its head (window.chartData); fetch here only if it didn't.
+// The page reads its data once, in its head (window.chartData, already parsed); fetch here only
+// if it didn't.
 function loadJSON(name, path) {
   const early = window.chartData && window.chartData[name];
-  const request = (early || fetch(new URL(path, import.meta.url))).then((res) => {
-    if (!res.ok) throw new Error(`${path} returned HTTP ${res.status}`);
-    return res.json();
-  });
+  const request =
+    early ||
+    fetch(new URL(path, import.meta.url)).then((res) => {
+      if (!res.ok) throw new Error(`${path} returned HTTP ${res.status}`);
+      return res.json();
+    });
   request.catch(() => {}); // Each chart reports its own failure.
   return request;
 }
@@ -485,15 +488,27 @@ async function buildDrift(root) {
 
   if (!moving) return;
   const grids = [...root.querySelectorAll('.dr-stars')];
-  // Each arrival fills the grids from empty; a departure empties them once they are hidden.
+  // Each arrival fills the grids from empty; a departure empties them once they are hidden and
+  // the next scene has arrived. A reader who moves on while the grids are still filling sees
+  // them finish at once: 600 stars changing color every frame would otherwise hold up the next
+  // scene's arrival. All six grids empty in one pass.
+  const unfillAll = () => {
+    grids.forEach((grid) => grid.classList.add('is-resetting', 'is-pending'));
+    void root.getBoundingClientRect(); // lands the empty state before transitions come back
+    grids.forEach((grid) => grid.classList.remove('is-resetting', 'is-settled'));
+  };
   let leaveTimer = 0;
   onScene(({ id, previousId }) => {
     clearTimeout(leaveTimer);
     if (id === 'everywhere' && previousId !== 'everywhere') {
-      grids.forEach((grid) => unfill(grid));
+      unfillAll();
       grids.forEach((grid) => play(grid, 180));
     } else if (previousId === 'everywhere' && id !== 'everywhere') {
-      leaveTimer = setTimeout(() => grids.forEach((grid) => unfill(grid)), MOVE_MS + 60);
+      grids.forEach((grid) => {
+        grid.classList.add('is-settled');
+        grid.classList.remove('is-pending');
+      });
+      leaveTimer = setTimeout(unfillAll, MOVE_MS + 900);
     }
   });
 }

@@ -206,5 +206,137 @@
         "url": "https://doi.org/10.1037/apl0000994"
       }
     ]
+  },
+  "rules": {
+    "_note": "Each setting's average over the 12 simulated companies in tools/lab-check.mjs (run seed 1). The check fails if any value here drifts from the model.",
+    "chance": 1.25,
+    "settings": [
+      {
+        "id": "likes",
+        "label": "One-click likes",
+        "scale": "stars",
+        "settings": {
+          "scale": "stars",
+          "type": "tap",
+          "vis": "visible",
+          "who": "anyone",
+          "feed": "count"
+        },
+        "hits": 4.5,
+        "finds": "one-click likes find",
+        "cost": "about {n} of 80 people end up rated 4.8 or higher",
+        "costValue": 23.6,
+        "costMetric": "top48"
+      },
+      {
+        "id": "written",
+        "label": "Written reviews",
+        "scale": "stars",
+        "settings": {
+          "scale": "stars",
+          "type": "written",
+          "vis": "visible",
+          "who": "anyone",
+          "feed": "count"
+        },
+        "hits": 4.75,
+        "finds": "written reviews find",
+        "cost": "people write one a round instead of tapping three"
+      },
+      {
+        "id": "hidden",
+        "label": "Hidden until both write",
+        "scale": "stars",
+        "settings": {
+          "scale": "stars",
+          "type": "tap",
+          "vis": "blind",
+          "who": "anyone",
+          "feed": "count"
+        },
+        "hits": 4.83,
+        "finds": "hiding reviews until both write finds",
+        "cost": "every review waits for the other side"
+      },
+      {
+        "id": "said",
+        "label": "Says how they know you",
+        "scale": "stars",
+        "settings": {
+          "scale": "stars",
+          "type": "tap",
+          "vis": "visible",
+          "who": "said",
+          "feed": "count"
+        },
+        "hits": 4.75,
+        "finds": "saying how you know someone finds",
+        "cost": "a stranger’s vouch counts only a quarter as much"
+      },
+      {
+        "id": "work",
+        "label": "Tied to real work",
+        "scale": "stars",
+        "settings": {
+          "scale": "stars",
+          "type": "work",
+          "vis": "visible",
+          "who": "anyone",
+          "feed": "count"
+        },
+        "hits": 6.08,
+        "finds": "tying praise to real work finds",
+        "cost": "each vouch has to point at something the person made"
+      },
+      {
+        "id": "together",
+        "label": "Everything together",
+        "scale": "stars",
+        "settings": {
+          "scale": "stars",
+          "type": "work",
+          "vis": "blind",
+          "who": "said",
+          "feed": "plain"
+        },
+        "hits": 8.42,
+        "finds": "everything together finds",
+        "cost": "every vouch points at real work, waits for both sides and says how you know them"
+      },
+      {
+        "id": "linkedin",
+        "label": "LinkedIn-style endorsements",
+        "scale": "yes",
+        "settings": {
+          "scale": "yes",
+          "type": "tap",
+          "vis": "visible",
+          "who": "anyone",
+          "feed": "count"
+        },
+        "hits": 2.42,
+        "finds": "LinkedIn-style endorsements find",
+        "cost": "people say yes {n}% of the time",
+        "costValue": 78,
+        "costMetric": "yesRate"
+      },
+      {
+        "id": "cosign",
+        "label": "Cosign-style rules",
+        "scale": "yes",
+        "settings": {
+          "scale": "yes",
+          "type": "written",
+          "vis": "visible",
+          "who": "said",
+          "feed": "reputation"
+        },
+        "hits": 5.92,
+        "finds": "Cosign-style rules find",
+        "cost": "about {n} of 80 people get no yes at all",
+        "costValue": 20.2,
+        "costMetric": "unrated"
+      }
+    ]
   }
 }

@@ -31,7 +31,12 @@
   <link rel="modulepreload" href="js/stars.js">
   <script>
     // Start the chart data while the page parses; js/charts.js picks it up (see index.html).
-    window.chartData = { figures: fetch('data/figures.json') };
+    window.chartData = {
+      figures: fetch('data/figures.json').then((res) => {
+        if (!res.ok) throw new Error(`data/figures.json returned HTTP ${res.status}`);
+        return res.json();
+      }),
+    };
     window.chartData.figures.catch(() => {}); // charts.js reports failures
   </script>
 </head>
@@ -46,251 +51,240 @@
   </header>
 
   <main id="main">
-    <section class="notes-hero wrap" aria-labelledby="title">
-      <h1 id="title">The notes behind the drop</h1>
-      <p class="notes-lede">What the lab means for a cosign, why ratings drift to the top, the research behind it, and where every number came from.</p>
-      <nav class="notes-toc label" aria-label="On this page">
-        <a href="#cosign">What this means for a cosign</a>
-        <a href="#why">Why this happens</a>
-        <a href="#research">The research</a>
-        <a href="#methods">Methods and sources</a>
-      </nav>
+    <section class="notes-hero wrap" id="methods" aria-labelledby="title">
+      <h1 id="title">How the drop was made</h1>
+      <p class="notes-lede">The Airbnb number is our own count of this year’s public listings. The grids come from published research, with a source for each. The lab is a simulation we wrote, and every rule and number in it is here. Open any part below.</p>
     </section>
 
-    <section class="notes-section" id="cosign" aria-labelledby="h-cosign">
-      <div class="wrap">
-        <h2 id="h-cosign">What this means for a cosign</h2>
-        <p>Say what the person did, and how you know them.</p>
-        <p><a href="https://cosign.co/faq">Cosign</a> already gets much of this right. Cosigning puts your name behind your praise. Its guide asks for “a specific contribution” over “a generic compliment,” and a private “Work/Worked Together” signal lets you say you work or worked with someone. Its advice to readers fits this whole drop: “Read who is saying what, and why.”</p>
-        <p>The lab’s result rests on our guesses about how people judge real work. <a href="index.html#fix">Try other rules</a> in the lab to change them, or to try a Cosign-style setup.</p>
-        <p>One question stays open: how much does pointing at real work help real vouches? Our lab says a lot, but only because of rules we chose. Real vouches and real outcomes would settle it.</p>
-      </div>
-    </section>
+    <div class="wrap folds">
+      <details class="fold" id="data">
+        <summary><span class="fold-title">The data</span><span class="fold-sum label">Where the Airbnb number and the six grids come from</span></summary>
+        <div class="fold-body">
+  <h3 id="m-airbnb">The Airbnb numbers</h3>
+          <p><a href="https://insideairbnb.com/">Inside Airbnb</a> publishes snapshots of public Airbnb listings under a <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0</a> license. We used the detailed listings files for <a href="https://data.insideairbnb.com/united-states/ca/san-francisco/2026-06-14/data/listings.csv.gz">San Francisco</a> and <a href="https://data.insideairbnb.com/united-states/ny/new-york-city/2026-06-14/data/listings.csv.gz">New York City</a>, both compiled on 14 June 2026, and kept listings with a guest rating and at least 10 reviews: 3,592 in San Francisco and 12,102 in New York. The rating is the overall score Airbnb shows on each listing. Their median is 4.84 and their mean 4.79, which gives the title its number. On the page, “typical” means that median: half of the listings are rated 4.84 or higher. Of these 15,694 listings, 92.3 percent sit at 4.5 or above, 60.6 percent at 4.8 or above, and 0.3 percent below 4.0, which the page rounds to fewer than 1 in 100. In San Francisco, anything under 4.7 lands in the bottom 15 percent.</p>
+          <p>Counting every rated listing (27,448), the median is 4.88 and 62.8 percent sit at 4.8 or above. We use the 10-review cut because a single five-star review can give a new listing a perfect score. Inside Airbnb no longer serves its older snapshots, so we make no claim about how these ratings changed over time. The script that computes every Airbnb number here is <a href="https://github.com/briangrover9-hue/cosign-drop/blob/main/research/airbnb_measure.py">research/airbnb_measure.py</a>.</p>
 
-    <section class="notes-section" id="why" aria-labelledby="h-why">
-      <div class="wrap">
-        <h2 id="h-why">Why this happens</h2>
-
-        <p>No one has to lie. Four small, ordinary habits all push the same way.</p>
-        <ol class="forces" role="list">
-          <li>
-            <h3><span class="force-n">1.</span> Giving is free</h3>
-            <p>A one-click endorsement costs nothing, so little stops anyone from giving one. Scarce signals work better. At two dating events, people got a few free “roses” to attach to date requests. A request with a rose was accepted about a fifth more often.</p>
-          </li>
-          <li>
-            <h3><span class="force-n">2.</span> The other person sees what you said</h3>
-            <p>If they can rate you back, a low score invites a low score in return. When Airbnb hid each review until both sides had written one, the link between guest and host ratings fell by about half.</p>
-          </li>
-          <li>
-            <h3><span class="force-n">3.</span> Honesty costs you</h3>
-            <p>A bad rating can cost someone income, so people hold back. On one big freelance site, 28.4 percent of employers who privately said they would never rehire a worker still gave that worker four stars or more in public.</p>
-          </li>
-          <li>
-            <h3><span class="force-n">4.</span> Unhappy people go quiet</h3>
-            <p>Happy customers leave feedback. Mildly unhappy ones mostly say nothing. On eBay, fewer than 1 in 100 comments was negative. One estimate says about 1 in 5 buyers was unhappy.</p>
-          </li>
-        </ol>
-        <p>Then the feed makes it worse. On one news site, a single random up-vote made the next reader 32 percent more likely to up-vote too. Praise keeps flowing to whoever already has it.</p>
-        <p>Hotels are the exception. On TripAdvisor, only about 1 in 4 hotels is rated 4.5 or higher. The researchers suggest people rate a business more harshly than a person.</p>
-      </div>
-    </section>
-
-    <section class="notes-section" id="research" aria-labelledby="h-research">
-      <div class="wrap">
-        <h2 id="h-research">The research</h2>
-
-        <h3 id="h-why-now">When writing got cheap, reputation got expensive</h3>
-        <p>ChatGPT arrived in November 2022, and soon anyone could write a polished job proposal. Economists compared job posts on Freelancer.com from before ChatGPT with posts from 2024.</p>
-        <figure class="figure" id="fig-why-now" aria-labelledby="why-now-title" aria-describedby="why-now-cap">
-          <p class="fig-title" id="why-now-title">What an employer would pay for one step more of each</p>
-          <div id="why-now-root" class="chart" data-chart="why-now">
-            <table class="fallback">
-              <caption class="visually-hidden">What an employer would pay, before ChatGPT and in 2024</caption>
-              <thead><tr><th scope="col">For one standard deviation more of</th><th scope="col">Before ChatGPT</th><th scope="col">2024</th></tr></thead>
+  <h3 id="m-drift">The drift grids</h3>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th scope="col">System</th><th scope="col">Top of the scale</th><th scope="col">Share</th><th scope="col">Source</th></tr></thead>
               <tbody>
-                <tr><th scope="row">A proposal tailored to the job</th><td>$25.67</td><td>$14.85</td></tr>
-                <tr><th scope="row">A higher reputation score on the site</th><td>$27.96</td><td>$46.24</td></tr>
+                <tr><td>US college grades</td><td>Letter grades that are A’s</td><td>15% in 1960, 43% by the late 2000s</td><td><a href="https://www.gradeinflation.com/tcr2012grading.pdf">Rojstaczer and Healy (2012)</a></td></tr>
+                <tr><td>Harvard College</td><td>Grades that are A’s</td><td>24% in 2005, 60.2% in 2025</td><td><a href="https://oue.fas.harvard.edu/faculty-resources/report-on-grading/">Harvard Office of Undergraduate Education (2025)</a></td></tr>
+                <tr><td>An online labor market</td><td>Workers rated 5 stars</td><td>33%, then 85% six years later</td><td><a href="https://www.nber.org/system/files/working_papers/w25857/w25857.pdf">Filippas, Horton and Golden (2022)</a></td></tr>
+                <tr><td>eBay sellers, 2011 to 2014</td><td>Feedback that is positive</td><td>99.3% for the average seller; median 100%</td><td><a href="https://www.nber.org/system/files/working_papers/w20830/w20830.pdf">Nosko and Tadelis (2015)</a></td></tr>
+                <tr><td>Airbnb, 2015</td><td>Listings rated 4.5 or higher</td><td>94%</td><td><a href="https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf">Zervas, Proserpio and Byers</a></td></tr>
+                <tr><td>TripAdvisor hotels, 2015</td><td>Hotels rated 4.5 or higher</td><td>26%</td><td>Same</td></tr>
+                <tr><td>LinkedIn endorsements</td><td>There is no negative endorsement</td><td>100%; a billion given in under six months</td><td><a href="https://web.archive.org/web/20120926031752/http://blog.linkedin.com:80/2012/09/24/introducing-endorsements-give-kudos-with-just-one-click/">LinkedIn’s 2012 launch post</a></td></tr>
+                <tr><td>GitHub stars</td><td>There is no negative star</td><td>100%; 6.0 million suspected fakes, July 2019 to December 2024</td><td><a href="https://cmustrudel.github.io/papers/icse2026fakestars.pdf">He et al. (ICSE 2026)</a></td></tr>
               </tbody>
             </table>
           </div>
-          <figcaption id="why-now-cap">How many more dollars an employer would pay for one step up in each, one standard deviation, on job posts from before ChatGPT and from 2024.<span class="src">Galdin and Silbert (2025), <a href="https://arxiv.org/abs/2511.08785">Making Talk Cheap</a>, Table 2, applications the employer looked at. The authors stress the fall in the first row; the rise in the second is our reading of their table.</span></figcaption>
-        </figure>
-        <p>Employers would pay 42 percent less for a well-tailored proposal. What they would pay for a higher reputation score rose by about two thirds. We read that as employers leaning on a worker’s record once the writing tells them less.</p>
-        <p>Both sides use AI more each year. In a 2025 survey, 29.3 percent of job seekers had used it on a resume or cover letter. In <a href="https://www.shrm.org/topics-tools/research/2025-talent-trends/ai-in-hr">SHRM’s 2025 survey</a>, 43 percent of organizations used AI for HR tasks.</p>
-
-        <h3 id="h-predicts">Watching someone work beats counting their years</h3>
-        <p>Work samples, where a candidate does a piece of the real job, predict performance better than years of experience. A 2022 re-analysis lowered their score, but years of experience ended lower still.</p>
-        <figure class="figure" id="fig-validity" aria-labelledby="validity-title" aria-describedby="validity-cap">
-          <p class="fig-title" id="validity-title">How well each method predicts job performance</p>
-          <div id="validity-root" class="chart" data-chart="validity">
-            <table class="fallback">
-              <caption class="visually-hidden">Validity of hiring methods, 1998 and 2022 estimates</caption>
-              <thead><tr><th scope="col">Method</th><th scope="col">1998</th><th scope="col">2022</th></tr></thead>
-              <tbody>
-                <tr><th scope="row">Structured interviews</th><td>.51</td><td>.42</td></tr>
-                <tr><th scope="row">Job knowledge tests</th><td>.48</td><td>.40</td></tr>
-                <tr><th scope="row">Biodata questionnaires</th><td>.35</td><td>.38</td></tr>
-                <tr><th scope="row">Work samples</th><td>.54</td><td>.33</td></tr>
-                <tr><th scope="row">Cognitive ability tests</th><td>.51</td><td>.31</td></tr>
-                <tr><th scope="row">Integrity tests</th><td>.41</td><td>.31</td></tr>
-                <tr><th scope="row">Unstructured interviews</th><td>.38</td><td>.19</td></tr>
-                <tr><th scope="row">Conscientiousness</th><td>.31</td><td>.19</td></tr>
-                <tr><th scope="row">Years of experience</th><td>.18</td><td>.07</td></tr>
-                <tr><th scope="row">Peer ratings</th><td>.49</td><td>not re-estimated</td></tr>
-                <tr><th scope="row">Reference checks</th><td>.26</td><td>not re-estimated</td></tr>
-                <tr><th scope="row">Years of education</th><td>.10</td><td>not re-estimated</td></tr>
-              </tbody>
-            </table>
+          <p>The page draws four of these, Harvard, eBay, LinkedIn and GitHub; the rest are here for the record. LinkedIn reported in <a href="https://web.archive.org/web/20130308140056/http://blog.linkedin.com:80/2013/03/06/1-billion-endorsements-given-on-linkedin-infographic/">March 2013</a> that a billion endorsements had been given, less than six months after launch. Grids round to the nearest whole star. The labor-market paper reports the rise in five-star ratings over six years without naming the years; its average rating runs from 3.74 in early 2007 to 4.85 in May 2016. On GitHub, researchers also found that 16.66 percent of repositories that gained at least 50 stars in July 2024 had run a fake-star campaign. TripAdvisor’s 26 percent is the “about 1 in 4” on the page; Zervas and colleagues note TripAdvisor does not let hotels rate guests back and suggest people rate “other individuals differently or more tactfully, than they rate firms.”</p>
+        </div>
+      </details>
+      <details class="fold" id="lab">
+        <summary><span class="fold-title">The lab’s rules</span><span class="fold-sum label">How the 80 simulated coworkers rate each other, and what each setting finds</span></summary>
+        <div class="fold-body">
+  <h3 id="m-lab">How the lab works</h3>
+          <p>The lab is a simulation, written for this page, of how scores evolve under simple rules. It does not use real people or real data. Its code is in <a href="https://github.com/briangrover9-hue/cosign-drop/blob/main/js/lab-model.js">js/lab-model.js</a>.</p>
+          <div id="lab-rules">
+            <ul>
+              <li><strong>People.</strong> 80 coworkers in ten teams of eight. Each has a hidden skill drawn from a bell curve and a visibility (how much of a presence they have) that is only loosely related to skill, a correlation of 0.2. Each person also picks two people at random on other teams as people they have worked with, rarely the same one twice, and those links go both ways.</li>
+              <li><strong>Rounds.</strong> Each of 30 rounds, every person gives three one-tap vouches, or one written vouch, or one vouch tied to a piece of work. Each vouch is as likely to go to someone they worked with as to whoever the feed shows them. No one vouches for the same person twice in a round, and everyone gives a round’s vouches before anyone sees them.</li>
+              <li><strong>Judgment.</strong> Coworkers judge your skill with some noise. People who never worked with you judge you 35 percent on skill and 65 percent on visibility, with more noise. Writing a vouch cuts either kind of noise by a fifth. A vouch tied to work is judged from the work, which shows skill with less noise, even to strangers.</li>
+              <li><strong>Stars.</strong> Raters judge people partly against the current average rating and add a little on top, because a below-average rating feels like a penalty; with no fixed standard, that extra compounds every round. Against the fixed standard, an average person earns 3.2 stars, plus one star for each standard deviation of skill the rater sees. A one-tap rating is judged entirely against the average, a written vouch 30 percent against the fixed standard and a vouch tied to work 75 percent, the slider under “A vouch is.” Ratings round to whole stars from 1 to 5. Twelve percent of one-tap ratings and four percent of written ones are reflexive fives. A score is the average of the last 12 vouches a person received.</li>
+              <li><strong>A named yes.</strong> There is no way to say no, only silence. A giver says yes when someone seems at least average (one tap) or at least half a standard deviation above it (written or tied to work), and a quarter of one-tap judgments, and 3 percent of written ones, are a yes given without judging. A person’s standing is the number of yeses they have received, weighted as the rules on how they know you and on the feed describe.</li>
+              <li><strong>Visible or blind.</strong> A visible star rating is pulled 40 percent toward what the other person last gave the rater, and shades up more (0.12 stars) than a blind one (0.05). A visible yes makes a yes back easier: when the other person last said yes to the giver, the giver’s bar drops by half a standard deviation.</li>
+              <li><strong>How they know you.</strong> When a vouch says how the giver knows you, a vouch from someone who never worked with you counts a quarter as much.</li>
+              <li><strong>Feed.</strong> A feed ranked by count shows people more often the more vouches they have. A feed ranked by who vouched weights each vouch by the giver’s track record, meaning how the people they vouched for (with a yes, or four or five stars) have turned out, which the model reveals a little each round with noise; that weighting sets the scores too, and a record built on few vouches counts for less. Cosign’s pages don’t say how its reputation is measured, so the track record is our stand-in. In either ranked feed, a person’s place in it sways how others judge them, by the same amount for every kind of vouch. A plain feed ranks no one.</li>
+              <li><strong>Measures.</strong> “At 4.8 or above” counts people whose score is at least 4.8. “Top 10 by score” counts how many of the 10 highest scores or standings belong to the 10 most skilled people; chance alone gives about one. Ties are broken at random, once per run, and people with no vouches rank last. The lab shows one simulated company, world 374, picked from 600. Its first run keeps every result the text describes (the worst setting finds about half, tying ratings to work finds the most of any single switch, and on the yes scale a track record beats a raw count), and each of the eight sets of rules in scene 5 finds within one of its average there. On its first run the worst setting finds 5 of the 10 most skilled and tying ratings to work finds 7; the table below gives the averages, which are what scene 5’s bars show.</li>
+              <li><strong>The chart.</strong> On the stars scale the dots sit by score, from 1 to 5. On the yes scale they sit by standing, on an axis that ends at a round number at or above the 95th percentile of standings, so the few people far ahead wait at its end, marked “+”, instead of squeezing everyone else toward 0. Weighted yeses compound, so their axis is spaced by square root: its evenly spaced ticks read 0, 1, 4, 9 and 16 sixteenths of the end. People with no vouches, or no yes, sit in their own lane at the left.</li>
+            </ul>
           </div>
-          <figcaption id="validity-cap">Each number is the correlation between a method’s score and later job performance, corrected for imperfect measures of performance and, where the authors judged it sound, for studying only people who were hired. Zero means the method ranks people no better than chance. The gold star marks work samples.<span class="src"><a href="https://doi.org/10.1037/0033-2909.124.2.262">Schmidt and Hunter (1998)</a>, Table 1; <a href="https://doi.org/10.1037/apl0000994">Sackett, Zhang, Berry and Lievens (2022)</a>, Table 3.</span></figcaption>
-        </figure>
-
-        <h3 id="h-holds">What keeps a vouch honest</h3>
-        <p>The research points to four rules. Cosign already ships a version of most of them.</p>
-        <ol class="rules" role="list">
-          <li>
-            <h4>A vouch stays hidden until both people have written theirs</h4>
-            <div class="reveal" id="reveal">
-              <div class="cards">
-                <div class="card">
-                  <div class="card-inner">
-                    <div class="card-face card-front">
-                      <span class="who">Dana, about Omar</span>
-                      <span class="sealed">Written. Hidden until Omar writes his.</span>
-                    </div>
-                    <div class="card-face card-back">
-                      <span class="who">Dana, about Omar</span>
-                      <blockquote>Omar rebuilt our billing retries in three weeks. Failed charges dropped, and I stopped getting paged on weekends.</blockquote>
-                    </div>
-                  </div>
-                </div>
-                <div class="card">
-                  <div class="card-inner">
-                    <div class="card-face card-front">
-                      <span class="who">Omar, about Dana</span>
-                      <span class="sealed">Written. Hidden until Dana writes hers.</span>
-                    </div>
-                    <div class="card-face card-back">
-                      <span class="who">Omar, about Dana</span>
-                      <blockquote>Dana ran the launch checklist and caught the tax bug two days before we shipped. I’d want her on the next launch.</blockquote>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="reveal-controls">
-                <button class="btn" type="button" id="reveal-btn" aria-controls="reveal">Both are in. Reveal them.</button>
-                <span class="meta" id="reveal-note">An example. Neither person could read the other’s before writing.</span>
-              </div>
-            </div>
-            <p>Neither card can be written to match the other, so there’s nothing to trade. On Airbnb, blind reviews cut the link between the two sides’ ratings by about half. Cosign’s private signals work on a related idea. The person gets the signal, but nobody else sees it, and when the interest is mutual, Cosign can open a private conversation.</p>
-          </li>
-          <li>
-            <h4>It names something specific the person did</h4>
-            <p>A specific claim ties praise to the work itself. Cosign’s guide asks for “a specific contribution” over “a generic compliment.”</p>
-          </li>
-          <li>
-            <h4>It says how you know them</h4>
-            <p>Expedia only lets guests who booked a stay review a hotel. TripAdvisor lets anyone. Comparing the same hotels, economists found more signs of fake reviews on TripAdvisor, most of all where a hotel had a reason to fake them. LinkedIn began highlighting endorsements from colleagues in 2016. Cosign asks cosigners to be specific about what they know.</p>
-          </li>
-          <li>
-            <h4>It costs the giver something</h4>
-            <p>Scarce signals keep their meaning, as the roses suggest. The simplest cost is your name. Cosign describes a cosign as putting “your name and reputation behind that belief.”</p>
-          </li>
-        </ol>
-        <p>One more finding applies to networks that rank people. A feed that ranks by raw count hands the gains to whoever is already ahead. On Cosign’s ranked lists, ordering “can reflect the reputation behind contributions as well as how many people have contributed.” In the lab, ranking by the track record of who said yes finds more of the best people than ranking by count.</p>
-      </div>
-    </section>
-
-    <section class="notes-section methods" id="methods" aria-labelledby="h-methods">
-      <div class="wrap">
-        <h2 id="h-methods">Methods and sources</h2>
-
-        <h3 id="m-airbnb">The Airbnb numbers</h3>
-        <p><a href="https://insideairbnb.com/">Inside Airbnb</a> publishes snapshots of public Airbnb listings under a <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0</a> license. We used the detailed listings files for <a href="https://data.insideairbnb.com/united-states/ca/san-francisco/2026-06-14/data/listings.csv.gz">San Francisco</a> and <a href="https://data.insideairbnb.com/united-states/ny/new-york-city/2026-06-14/data/listings.csv.gz">New York City</a>, both compiled on 14 June 2026, and kept listings with a guest rating and at least 10 reviews: 3,592 in San Francisco and 12,102 in New York. The rating is the overall score Airbnb shows on each listing. Their median is 4.84 and their mean 4.79, which gives the title its number. On the page, “typical” means that median: half of the listings are rated 4.84 or higher. Of these 15,694 listings, 92.3 percent sit at 4.5 or above, 60.6 percent at 4.8 or above, and 0.3 percent below 4.0, which the page rounds to fewer than 1 in 100. In San Francisco, anything under 4.7 lands in the bottom 15 percent.</p>
-        <p>Counting every rated listing (27,448), the median is 4.88 and 62.8 percent sit at 4.8 or above. We use the 10-review cut because a single five-star review can give a new listing a perfect score. Inside Airbnb no longer serves its older snapshots, so we make no claim about how these ratings changed over time. The script that computes every Airbnb number here is <a href="https://github.com/briangrover9-hue/cosign-drop/blob/main/research/airbnb_measure.py">research/airbnb_measure.py</a>.</p>
-
-        <h3 id="m-why-now">Why now</h3>
-        <p><a href="https://arxiv.org/abs/2511.08785">Galdin and Silbert (2025)</a> use Freelancer.com job posts from January 2021 to July 2024. Their Table 2 compares posts from before ChatGPT’s release on November 30, 2022 with posts from March 26, 2024 on, by which time the site had its own AI writing tool (from April 2023). It turns how much employers favor each part of an application into dollars: how much higher a bid an employer would accept for one step up, one standard deviation, in that part. We quote the columns limited to applications the employer looked at. The reputation score is the site’s own ranking of workers, built mostly from their record there; employers see the ranking and many of its inputs, but not the score itself. Employers would pay $14.85 more for a proposal one standard deviation better tailored after ChatGPT, against $25.67 before, which is 42 percent less, and $46.24 more for a higher reputation score, against $27.96, which is about two thirds more. The job seeker figures come from <a href="https://www.ihire.com/resourcecenter/employer/pages/the-state-of-online-recruiting-2025">iHire’s State of Online Recruiting 2025</a>, a survey by a job site of 1,421 job seekers, where 29.3 percent had used AI on a resume or cover letter, up from 17.3 percent a year earlier, and the HR figures from <a href="https://www.shrm.org/topics-tools/research/2025-talent-trends/ai-in-hr">SHRM’s 2025 Talent Trends</a>, a February 2025 survey of 2,040 HR professionals about their organizations: 43 percent of organizations used AI for HR tasks, up from 26 percent in 2024.</p>
-
-        <h3 id="m-drift">The drift grids</h3>
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th scope="col">System</th><th scope="col">Top of the scale</th><th scope="col">Share</th><th scope="col">Source</th></tr></thead>
+          <div class="table-scroll">
+          <table class="lab-results">
+            <caption>What each setting finds, averaged over a dozen simulated companies</caption>
+            <thead><tr><th scope="col">Setting</th><th scope="col">Of the 10 most skilled, how many the top 10 finds</th><th scope="col">Average score, round 1 to 30, or share of yeses</th><th scope="col">People with no vouch or no yes</th></tr></thead>
             <tbody>
-              <tr><td>US college grades</td><td>Letter grades that are A’s</td><td>15% in 1960, 43% by the late 2000s</td><td><a href="https://www.gradeinflation.com/tcr2012grading.pdf">Rojstaczer and Healy (2012)</a></td></tr>
-              <tr><td>Harvard College</td><td>Grades that are A’s</td><td>24% in 2005, 60.2% in 2025</td><td><a href="https://oue.fas.harvard.edu/faculty-resources/report-on-grading/">Harvard Office of Undergraduate Education (2025)</a></td></tr>
-              <tr><td>An online labor market</td><td>Workers rated 5 stars</td><td>33%, then 85% six years later</td><td><a href="https://www.nber.org/system/files/working_papers/w25857/w25857.pdf">Filippas, Horton and Golden (2022)</a></td></tr>
-              <tr><td>eBay sellers, 2011 to 2014</td><td>Feedback that is positive</td><td>99.3% for the average seller; median 100%</td><td><a href="https://www.nber.org/system/files/working_papers/w20830/w20830.pdf">Nosko and Tadelis (2015)</a></td></tr>
-              <tr><td>Airbnb, 2015</td><td>Listings rated 4.5 or higher</td><td>94%</td><td><a href="https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf">Zervas, Proserpio and Byers</a></td></tr>
-              <tr><td>TripAdvisor hotels, 2015</td><td>Hotels rated 4.5 or higher</td><td>26%</td><td>Same</td></tr>
-              <tr><td>LinkedIn endorsements</td><td>There is no negative endorsement</td><td>100%; a billion given in under six months</td><td><a href="https://web.archive.org/web/20120926031752/http://blog.linkedin.com:80/2012/09/24/introducing-endorsements-give-kudos-with-just-one-click/">LinkedIn’s 2012 launch post</a></td></tr>
-              <tr><td>GitHub stars</td><td>There is no negative star</td><td>100%; 6.0 million suspected fakes, July 2019 to December 2024</td><td><a href="https://cmustrudel.github.io/papers/icse2026fakestars.pdf">He et al. (ICSE 2026)</a></td></tr>
+              <tr><th scope="row">Worst: stars, one tap, seen right away, not said, feed by count</th><td>4.50</td><td>3.5 to 4.4</td><td>0</td></tr>
+              <tr><th scope="row">Tied to work, the rest as worst</th><td>6.08</td><td>3.2 to 3.3</td><td>0</td></tr>
+              <tr><th scope="row">Written, the rest as worst</th><td>4.75</td><td>3.3 to 3.7</td><td>0</td></tr>
+              <tr><th scope="row">After both write, the rest as worst</th><td>4.83</td><td>3.4 to 4.2</td><td>0</td></tr>
+              <tr><th scope="row">Says how they know you, the rest as worst</th><td>4.75</td><td>3.5 to 4.5</td><td>0</td></tr>
+              <tr><th scope="row">Feed ranks nothing, the rest as worst</th><td>5.25</td><td>3.5 to 4.4</td><td>0</td></tr>
+              <tr><th scope="row">Feed ranks by who vouched, the rest as worst</th><td>4.67</td><td>3.5 to 4.4</td><td>0</td></tr>
+              <tr><th scope="row">Tied to work, after both write, said, feed ranks nothing</th><td>8.42</td><td>3.2 to 3.2</td><td>0</td></tr>
+              <tr><th scope="row">LinkedIn-style endorsements: named yes, one tap, right away, not said, feed by count</th><td>2.42</td><td>78% yes</td><td>0</td></tr>
+              <tr><th scope="row">Cosign-style rules: named yes, written, right away, said, feed by who vouched</th><td>5.92</td><td>64% yes</td><td>20.2</td></tr>
+              <tr><th scope="row">Cosign-style, feed by count</th><td>3.75</td><td>64% yes</td><td>21.4</td></tr>
+              <tr><th scope="row">Cosign-style, feed ranks nothing</th><td>6.17</td><td>37% yes</td><td>5.1</td></tr>
+              <tr><th scope="row">Cosign-style, tied to work</th><td>6.67</td><td>69% yes</td><td>32.4</td></tr>
+              <tr><th scope="row">Cosign-style, tied to work, feed ranks nothing</th><td>6.25</td><td>37% yes</td><td>13.8</td></tr>
+              <tr><th scope="row">Picking 10 people at random</th><td>1.25</td><td></td><td></td></tr>
             </tbody>
           </table>
+          </div>
+          <p>Tying ratings to work is our most generous setting. We assume a vouch that points at work has no reflexive fives or yeses, reads skill with less noise, is judged on the work even by strangers, and is held to a fixed standard. That standard is what keeps the scores from drifting: with the other switches at their worst, setting it to 0 lets the average climb 0.75 over the run, against 0.96 for one-tap stars. If strangers judged a piece of work entirely by how well known its maker is, tying ratings to work would find 4.25, below the worst setting’s 4.50. On the yes scale, tied-to-work yeses leave more people with none, because none of them is reflexive. Having no yes there can mean nobody looked, and Cosign’s guide says as much: “Having few or no cosigns is not a negative judgment about a person.”</p>
+          <p>The rules follow the research under “Why this happens” and “The research,” but every number in them is our assumption, including the ones that make tying vouches to work look strong. Change them under “Try other rules” and the sizes of the effects change with them. What held across the settings we tried is the direction: scores judged only against each other drift up, scores anchored to the work do not, and on the yes scale, weighting who said yes beats counting yeses. Push the assumptions to their extremes and some effects reverse.</p>
+
+          <p>One question stays open: how much does pointing at real work help real vouches? Our lab says a lot, but only because of rules we chose. Real vouches and real outcomes would settle it.</p>
         </div>
-        <p>The page draws four of these, Harvard, eBay, LinkedIn and GitHub; the rest are here for the record. LinkedIn reported in <a href="https://web.archive.org/web/20130308140056/http://blog.linkedin.com:80/2013/03/06/1-billion-endorsements-given-on-linkedin-infographic/">March 2013</a> that a billion endorsements had been given, less than six months after launch. Grids round to the nearest whole star. The labor-market paper reports the rise in five-star ratings over six years without naming the years; its average rating runs from 3.74 in early 2007 to 4.85 in May 2016. On GitHub, researchers also found that 16.66 percent of repositories that gained at least 50 stars in July 2024 had run a fake-star campaign. TripAdvisor’s 26 percent is the “about 1 in 4” on the page; Zervas and colleagues note TripAdvisor does not let hotels rate guests back and suggest people rate “other individuals differently or more tactfully, than they rate firms.”</p>
+      </details>
+      <details class="fold" id="research">
+        <summary><span class="fold-title">The research</span><span class="fold-sum label">Why ratings drift, what predicts job performance, and what keeps a vouch honest</span></summary>
+        <div class="fold-body">
+          <h3 id="why">Why this happens</h3>
+          <p>No one has to lie. Four small, ordinary habits all push the same way.</p>
+          <ol class="forces" role="list">
+            <li>
+              <h3><span class="force-n">1.</span> Giving is free</h3>
+              <p>A one-click endorsement costs nothing, so little stops anyone from giving one. Scarce signals work better. At two dating events, people got a few free “roses” to attach to date requests. A request with a rose was accepted about a fifth more often.</p>
+            </li>
+            <li>
+              <h3><span class="force-n">2.</span> The other person sees what you said</h3>
+              <p>If they can rate you back, a low score invites a low score in return. When Airbnb hid each review until both sides had written one, the link between guest and host ratings fell by about half.</p>
+            </li>
+            <li>
+              <h3><span class="force-n">3.</span> Honesty costs you</h3>
+              <p>A bad rating can cost someone income, so people hold back. On one big freelance site, 28.4 percent of employers who privately said they would never rehire a worker still gave that worker four stars or more in public.</p>
+            </li>
+            <li>
+              <h3><span class="force-n">4.</span> Unhappy people go quiet</h3>
+              <p>Happy customers leave feedback. Mildly unhappy ones mostly say nothing. On eBay, fewer than 1 in 100 comments was negative. One estimate says about 1 in 5 buyers was unhappy.</p>
+            </li>
+          </ol>
+          <p>Then the feed makes it worse. On one news site, a single random up-vote made the next reader 32 percent more likely to up-vote too. Praise keeps flowing to whoever already has it.</p>
+          <p>Hotels are the exception. On TripAdvisor, only about 1 in 4 hotels is rated 4.5 or higher. The researchers suggest people rate a business more harshly than a person.</p>
 
-        <h3 id="m-why">Why this happens</h3>
-        <ul>
-          <li>Roses: <a href="https://web.stanford.edu/~niederle/Lee.Niederle.Rose.ExpEcon.2015.pdf">Lee and Niederle (2015)</a>, two dating events with 613 participants, each given two or eight roses that were free to send but limited in number. “About a fifth more often” is their estimate of 3.3 percentage points, a 20 percent increase, holding the sender’s and recipient’s desirability fixed. Job-market signals, which are scarce the same way: <a href="https://web.stanford.edu/~niederle/JobMarket.JEP2010..pdf">Coles et al. (2010)</a>, Table 3, where a candidate’s signal of interest came with a 6.8 point higher chance of an interview, an association in their data.</li>
-          <li>eBay retaliation: <a href="https://ben.orsee.org/papers/engineering_trust.pdf">Bolton, Greiner and Ockenfels (2013)</a>, on sellers answering negative feedback in kind, and a laboratory version of eBay’s system in which blind feedback cut the correlation between the two sides’ ratings from 0.68 to 0.41 (Table 4). Airbnb’s simultaneous reveal: <a href="https://andreyfradkin.com/assets/reviews_paper.pdf">Fradkin, Grewal and Holtz (2021)</a>, the introduction and Section 7: the correlation between guest and host ratings fell by 48 percent, the “about half” on the page, while the average guest rating moved only 0.25 percent.</li>
-          <li>Public and private feedback: Filippas, Horton and Golden (2022), read in the NBER working paper version; the platform is not named in the paper. In its surveys, “some employers report they fear retaliation, while others claim to not want to harm the rated individual.”</li>
-          <li>Silent buyers: <a href="https://www.cs.princeton.edu/courses/archive/spr08/cos444/papers/dellarocas_wood06.pdf">Dellarocas and Wood (2008)</a>, Tables 2, 5 and 6: 0.55 percent of comments were negative, the “fewer than 1 in 100” on the page, and two versions of their model put dissatisfied buyers at 18.5 and 21 percent, the “about 1 in 5.” Counting every sale, including the ones with no feedback, the average seller’s positive share falls from 99.3 percent to 64 percent: Nosko and Tadelis (2015).</li>
-          <li>Feeds: <a href="https://snap.stanford.edu/class/cs224w-readings/muchnik13bias.pdf">Muchnik, Aral and Taylor (2013)</a>, where one random up-vote made the next viewer 32 percent more likely to up-vote and those comments ended 25 percent higher; <a href="https://www.princeton.edu/~mjs3/salganik_dodds_watts06_full.pdf">Salganik, Dodds and Watts (2006)</a>, where showing download counts to 14,341 people made the hits bigger and harder to predict; and <a href="https://doi.org/10.1126/science.159.3810.56">Merton (1968)</a> on the Matthew effect.</li>
-          <li>Verified reviews: <a href="https://www.nber.org/system/files/working_papers/w18340/w18340.pdf">Mayzlin, Dover and Chevalier (2014)</a>. Colleague endorsements: LinkedIn’s <a href="https://www.linkedin.com/blog/member/product/rethinking-endorsements-linkedin-features">2016 update</a>.</li>
-        </ul>
+          <h3 id="h-why-now">When writing got cheap, reputation got expensive</h3>
+          <p>ChatGPT arrived in November 2022, and soon anyone could write a polished job proposal. Economists compared job posts on Freelancer.com from before ChatGPT with posts from 2024.</p>
+          <figure class="figure" id="fig-why-now" aria-labelledby="why-now-title" aria-describedby="why-now-cap">
+            <p class="fig-title" id="why-now-title">What an employer would pay for one step more of each</p>
+            <div id="why-now-root" class="chart" data-chart="why-now">
+              <table class="fallback">
+                <caption class="visually-hidden">What an employer would pay, before ChatGPT and in 2024</caption>
+                <thead><tr><th scope="col">For one standard deviation more of</th><th scope="col">Before ChatGPT</th><th scope="col">2024</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">A proposal tailored to the job</th><td>$25.67</td><td>$14.85</td></tr>
+                  <tr><th scope="row">A higher reputation score on the site</th><td>$27.96</td><td>$46.24</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption id="why-now-cap">How many more dollars an employer would pay for one step up in each, one standard deviation, on job posts from before ChatGPT and from 2024.<span class="src">Galdin and Silbert (2025), <a href="https://arxiv.org/abs/2511.08785">Making Talk Cheap</a>, Table 2, applications the employer looked at. The authors stress the fall in the first row; the rise in the second is our reading of their table.</span></figcaption>
+          </figure>
+          <p>Employers would pay 42 percent less for a well-tailored proposal. What they would pay for a higher reputation score rose by about two thirds. We read that as employers leaning on a worker’s record once the writing tells them less.</p>
+          <p>Both sides use AI more each year. In a 2025 survey, 29.3 percent of job seekers had used it on a resume or cover letter. In <a href="https://www.shrm.org/topics-tools/research/2025-talent-trends/ai-in-hr">SHRM’s 2025 survey</a>, 43 percent of organizations used AI for HR tasks.</p>
 
-        <h3 id="m-predicts">Job performance</h3>
-        <p>The chart’s numbers are .54 to .33 for work samples and .18 to .07 for years of experience, among others. They are correlations between each method’s score and later job performance, after statistical corrections. <a href="https://doi.org/10.1037/0033-2909.124.2.262">Schmidt and Hunter (1998)</a> corrected for imperfect measures of performance and for the fact that studies only see people who were hired, a narrower group than everyone who applied. <a href="https://doi.org/10.1037/apl0000994">Sackett and colleagues (2022)</a> list the new values in their Table 3 and explain each larger change in their text. That second correction had often been made too large, which is the main reason cognitive ability tests, both kinds of interview and job knowledge tests fell. Work samples, integrity tests, conscientiousness and years of experience fell because newer meta-analyses, which pool the results of many earlier studies, found lower values. The 1998 work-sample figure came from a 1974 review written before such pooling was done, and the new experience figure looks at experience before hiring instead of time in the current job. Five of the 1998 values, including work samples, reference checks and peer ratings, never got that second correction, and eight could not be re-estimated in 2022, including reference checks, peer ratings (coworkers rating each other, at .49) and years of education. In a <a href="https://doi.org/10.1017/iop.2023.24">2023 follow-up</a> the same authors lowered cognitive ability again, to .23, using an unpublished analysis, and their method is disputed: see <a href="https://doi.org/10.1037/apl0001078">Oh, Le and Roth (2023)</a> and the reply that followed. One more caution: in the 2022 table, Black candidates’ average work-sample scores sit about two thirds of a standard deviation below white candidates’, one of the larger gaps among the methods listed, so how work samples are designed and scored matters.</p>
+          <h3 id="h-predicts">Watching someone work beats counting their years</h3>
+          <p>Work samples, where a candidate does a piece of the real job, predict performance better than years of experience. A 2022 re-analysis lowered their score, but years of experience ended lower still.</p>
+          <figure class="figure" id="fig-validity" aria-labelledby="validity-title" aria-describedby="validity-cap">
+            <p class="fig-title" id="validity-title">How well each method predicts job performance</p>
+            <div id="validity-root" class="chart" data-chart="validity">
+              <table class="fallback">
+                <caption class="visually-hidden">Validity of hiring methods, 1998 and 2022 estimates</caption>
+                <thead><tr><th scope="col">Method</th><th scope="col">1998</th><th scope="col">2022</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Structured interviews</th><td>.51</td><td>.42</td></tr>
+                  <tr><th scope="row">Job knowledge tests</th><td>.48</td><td>.40</td></tr>
+                  <tr><th scope="row">Biodata questionnaires</th><td>.35</td><td>.38</td></tr>
+                  <tr><th scope="row">Work samples</th><td>.54</td><td>.33</td></tr>
+                  <tr><th scope="row">Cognitive ability tests</th><td>.51</td><td>.31</td></tr>
+                  <tr><th scope="row">Integrity tests</th><td>.41</td><td>.31</td></tr>
+                  <tr><th scope="row">Unstructured interviews</th><td>.38</td><td>.19</td></tr>
+                  <tr><th scope="row">Conscientiousness</th><td>.31</td><td>.19</td></tr>
+                  <tr><th scope="row">Years of experience</th><td>.18</td><td>.07</td></tr>
+                  <tr><th scope="row">Peer ratings</th><td>.49</td><td>not re-estimated</td></tr>
+                  <tr><th scope="row">Reference checks</th><td>.26</td><td>not re-estimated</td></tr>
+                  <tr><th scope="row">Years of education</th><td>.10</td><td>not re-estimated</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption id="validity-cap">Each number is the correlation between a method’s score and later job performance, corrected for imperfect measures of performance and, where the authors judged it sound, for studying only people who were hired. Zero means the method ranks people no better than chance. The gold star marks work samples.<span class="src"><a href="https://doi.org/10.1037/0033-2909.124.2.262">Schmidt and Hunter (1998)</a>, Table 1; <a href="https://doi.org/10.1037/apl0000994">Sackett, Zhang, Berry and Lievens (2022)</a>, Table 3.</span></figcaption>
+          </figure>
 
-        <h3 id="m-lab">The trust lab</h3>
-        <p>The lab is a simulation, written for this page, of how scores evolve under simple rules. It does not use real people or real data. Its code is in <a href="https://github.com/briangrover9-hue/cosign-drop/blob/main/js/lab-model.js">js/lab-model.js</a>.</p>
-        <div id="lab-rules">
+          <h3 id="h-holds">What keeps a vouch honest</h3>
+          <p>The research points to four rules. Cosign already ships a version of most of them.</p>
+          <ol class="rules" role="list">
+            <li>
+              <h4>A vouch stays hidden until both people have written theirs</h4>
+              <div class="reveal" id="reveal">
+                <div class="cards">
+                  <div class="card">
+                    <div class="card-inner">
+                      <div class="card-face card-front">
+                        <span class="who">Dana, about Omar</span>
+                        <span class="sealed">Written. Hidden until Omar writes his.</span>
+                      </div>
+                      <div class="card-face card-back">
+                        <span class="who">Dana, about Omar</span>
+                        <blockquote>Omar rebuilt our billing retries in three weeks. Failed charges dropped, and I stopped getting paged on weekends.</blockquote>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-inner">
+                      <div class="card-face card-front">
+                        <span class="who">Omar, about Dana</span>
+                        <span class="sealed">Written. Hidden until Dana writes hers.</span>
+                      </div>
+                      <div class="card-face card-back">
+                        <span class="who">Omar, about Dana</span>
+                        <blockquote>Dana ran the launch checklist and caught the tax bug two days before we shipped. I’d want her on the next launch.</blockquote>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="reveal-controls">
+                  <button class="btn" type="button" id="reveal-btn" aria-controls="reveal">Both are in. Reveal them.</button>
+                  <span class="meta" id="reveal-note">An example. Neither person could read the other’s before writing.</span>
+                </div>
+              </div>
+              <p>Neither card can be written to match the other, so there’s nothing to trade. On Airbnb, blind reviews cut the link between the two sides’ ratings by about half. Cosign’s private signals work on a related idea. The person gets the signal, but nobody else sees it, and when the interest is mutual, Cosign can open a private conversation.</p>
+            </li>
+            <li>
+              <h4>It names something specific the person did</h4>
+              <p>A specific claim ties praise to the work itself. Cosign’s guide asks for “a specific contribution” over “a generic compliment.”</p>
+            </li>
+            <li>
+              <h4>It says how you know them</h4>
+              <p>Expedia only lets guests who booked a stay review a hotel. TripAdvisor lets anyone. Comparing the same hotels, economists found more signs of fake reviews on TripAdvisor, most of all where a hotel had a reason to fake them. LinkedIn began highlighting endorsements from colleagues in 2016. Cosign asks cosigners to be specific about what they know.</p>
+            </li>
+            <li>
+              <h4>It costs the giver something</h4>
+              <p>Scarce signals keep their meaning, as the roses suggest. The simplest cost is your name. Cosign describes a cosign as putting “your name and reputation behind that belief.”</p>
+            </li>
+          </ol>
+          <p>One more finding applies to networks that rank people. A feed that ranks by raw count hands the gains to whoever is already ahead. On Cosign’s ranked lists, ordering “can reflect the reputation behind contributions as well as how many people have contributed.” In the lab, ranking by the track record of who said yes finds more of the best people than ranking by count.</p>
+        </div>
+      </details>
+      <details class="fold" id="sources">
+        <summary><span class="fold-title">Sources</span><span class="fold-sum label">Every source behind the numbers, and how this was made</span></summary>
+        <div class="fold-body">
+  <h3 id="m-why">Why this happens, the sources</h3>
           <ul>
-            <li><strong>People.</strong> 80 coworkers in ten teams of eight. Each has a hidden skill drawn from a bell curve and a visibility (how much of a presence they have) that is only loosely related to skill, a correlation of 0.2. Each person also picks two people at random on other teams as people they have worked with, rarely the same one twice, and those links go both ways.</li>
-            <li><strong>Rounds.</strong> Each of 30 rounds, every person gives three one-tap vouches, or one written vouch, or one vouch tied to a piece of work. Each vouch is as likely to go to someone they worked with as to whoever the feed shows them. No one vouches for the same person twice in a round, and everyone gives a round’s vouches before anyone sees them.</li>
-            <li><strong>Judgment.</strong> Coworkers judge your skill with some noise. People who never worked with you judge you 35 percent on skill and 65 percent on visibility, with more noise. Writing a vouch cuts either kind of noise by a fifth. A vouch tied to work is judged from the work, which shows skill with less noise, even to strangers.</li>
-            <li><strong>Stars.</strong> Raters judge people partly against the current average rating and add a little on top, because a below-average rating feels like a penalty; with no fixed standard, that extra compounds every round. Against the fixed standard, an average person earns 3.2 stars, plus one star for each standard deviation of skill the rater sees. A one-tap rating is judged entirely against the average, a written vouch 30 percent against the fixed standard and a vouch tied to work 75 percent, the slider under “A vouch is.” Ratings round to whole stars from 1 to 5. Twelve percent of one-tap ratings and four percent of written ones are reflexive fives. A score is the average of the last 12 vouches a person received.</li>
-            <li><strong>A named yes.</strong> There is no way to say no, only silence. A giver says yes when someone seems at least average (one tap) or at least half a standard deviation above it (written or tied to work), and a quarter of one-tap judgments, and 3 percent of written ones, are a yes given without judging. A person’s standing is the number of yeses they have received, weighted as the rules on how they know you and on the feed describe.</li>
-            <li><strong>Visible or blind.</strong> A visible star rating is pulled 40 percent toward what the other person last gave the rater, and shades up more (0.12 stars) than a blind one (0.05). A visible yes makes a yes back easier: when the other person last said yes to the giver, the giver’s bar drops by half a standard deviation.</li>
-            <li><strong>How they know you.</strong> When a vouch says how the giver knows you, a vouch from someone who never worked with you counts a quarter as much.</li>
-            <li><strong>Feed.</strong> A feed ranked by count shows people more often the more vouches they have. A feed ranked by who vouched weights each vouch by the giver’s track record, meaning how the people they vouched for (with a yes, or four or five stars) have turned out, which the model reveals a little each round with noise; that weighting sets the scores too, and a record built on few vouches counts for less. Cosign’s pages don’t say how its reputation is measured, so the track record is our stand-in. In either ranked feed, a person’s place in it sways how others judge them, by the same amount for every kind of vouch. A plain feed ranks no one.</li>
-            <li><strong>Measures.</strong> “At 4.8 or above” counts people whose score is at least 4.8. “Top 10 by score” counts how many of the 10 highest scores or standings belong to the 10 most skilled people; chance alone gives about one. Ties are broken at random, once per run, and people with no vouches rank last. The lab shows one simulated company, world 256, picked from 600: among the worlds whose first run keeps every result the text describes (the worst setting finds about half, tying ratings to work finds the most of any single switch, and on the yes scale a track record beats a raw count), its results sit closest to the average of a dozen. On its first run the worst setting finds 5 of the 10 most skilled and tying ratings to work finds 8; the table below gives the averages.</li>
+            <li>Roses: <a href="https://web.stanford.edu/~niederle/Lee.Niederle.Rose.ExpEcon.2015.pdf">Lee and Niederle (2015)</a>, two dating events with 613 participants, each given two or eight roses that were free to send but limited in number. “About a fifth more often” is their estimate of 3.3 percentage points, a 20 percent increase, holding the sender’s and recipient’s desirability fixed. Job-market signals, which are scarce the same way: <a href="https://web.stanford.edu/~niederle/JobMarket.JEP2010..pdf">Coles et al. (2010)</a>, Table 3, where a candidate’s signal of interest came with a 6.8 point higher chance of an interview, an association in their data.</li>
+            <li>eBay retaliation: <a href="https://ben.orsee.org/papers/engineering_trust.pdf">Bolton, Greiner and Ockenfels (2013)</a>, on sellers answering negative feedback in kind, and a laboratory version of eBay’s system in which blind feedback cut the correlation between the two sides’ ratings from 0.68 to 0.41 (Table 4). Airbnb’s simultaneous reveal: <a href="https://andreyfradkin.com/assets/reviews_paper.pdf">Fradkin, Grewal and Holtz (2021)</a>, the introduction and Section 7: the correlation between guest and host ratings fell by 48 percent, the “about half” on the page, while the average guest rating moved only 0.25 percent.</li>
+            <li>Public and private feedback: Filippas, Horton and Golden (2022), read in the NBER working paper version; the platform is not named in the paper. In its surveys, “some employers report they fear retaliation, while others claim to not want to harm the rated individual.”</li>
+            <li>Silent buyers: <a href="https://www.cs.princeton.edu/courses/archive/spr08/cos444/papers/dellarocas_wood06.pdf">Dellarocas and Wood (2008)</a>, Tables 2, 5 and 6: 0.55 percent of comments were negative, the “fewer than 1 in 100” on the page, and two versions of their model put dissatisfied buyers at 18.5 and 21 percent, the “about 1 in 5.” Counting every sale, including the ones with no feedback, the average seller’s positive share falls from 99.3 percent to 64 percent: Nosko and Tadelis (2015).</li>
+            <li>Feeds: <a href="https://snap.stanford.edu/class/cs224w-readings/muchnik13bias.pdf">Muchnik, Aral and Taylor (2013)</a>, where one random up-vote made the next viewer 32 percent more likely to up-vote and those comments ended 25 percent higher; <a href="https://www.princeton.edu/~mjs3/salganik_dodds_watts06_full.pdf">Salganik, Dodds and Watts (2006)</a>, where showing download counts to 14,341 people made the hits bigger and harder to predict; and <a href="https://doi.org/10.1126/science.159.3810.56">Merton (1968)</a> on the Matthew effect.</li>
+            <li>Verified reviews: <a href="https://www.nber.org/system/files/working_papers/w18340/w18340.pdf">Mayzlin, Dover and Chevalier (2014)</a>. Colleague endorsements: LinkedIn’s <a href="https://www.linkedin.com/blog/member/product/rethinking-endorsements-linkedin-features">2016 update</a>.</li>
           </ul>
-        </div>
-        <div class="table-scroll">
-        <table class="lab-results">
-          <caption>What each setting finds, averaged over a dozen simulated companies</caption>
-          <thead><tr><th scope="col">Setting</th><th scope="col">Of the 10 most skilled, how many the top 10 finds</th><th scope="col">Average score, round 1 to 30, or share of yeses</th><th scope="col">People with no vouch or no yes</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">Worst: stars, one tap, seen right away, not said, feed by count</th><td>4.50</td><td>3.5 to 4.4</td><td>0</td></tr>
-            <tr><th scope="row">Tied to work, the rest as worst</th><td>6.08</td><td>3.2 to 3.3</td><td>0</td></tr>
-            <tr><th scope="row">Written, the rest as worst</th><td>4.75</td><td>3.3 to 3.7</td><td>0</td></tr>
-            <tr><th scope="row">After both write, the rest as worst</th><td>4.83</td><td>3.4 to 4.2</td><td>0</td></tr>
-            <tr><th scope="row">Says how they know you, the rest as worst</th><td>4.75</td><td>3.5 to 4.5</td><td>0</td></tr>
-            <tr><th scope="row">Feed ranks nothing, the rest as worst</th><td>5.25</td><td>3.5 to 4.4</td><td>0</td></tr>
-            <tr><th scope="row">Feed ranks by who vouched, the rest as worst</th><td>4.67</td><td>3.5 to 4.4</td><td>0</td></tr>
-            <tr><th scope="row">Tied to work, after both write, said, feed ranks nothing</th><td>8.42</td><td>3.2 to 3.2</td><td>0</td></tr>
-            <tr><th scope="row">Named yes, one tap, right away, not said, feed by count, roughly LinkedIn endorsements at launch</th><td>2.42</td><td>78% yes</td><td>0</td></tr>
-            <tr><th scope="row">Cosign-style: named yes, written, right away, said, feed by who vouched</th><td>5.92</td><td>64% yes</td><td>20.2</td></tr>
-            <tr><th scope="row">Cosign-style, feed by count</th><td>3.75</td><td>64% yes</td><td>21.4</td></tr>
-            <tr><th scope="row">Cosign-style, feed ranks nothing</th><td>6.17</td><td>37% yes</td><td>5.1</td></tr>
-            <tr><th scope="row">Cosign-style, tied to work</th><td>6.67</td><td>69% yes</td><td>32.4</td></tr>
-            <tr><th scope="row">Cosign-style, tied to work, feed ranks nothing</th><td>6.25</td><td>37% yes</td><td>13.8</td></tr>
-            <tr><th scope="row">Picking 10 people at random</th><td>1.25</td><td></td><td></td></tr>
-          </tbody>
-        </table>
-        </div>
-        <p>Tying ratings to work is our most generous setting. We assume a vouch that points at work has no reflexive fives or yeses, reads skill with less noise, is judged on the work even by strangers, and is held to a fixed standard. That standard is what keeps the scores from drifting: with the other switches at their worst, setting it to 0 lets the average climb 0.75 over the run, against 0.96 for one-tap stars. If strangers judged a piece of work entirely by how well known its maker is, tying ratings to work would find 4.25, below the worst setting’s 4.50. On the yes scale, tied-to-work yeses leave more people with none, because none of them is reflexive. Having no yes there can mean nobody looked, and Cosign’s guide says as much: “Having few or no cosigns is not a negative judgment about a person.”</p>
-        <p>The rules follow the research under “Why this happens” and “The research,” but every number in them is our assumption, including the ones that make tying vouches to work look strong. Change them under “Try other rules” and the sizes of the effects change with them. What held across the settings we tried is the direction: scores judged only against each other drift up, scores anchored to the work do not, and on the yes scale, weighting who said yes beats counting yeses. Push the assumptions to their extremes and some effects reverse.</p>
 
-        <h3 id="m-made">How this was made</h3>
-        <p>We built this with Claude Code, Anthropic’s coding agent, over two days in September 2026. Agents traced each number to its primary source. The page is plain HTML, CSS and JavaScript, with no framework, cookies or tracking. Every source we checked, including the ones we cut, is listed in <a href="https://github.com/briangrover9-hue/cosign-drop/blob/main/research/sources.md">the sources ledger</a>.</p>
+  <h3 id="m-why-now">Why now</h3>
+          <p><a href="https://arxiv.org/abs/2511.08785">Galdin and Silbert (2025)</a> use Freelancer.com job posts from January 2021 to July 2024. Their Table 2 compares posts from before ChatGPT’s release on November 30, 2022 with posts from March 26, 2024 on, by which time the site had its own AI writing tool (from April 2023). It turns how much employers favor each part of an application into dollars: how much higher a bid an employer would accept for one step up, one standard deviation, in that part. We quote the columns limited to applications the employer looked at. The reputation score is the site’s own ranking of workers, built mostly from their record there; employers see the ranking and many of its inputs, but not the score itself. Employers would pay $14.85 more for a proposal one standard deviation better tailored after ChatGPT, against $25.67 before, which is 42 percent less, and $46.24 more for a higher reputation score, against $27.96, which is about two thirds more. The job seeker figures come from <a href="https://www.ihire.com/resourcecenter/employer/pages/the-state-of-online-recruiting-2025">iHire’s State of Online Recruiting 2025</a>, a survey by a job site of 1,421 job seekers, where 29.3 percent had used AI on a resume or cover letter, up from 17.3 percent a year earlier, and the HR figures from <a href="https://www.shrm.org/topics-tools/research/2025-talent-trends/ai-in-hr">SHRM’s 2025 Talent Trends</a>, a February 2025 survey of 2,040 HR professionals about their organizations: 43 percent of organizations used AI for HR tasks, up from 26 percent in 2024.</p>
 
-        <h3 id="m-credits">Credits</h3>
-        <p>Airbnb data from Inside Airbnb, used under CC BY 4.0. Type is Newsreader by Production Type and IBM Plex Mono by IBM, both under the SIL Open Font License.</p>
-      </div>
-    </section>
+  <h3 id="m-predicts">Job performance</h3>
+          <p>The chart’s numbers are .54 to .33 for work samples and .18 to .07 for years of experience, among others. They are correlations between each method’s score and later job performance, after statistical corrections. <a href="https://doi.org/10.1037/0033-2909.124.2.262">Schmidt and Hunter (1998)</a> corrected for imperfect measures of performance and for the fact that studies only see people who were hired, a narrower group than everyone who applied. <a href="https://doi.org/10.1037/apl0000994">Sackett and colleagues (2022)</a> list the new values in their Table 3 and explain each larger change in their text. That second correction had often been made too large, which is the main reason cognitive ability tests, both kinds of interview and job knowledge tests fell. Work samples, integrity tests, conscientiousness and years of experience fell because newer meta-analyses, which pool the results of many earlier studies, found lower values. The 1998 work-sample figure came from a 1974 review written before such pooling was done, and the new experience figure looks at experience before hiring instead of time in the current job. Five of the 1998 values, including work samples, reference checks and peer ratings, never got that second correction, and eight could not be re-estimated in 2022, including reference checks, peer ratings (coworkers rating each other, at .49) and years of education. In a <a href="https://doi.org/10.1017/iop.2023.24">2023 follow-up</a> the same authors lowered cognitive ability again, to .23, using an unpublished analysis, and their method is disputed: see <a href="https://doi.org/10.1037/apl0001078">Oh, Le and Roth (2023)</a> and the reply that followed. One more caution: in the 2022 table, Black candidates’ average work-sample scores sit about two thirds of a standard deviation below white candidates’, one of the larger gaps among the methods listed, so how work samples are designed and scored matters.</p>
+
+  <h3 id="m-made">How this was made</h3>
+          <p>We built this with Claude Code, Anthropic’s coding agent, over two days in September 2026. Agents traced each number to its primary source. The page is plain HTML, CSS and JavaScript, with no framework, cookies or tracking. Every source we checked, including the ones we cut, is listed in <a href="https://github.com/briangrover9-hue/cosign-drop/blob/main/research/sources.md">the sources ledger</a>.</p>
+
+  <h3 id="m-credits">Credits</h3>
+          <p>Airbnb data from Inside Airbnb, used under CC BY 4.0. Type is Newsreader by Production Type and IBM Plex Mono by IBM, both under the SIL Open Font License.</p>
+        </div>
+      </details>
+    </div>
   </main>
 
   <footer class="site-footer">

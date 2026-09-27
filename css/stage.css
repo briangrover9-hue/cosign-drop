@@ -548,7 +548,14 @@ html.stage-on:not(.stage-ready) [data-rise] {
     transform var(--move) var(--ease) var(--delay, 0ms);
 }
 .is-in .w {
-  --delay: calc(100ms + var(--i, 0) * 65ms);
+  --delay: calc(40ms + var(--i, 0) * 36ms);
+}
+/* A scene reached while the tab was hidden is in place when the reader comes back. */
+html.is-sudden .scene,
+html.is-sudden .beat,
+html.is-sudden [data-rise],
+html.is-sudden .w {
+  transition: none !important;
 }
 /* A beat's own state wins over its scene's, so the lab's text can change beat by beat while its
    chart stays put. */

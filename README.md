@@ -11,17 +11,17 @@ Six full-screen scenes under a fixed frame: the title and the page's own rating 
 1. **Everyone's a 4.8.** We rate everything now, and approval that costs nothing turns into a commodity that can't tell anyone apart.
 2. **It's the same everywhere.** Harvard grades, eBay sellers, LinkedIn endorsements, GitHub stars and Airbnb listings, each a grid of 100 stars that fills as the scene arrives, all crowded at the top; hotels, rated as businesses, are the exception.
 3. **One example up close.** Drag the star to guess the typical Airbnb rating in San Francisco and New York. The big number counts to the answer from our own measurement of this year's data, 4.84, as every listing rises from the slider's track.
-4. **The lab.** A simulated company of 80 coworkers rating each other with one-click stars. The scores drift up toward 5, and the top 10 by score finds only half of the 10 most skilled.
-5. **The fix.** One big switch on the same lab: praise has to point at real work. Flip it and the gold stars move onto the most skilled people. "Try other rules" opens a frosted panel with every switch and assumption, beside the chart on desktop and above it on a phone.
+4. **The lab.** A simulated company of 80 coworkers rating each other with one-click stars. The scores drift up toward 5, and the top 10 by score finds only half of the 10 most skilled. A "How this works" strip above the chart gives the model in three plain steps before any result, and on a phone it folds away after the first run.
+5. **The fix.** Which rules find the best people, in our simulation? A bar for each set of rules, from one-click likes to everything together, shows how many of the 10 most skilled the top 10 finds, averaged over 12 simulated companies, with a line where guessing lands. "Stars" or "A named yes" picks the bars, so LinkedIn-style endorsements (about 2) sit beside Cosign-style rules (about 6). A line under the bars says they are simulated, not measured: the direction of each effect comes from research, and the sizes are our guesses. The scene opens on "Tied to real work," the rules its headline names, and a tap on any bar runs those rules in the lab beside it, with one plain line on what they find and what they cost. "Try other rules" opens a frosted panel with every switch and assumption.
 6. **What this means for a cosign.** Most ratings count every vote the same; people don't. Weighing approval by who gave it and how much care went into it keeps it from turning into a commodity, and tying it to the work is the next step.
 
-Scenes 2, 4, 5 and 6 each have a "Why?" that opens a few sentences of evidence, with sources, in a frosted card over the scene's text. The page's rating climbs from 3.0 to 5.0 as you go, and the last scene says so. `methods.html` holds the rest: why ratings drift, the research, and every source and rule behind the numbers.
+Scenes 2, 4, 5 and 6 each have a "Why?" that opens a few sentences of evidence, with sources, in a frosted card over the scene's text. The page's rating climbs from 3.0 to 5.0 as you go, and the last scene says so. `methods.html` holds the rest behind a short summary, in four parts that open on request: the data, the lab's rules, the research, and the sources.
 
 ## Data and sources
 
 - `research/airbnb_measure.py` downloads Inside Airbnb's detailed listings for San Francisco and New York City (snapshot of 14 June 2026) and writes the rating distribution to `data/airbnb.json`. Inside Airbnb data is licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); credit to [Inside Airbnb](https://insideairbnb.com/).
 - `research/sources.md` lists every number the page uses, the primary source it came from, and the ones that were cut.
-- `data/figures.json` holds the numbers drawn in the charts, each traceable to the ledger.
+- `data/figures.json` holds the numbers drawn in the charts, each traceable to the ledger. Its `rules` block is scene 5's bars; `node tools/lab-check.mjs` fails if any of them drifts from the model.
 
 ## How it was built
 

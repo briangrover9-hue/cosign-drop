@@ -1,4 +1,5 @@
-// The notes page: two hidden vouch cards that flip at the same moment, once both are in.
+// The notes page: four parts that stay closed until a reader opens one, a link into a closed part
+// that opens it, and two hidden vouch cards that flip at the same moment, once both are in.
 
 // iOS Safari has needed a touch listener on the page before it shows :active on a tap, which
 // the buttons use for press feedback. The listener is passive and does nothing else.
@@ -36,3 +37,20 @@ if (header) {
   window.addEventListener('scroll', mark, { passive: true });
   mark();
 }
+
+// A link to something inside a closed part opens that part first, then goes to it.
+function openTarget() {
+  let id = '';
+  try {
+    id = decodeURIComponent(location.hash.slice(1));
+  } catch {
+    return;
+  }
+  const target = id && document.getElementById(id);
+  if (!target) return;
+  const fold = target.closest('details');
+  if (fold && !fold.open) fold.open = true;
+  target.scrollIntoView();
+}
+openTarget();
+window.addEventListener('hashchange', openTarget);

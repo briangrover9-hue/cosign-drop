@@ -59,7 +59,8 @@ function splitWords(el) {
     if (i) shown.append(' ');
     const w = document.createElement('span');
     w.className = 'w';
-    w.style.setProperty('--i', String(i));
+    // Past the tenth word the rest arrive together, so a long headline still lands quickly.
+    w.style.setProperty('--i', String(Math.min(i, 10)));
     w.textContent = word;
     shown.append(w);
   });
@@ -68,13 +69,14 @@ function splitWords(el) {
 }
 
 // Every other piece of a scene arrives after its headline has started: the visual first, then
-// the text under the headline, one piece at a time.
+// the text under the headline, one piece at a time. Every piece has started by 480ms, so the
+// whole scene is in within about a second of the key press.
 function setDelays(unit, words) {
   let k = 0;
   for (const el of unit.querySelectorAll('[data-rise]')) {
     if (el.closest('.beat') !== (unit.classList.contains('beat') ? unit : null)) continue;
     const visual = el.classList.contains('scene-visual');
-    el.style.setProperty('--delay', `${visual ? 140 : 160 + words * 50 + k++ * 90}ms`);
+    el.style.setProperty('--delay', `${visual ? 60 : Math.min(480, 200 + Math.min(words, 10) * 20 + k++ * 60)}ms`);
   }
 }
 
@@ -139,6 +141,11 @@ function go(next, { focus = false, from = 'input' } = {}) {
   const hadFocus = prevUnit && prevUnit.contains(document.activeElement);
 
   if (staged()) {
+    // A tab in the background paints no frames, so a scene changed there would not start its
+    // arrival until the reader came back. There the scene is simply in place. The first scene
+    // still arrives in motion, when the reader first looks.
+    const sudden = document.hidden && from !== 'load';
+    if (sudden) html.classList.add('is-sudden');
     // Stage the arriving pieces at their start, in this direction, before anything moves.
     if (newSection) stageUnit(nextSection);
     if (nextUnit !== nextSection) stageUnit(nextUnit);
@@ -159,10 +166,14 @@ function go(next, { focus = false, from = 'input' } = {}) {
       arrive(nextUnit);
       nextSection.dataset.beat = nextScene.beat;
     }
-    requestAnimationFrame(() => {
-      if (newSection) enterUnit(nextSection);
-      if (nextUnit !== nextSection) enterUnit(nextUnit);
-    });
+    // The pieces start on their way now, from the start the reflow above fixed, instead of on
+    // the next frame, so a late frame never holds the words back.
+    if (newSection) enterUnit(nextSection);
+    if (nextUnit !== nextSection) enterUnit(nextUnit);
+    if (sudden) {
+      void nextSection.offsetWidth;
+      html.classList.remove('is-sudden');
+    }
     if (focus || hadFocus || focusInCard) {
       nextUnit.querySelector('.scene-title')?.focus({ preventScroll: true });
     }
@@ -207,7 +218,7 @@ function updateFrame(i) {
     if (ratingNum) ratingNum.textContent = v.toFixed(1);
     if (ratingStars) setStarRow(ratingStars, Number(v.toFixed(1)));
   };
-  if (!motionAllowed()) show(target);
+  if (!motionAllowed() || document.hidden) show(target);
   else stopRating = animate(MOVE_MS, (e) => show(from + (target - from) * e));
 }
 
@@ -319,7 +330,9 @@ document.addEventListener(
       touch = null;
       return;
     }
-    touch = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    const area = event.target instanceof Element ? event.target.closest('.scene-visual') : null;
+    const scrolls = area && area.scrollHeight > area.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(area).overflowY);
+    touch = { x: event.touches[0].clientX, y: event.touches[0].clientY, area: scrolls ? area : null, top: scrolls ? area.scrollTop : 0 };
   },
   { passive: true },
 );
@@ -327,6 +340,7 @@ document.addEventListener(
   'touchmove',
   (event) => {
     if (event.touches.length > 1) touch = null; // a second finger: the reader is zooming
+    if (touch && touch.area) return; // an area that scrolls scrolls natively
     if (touch && event.cancelable) event.preventDefault(); // no rubber band while swiping
   },
   { passive: false },
@@ -336,7 +350,14 @@ document.addEventListener('touchend', (event) => {
   const t = event.changedTouches[0];
   const dx = t.clientX - touch.x;
   const dy = t.clientY - touch.y;
+  const { area, top } = touch;
   touch = null;
+  // A swipe that scrolled its area stays in the scene; one at the area's end moves the scene.
+  if (area) {
+    if (Math.abs(area.scrollTop - top) > 2) return;
+    const atEnd = dy < 0 ? area.scrollTop + area.clientHeight >= area.scrollHeight - 2 : area.scrollTop <= 0;
+    if (!atEnd) return;
+  }
   if (Math.abs(dy) > 44 && Math.abs(dy) > Math.abs(dx) * 1.2) go(current + (dy < 0 ? 1 : -1));
 });
 document.addEventListener('touchcancel', () => (touch = null));
@@ -487,8 +508,8 @@ html.dataset.scene = String(first);
 sections.forEach((section) => section.classList.remove('is-current'));
 
 // The first scene arrives once the fonts are in, so its words do not reflow as they rise; a
-// slow font gets 600ms before the scene arrives in the fallback face.
-const fontsIn = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 600))]) : Promise.resolve();
+// slow font gets 400ms before the scene arrives in the fallback face.
+const fontsIn = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 400))]) : Promise.resolve();
 fontsIn.then(() => {
   if (staged()) {
     sections.forEach((section) => setInert(section, true));

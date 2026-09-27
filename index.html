@@ -47,8 +47,13 @@
     // Start the chart data while the page parses; js/charts.js picks these up. A preload
     // would do the same in Chromium and Firefox, but WebKit never matches a fetch preload
     // and downloads the file twice.
-    window.chartData = { figures: fetch('data/figures.json'), airbnb: fetch('data/airbnb.json') };
-    Object.values(window.chartData).forEach((request) => request.catch(() => {})); // charts.js reports failures
+    // Each file is read once here and shared, parsed, with the charts and the lab.
+    const get = (path) => fetch(path).then((res) => {
+      if (!res.ok) throw new Error(`${path} returned HTTP ${res.status}`);
+      return res.json();
+    });
+    window.chartData = { figures: get('data/figures.json'), airbnb: get('data/airbnb.json') };
+    Object.values(window.chartData).forEach((request) => request.catch(() => {})); // each chart reports its own failure
   </script>
 </head>
 <body class="page-stage">
@@ -128,13 +133,11 @@
           <p class="label scene-links" data-rise><button type="button" class="text-button why-button" aria-controls="why-lab" aria-expanded="false">Why?</button></p>
         </div>
         <div class="beat" data-beat="fix" id="fix">
-          <h2 class="scene-title scene-switch" id="h-fix" tabindex="-1">
-            <button type="button" class="big-switch" id="work-switch" role="switch" aria-checked="false" aria-describedby="fix-note">
-              <span class="big-switch-track" aria-hidden="true"><span class="big-switch-thumb"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 1.8l3.05 6.52 7.13.86-5.26 4.9 1.38 7.05L12 17.6l-6.3 3.53 1.38-7.05L1.82 9.18l7.13-.86z"/></svg></span></span>
-              <span class="big-switch-label" data-words>The fix: praise has to point at real work</span>
-            </button>
-          </h2>
-          <p class="scene-body line" id="fix-note" data-rise>When a vouch has to point at something real the person made, it’s hard to fake. Flip the switch: the scores spread out, and the stars find 8 of the 10&nbsp;best.</p>
+          <h2 class="scene-title" id="h-fix" tabindex="-1" data-words>The fix: praise has to point at real work</h2>
+          <p class="scene-body" id="fix-note" data-rise>When a vouch has to point at something real the person made, it’s hard to fake. Tap any set of rules below to run it on the same 80&nbsp;people.</p>
+          <div class="rules" id="rules" data-rise aria-labelledby="rules-title">
+            <p class="fallback">This chart needs JavaScript. In our simulation, of the 10 most skilled people, the top 10 by score finds about 8 with everything together, about 6 when praise is tied to real work or with Cosign-style rules, about 5 with written reviews, hidden reviews or saying how you know someone, about 5 with one-click likes, and about 2 with LinkedIn-style endorsements. Guessing finds about 1. These are simulated, not measured.</p>
+          </div>
           <p class="beat-links label scene-links" data-rise>
             <button type="button" class="text-button" id="rules-open" aria-controls="lab-panel" aria-expanded="false">Try other rules</button>
             <span aria-hidden="true">·</span>
@@ -152,8 +155,18 @@
         <p>A vouch that points at real work can be checked against the work, so it says more about skill than about who is well known. Hiring research finds the same thing: a work sample, where a candidate does a piece of the real job, predicts job performance better than years of experience do (<a href="https://doi.org/10.1037/apl0000994">Sackett and colleagues, 2022</a>). In the lab, how firmly real work anchors a rating is our assumption, and “Try other rules” lets you change&nbsp;it.</p>
       </aside>
       <div class="scene-visual" data-rise>
-        <div id="lab-root" class="lab" data-seed="256">
-          <p class="fallback">This lab needs JavaScript. With one-click ratings that everyone can see, the scores drift up toward 5, and the top 10 by score holds only about half of the 10 most skilled people. When every rating points at real work, the scores stay spread out, and the top 10 holds most of them.</p>
+        <div id="lab-root" class="lab" data-seed="374">
+          <div class="lab-how" id="lab-how">
+            <p class="label lab-how-title">How this works</p>
+            <div class="lab-how-body" id="lab-how-body">
+              <ol class="lab-how-steps">
+                <li><svg class="lab-how-icon" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><circle class="is-hollow" cx="5" cy="5.5" r="3.2"/><circle class="is-filled" cx="16" cy="5.5" r="3.2"/><circle class="is-hollow" cx="27" cy="5.5" r="3.2"/><circle class="is-hollow" cx="10.5" cy="14.5" r="3.2"/><circle class="is-filled" cx="21.5" cy="14.5" r="3.2"/></svg><span>80 pretend coworkers. Each one is secretly good or not so good at their job.</span></li>
+                <li><svg class="lab-how-icon" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><circle class="is-hollow" cx="4.5" cy="10" r="3.2"/><circle class="is-hollow" cx="27.5" cy="10" r="3.2"/><path class="is-star" d="M12 1.8l3.05 6.52 7.13.86-5.26 4.9 1.38 7.05L12 17.6l-6.3 3.53 1.38-7.05L1.82 9.18l7.13-.86z" transform="translate(9 3) scale(.5833)"/></svg><span>Every round, they rate each other. Some ratings are honest, some are just being nice.</span></li>
+                <li><svg class="lab-how-icon" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><circle class="is-filled" cx="5.5" cy="10" r="3.2"/><path class="is-line" d="M11 8.4h5.5M11 11.6h5.5"/><path class="is-star is-hit" d="M12 1.8l3.05 6.52 7.13.86-5.26 4.9 1.38 7.05L12 17.6l-6.3 3.53 1.38-7.05L1.82 9.18l7.13-.86z" transform="translate(19.5 3) scale(.5833)"/></svg><span>We check: do the highest-rated people turn out to be the best ones? Black dots are the best. Gold stars are the highest rated.</span></li>
+              </ol>
+            </div>
+          </div>
+          <p class="fallback">This lab needs JavaScript. In the simulation, with one-click ratings that everyone can see, the scores drift up toward 5, and the top 10 by score holds only about half of the 10 most skilled people. When every rating points at real work, the scores stay spread out, and the top 10 holds most of them.</p>
         </div>
       </div>
     </section>
@@ -163,7 +176,7 @@
       <div class="scene-text">
         <h2 class="scene-title" id="h-cosign" tabindex="-1" data-words>What this means for a cosign</h2>
         <p class="scene-body" data-rise>Most ratings, referrals and endorsements count every vote the same. People don’t. A yes from someone whose judgment you trust, written with care, is worth more than a pile of&nbsp;taps.</p>
-        <p class="scene-body" data-rise>That’s what Cosign is built around: named yeses, and who said yes and why. The next step is tying each yes to the work&nbsp;itself.</p>
+        <p class="scene-body" data-rise>That’s how you keep approval from turning into a commodity, and it’s what Cosign is built around: named yeses, context from people who have worked together, and who said yes and why. The next step is tying each yes to the work&nbsp;itself.</p>
         <p class="label scene-links" data-rise><button type="button" class="text-button why-button" aria-controls="why-cosign" aria-expanded="false">Why?</button></p>
         <p class="byline label" data-rise>By <a href="https://www.linkedin.com/in/briantgrover">Brian Grover</a> <span aria-hidden="true">·</span> <a href="https://x.com/briantgrover">@briantgrover</a> <span aria-hidden="true">·</span> <a href="methods.html#methods">Methods and sources</a></p>
       </div>

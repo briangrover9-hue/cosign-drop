@@ -308,6 +308,9 @@ a {
   background-size: 220px 220px;
   animation: grain 1.1s steps(1, end) infinite;
 }
+html.is-tuning .grain {
+  animation-play-state: paused;
+}
 @keyframes grain {
   0%,
   100% {

@@ -396,6 +396,9 @@
 .dr-stars.is-pending .dr-s2 {
   fill: var(--paper);
 }
+.dr-stars.is-settled use {
+  transition: none;
+}
 @media (min-width: 960px) {
   .dr-list {
     --dr-gap: 36px;

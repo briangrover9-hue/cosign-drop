@@ -1,17 +1,19 @@
 // The trust lab: 80 coworkers vouching for each other, drawn as a dot plot that moves round by
 // round. The model lives in lab-model.js; this file draws it and wires up its controls.
 //
-// Scenes 4 and 5 share this one lab. Scene 4 plays the worst rules from round 0. Scene 5's big
-// switch ties every rating to real work, and the dots move to the new run's end at once, so the
-// gold stars can be seen finding the black dots. "Try other rules" opens a frosted panel over
-// the scene's text, beside the chart on desktop and above it on a phone, so the chart stays in
-// full view while its switches change.
+// Scenes 4 and 5 share this one lab. Scene 4 plays the worst rules from round 0. Scene 5 asks
+// which rules find the best people: a bar for each set of rules, with its average over a dozen
+// simulated companies, and a tap on a bar runs those rules on this company, with one plain line
+// on what they find and what they cost. "Try other rules" opens a frosted panel over the scene's
+// text, beside the chart on desktop and above it on a phone, so the chart stays in full view
+// while its switches change.
 import { createWorld, createRun, DEFAULTS, WORST, COSIGN, TOP_N, HIGH_BAR } from './lab-model.js';
 import { STAR_PATH } from './stars.js';
 import { MOVE_MS, ease, animate, reduceMotion, setLine } from './motion.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const ROUND_MS = 280; // time between rounds while playing
+const QUICK_ROUND_MS = 110; // a run started from scene 5's bars, so comparing rules stays quick
 // On the stars scale dots stack in score columns 0.05 wide, or 0.1 wide when the field is
 // too narrow for 0.05 columns to sit side by side without piling into each other. Both
 // widths put column edges on 4.8 and 5, so the 4.8+ band stays exact.
@@ -19,8 +21,12 @@ const COLUMNS_PER_STAR = [20, 10, 5];
 const LANE_COLUMNS = 4; // the lane for people with nothing to count stacks them four across
 const WIDE_FIELD = 520; // field width in pixels from which dots get bigger
 const MIN_FIELD_H = 96;
-// Yes-scale axis ends. Each divides by 4, so the quarter ticks are whole numbers.
-const YES_AXIS = [4, 8, 12, 16, 20, 24, 40, 60, 80, 100, 120, 160, 200, 240, 300, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 3000, 4000];
+// Yes-scale axis ends. On a plain count of yeses each divides by 4, so the quarter ticks are
+// whole numbers. Weighted yeses sit on a square-root axis, whose even ticks fall at 1, 4 and 9
+// sixteenths of the end, so each of those ends divides by 16.
+const YES_AXIS = [4, 8, 12, 16, 20, 24, 32, 40, 60, 80, 100, 120, 160, 200, 240, 300, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 3000, 4000];
+const ROOT_AXIS = [16, 32, 48, 64, 80, 96, 128, 160, 192, 240, 320, 400, 480, 640, 800, 960, 1280, 1600, 1920, 2400, 3200, 4000];
+// Scene 5 opens on the rules its headline names: praise tied to real work.
 const WORK = Object.freeze({ ...WORST, type: 'work' });
 const html = document.documentElement;
 
@@ -127,14 +133,12 @@ if (root && panel) mount(root, panel);
 
 function mount(root, panel) {
   const scene = root.closest('.scene');
-  const bigSwitch = document.getElementById('work-switch');
   const openButton = document.getElementById('rules-open');
   const labBody = document.getElementById('lab-body');
-  const fixNote = document.getElementById('fix-note');
   const bodyIntro = labBody ? labBody.textContent.trim() : '';
-  const noteIntro = fixNote ? fixNote.textContent.trim() : '';
+  const rulesBox = document.getElementById('rules');
 
-  const world = createWorld(Number(root.dataset.seed) || 256);
+  const world = createWorld(Number(root.dataset.seed) || 374);
   const N = world.people.length;
   const skilled = new Set(world.topSkill);
   // Within a column the most skilled sit lowest, so the order never shuffles.
@@ -157,6 +161,7 @@ function mount(root, panel) {
   const secondLabel = $('[data-readout="second"] .lab-readout-label');
   const spark = $('.lab-spark');
   const anchorBox = $('[data-slider="anchor"]');
+  const resultLine = $('.lab-result');
 
   // Static layer (axis, band, lane) and one reusable node per person. People
   // sit in three layers so filled dots draw above hollow ones and stars above both.
@@ -195,6 +200,7 @@ function mount(root, panel) {
     reference: null, // the finished run before the current one, for the dashed line
     scene: null, // the stage's current scene, by id
     resumeOnShow: false,
+    pace: ROUND_MS,
   };
 
   // Positions: where each dot is drawn now, where a tween started, where it ends.
@@ -229,10 +235,10 @@ function mount(root, panel) {
     state.snap = state.run.snapshot(); // anything drawn from here on belongs to the new run
     state.key = [...Object.values(state.settings), ...SLIDERS.map((a) => state.values[a.id])].join('|');
     state.reference = state.lastFinished;
-    state.axisMax = YES_AXIS[0];
+    state.axisMax = rootAxis(state.settings) ? ROOT_AXIS[0] : YES_AXIS[0];
   }
 
-  function play() {
+  function play(pace = ROUND_MS) {
     clearTimeout(startTimer);
     state.resumeOnShow = false;
     if (reduced) {
@@ -241,10 +247,11 @@ function mount(root, panel) {
     }
     if (state.run.done) startRun();
     state.playing = true;
+    state.pace = pace;
     svg.setAttribute('aria-label', `A dot plot of 80 people ${placedBy()}, changing round by round.`);
     const now = performance.now();
     advance(now);
-    nextRoundAt = now + ROUND_MS;
+    nextRoundAt = now + pace;
     loop();
   }
 
@@ -303,7 +310,9 @@ function mount(root, panel) {
     const S = state.run.settings;
     svg.setAttribute('aria-label', finishedLabel(m, S, state.run.rounds));
     state.lastFinished = { key: state.key, scale: S.scale, metrics: m, history: snap.history };
+    if (state.scene === 'lab') foldHowSoon();
     narrate(m);
+    describeRules(m);
     const second = S.scale === 'stars' ? ` The average score is ${m.mean.toFixed(2)}.` : ` People said yes ${percent(m.yesRate)} of the time.`;
     announce(`After ${state.run.rounds} rounds, the gold stars found ${m.hits} of the 10 best.${second}`);
   }
@@ -319,26 +328,6 @@ function mount(root, panel) {
           : `The stars found ${m.hits} of the 10 best.`,
       );
     }
-  }
-
-  // Scene 5's line says what the fix does. With the switch off it asks for the flip; with it on
-  // it reads as the result on the chart. The number is the run with every rating tied to work,
-  // under the current assumptions, so it stays true when a reader changes them.
-  const workResult = { key: '', metrics: null };
-  function updateNote() {
-    const key = SLIDERS.map((a) => state.values[a.id]).join('|');
-    if (key !== workResult.key) {
-      const run = createRun(world, WORK, 1, overrides());
-      while (!run.done) run.step();
-      workResult.key = key;
-      workResult.metrics = run.snapshot().metrics;
-    }
-    const m = workResult.metrics;
-    const claim = noteIntro.slice(0, noteIntro.indexOf('.') + 1);
-    const result =
-      m.top48 <= 10 ? `the scores spread out, and the stars find ${m.hits} of the 10 best.` : `the stars find ${m.hits} of the 10 best.`;
-    const on = state.settings.type === 'work';
-    setLine(fixNote, on ? `${claim} ${result.charAt(0).toUpperCase()}${result.slice(1)}` : `${claim} Flip the switch: ${result}`);
   }
 
   // Clear, then fill after a beat, so a repeated summary is still announced.
@@ -374,9 +363,10 @@ function mount(root, panel) {
       (isTop ? starLayer : n.home).append(n.g);
     });
 
-    // The yes axis grows to a round number above the top standing, and never shrinks mid-run.
+    // The yes axis grows to a round number at the 95th percentile of standings, and never
+    // shrinks mid-run.
     if (S.scale === 'yes') {
-      state.axisMax = axisEnd(snap, state.axisMax);
+      state.axisMax = axisEnd(snap, state.axisMax, rootAxis(S) ? ROOT_AXIS : YES_AXIS);
       if (geo && geo.axisMax !== state.axisMax) {
         geo = geometry(geo.width, geo.height);
         drawStatic(geo, animateIt && snap.round > 1);
@@ -433,22 +423,30 @@ function mount(root, panel) {
     const step = 2 * r + 1; // center to center, dots side by side or stacked
     const plotTop = 20; // top of the band and the lane rule; labels sit above
     const base = height - 26; // the axis line; tick labels sit below
+    const scale = state.settings.scale;
     const laneLeft = 1;
     const laneRight = laneLeft + LANE_COLUMNS * step + 3;
-    const x1 = laneRight + r + 10;
+    // On the yes scale the lane for people with no yes sits well clear of the axis's 0, so the
+    // lane never reads as a pile at 0.
+    const x1 = laneRight + r + (scale === 'yes' ? 24 : 10);
     const x5 = width - r - 6;
     const span = x5 - x1;
     const perStar = span / 4;
-    const scale = state.settings.scale;
     const axisMax = state.axisMax;
+    // Weighted yeses compound, so a few people run far ahead while most sit near 0. Spacing
+    // their axis by square root spreads out the crowd near 0 and keeps everyone's order. Anyone
+    // past the end waits at the end.
+    const root = rootAxis(state.settings);
+    const share = (v) => Math.min(1, Math.max(0, v / axisMax));
+    const yesX = root ? (v) => x1 + Math.sqrt(share(v)) * span : (v) => x1 + share(v) * span;
     return {
-      width, height, r, step, plotTop, base, laneLeft, laneRight, x1, x5, span, scale, axisMax,
+      width, height, r, step, plotTop, base, laneLeft, laneRight, x1, x5, span, scale, axisMax, root,
       columns: COLUMNS_PER_STAR.find((n) => perStar / n >= 0.6 * step) ?? COLUMNS_PER_STAR[COLUMNS_PER_STAR.length - 1],
       bins: Math.max(1, Math.floor(span / step)), // yes scale: columns as wide as a dot
       bottom: base - r - 1.5, // center of the lowest dot in a stack
       highest: plotTop + r + 3, // center of the highest dot a stack may reach
       starSize: Math.round(r * 2.8),
-      x: scale === 'yes' ? (v) => x1 + (v / axisMax) * span : (s) => x1 + (s - 1) * perStar,
+      x: scale === 'yes' ? yesX : (s) => x1 + (s - 1) * perStar,
     };
   }
 
@@ -470,12 +468,20 @@ function mount(root, panel) {
     } else {
       const title = weightedYeses(state.settings) ? 'Weighted yeses' : 'Yeses received';
       body += `<text class="lab-label" x="${G.width - 1}" y="${labelY}" text-anchor="end">${title}</text>`;
-      for (let k = 0; k <= 4; k++) body += tick(G.x1 + (G.span * k) / 4, (G.axisMax * k) / 4, k === 4 && String(G.axisMax).length > 1);
+      // Even ticks: on the square-root axis they read 0, 1, 4, 9 and 16 sixteenths of the end.
+      // The end reads "or more", since anyone past it waits there.
+      for (let k = 0; k <= 4; k++) {
+        const value = G.axisMax * (G.root ? (k / 4) ** 2 : k / 4);
+        body += tick(G.x1 + (G.span * k) / 4, k === 4 ? `${value}+` : value, k === 4);
+      }
     }
+    // The lane and the axis each stand on their own stretch of baseline, with a gap between.
+    const baseY = G.base + 0.5;
     body +=
       `<line class="lab-lane-rule" x1="${G.laneRight + 0.5}" x2="${G.laneRight + 0.5}" y1="${G.plotTop}" y2="${G.base}"/>` +
       `<text class="lab-label" x="0" y="${labelY}">${G.scale === 'yes' ? 'No yeses' : 'No vouches'}</text>` +
-      `<line class="lab-axis" x1="0" x2="${G.width}" y1="${G.base + 0.5}" y2="${G.base + 0.5}"/>`;
+      `<line class="lab-axis" x1="0" x2="${G.laneRight - 3}" y1="${baseY}" y2="${baseY}"/>` +
+      `<line class="lab-axis" x1="${(G.x1 - G.r - 3).toFixed(1)}" x2="${G.width}" y1="${baseY}" y2="${baseY}"/>`;
     staticLayer.innerHTML = body;
     // When the yes axis grows, its tick marks stay put and only the numbers change, so
     // nothing jitters; with motion the new numbers fade in while the dots ease over.
@@ -559,6 +565,10 @@ function mount(root, panel) {
   }
 
   function place(i) {
+    if (!Number.isFinite(cur[2 * i]) || !Number.isFinite(cur[2 * i + 1])) {
+      cur[2 * i] = to[2 * i];
+      cur[2 * i + 1] = to[2 * i + 1];
+    }
     nodes[i].g.setAttribute('transform', `translate(${cur[2 * i].toFixed(1)} ${cur[2 * i + 1].toFixed(1)})`);
   }
 
@@ -598,7 +608,7 @@ function mount(root, panel) {
     frameId = 0;
     if (state.playing && now >= nextRoundAt) {
       advance(now);
-      nextRoundAt = now + ROUND_MS;
+      nextRoundAt = now + state.pace;
     }
     if (tweenStart >= 0) tween(now);
     if (state.playing || tweenStart >= 0) loop();
@@ -625,7 +635,6 @@ function mount(root, panel) {
       const preset = PRESETS.find((p) => p.id === button.dataset.preset).settings;
       button.setAttribute('aria-pressed', String(sameAs(state.settings, preset)));
     }
-    bigSwitch?.setAttribute('aria-checked', String(state.settings.type === 'work'));
   }
 
   // Everything that differs between the stars and yes scales.
@@ -670,18 +679,25 @@ function mount(root, panel) {
     settle();
   }
 
-  // Scene 4 always starts from the worst rules and our assumptions.
-  function resetRules() {
-    const redraw = state.settings.scale !== WORST.scale || state.settings.feed !== WORST.feed;
-    state.settings = { ...WORST };
+  // A set of rules with our assumptions, as a new run at round 0: the worst rules for scene 4,
+  // a bar's rules in scene 5. The bars are our assumptions' averages, so a bar runs with them.
+  function useRules(settings) {
     for (const { a, input, sync } of sliders) {
       state.values[a.id] = a.initial;
       input.value = String(a.initial);
       sync();
     }
+    const next = { ...settings };
+    const redraw =
+      next.scale !== state.settings.scale ||
+      next.feed !== state.settings.feed ||
+      (next.scale === 'yes' && weightedYeses(next) !== weightedYeses(state.settings));
+    state.settings = next;
     syncControls();
     applyScale();
     applyAnchor();
+    state.playing = false;
+    startRun();
     if (redraw && geo) resize(true);
   }
 
@@ -696,13 +712,6 @@ function mount(root, panel) {
       const preset = PRESETS.find((p) => p.id === button.dataset.preset).settings;
       changeSettings({ ...preset }, { preset: button.dataset.preset });
     });
-  });
-
-  // The big switch: every rating points at real work, or back to one tap.
-  bigSwitch?.addEventListener('click', () => {
-    const on = state.settings.type !== 'work';
-    changeSettings({ ...state.settings, type: on ? 'work' : 'tap' }, { key: 'type', value: on ? 'work' : 'tap' });
-    updateNote();
   });
 
   $('[data-action="replay"]').addEventListener('click', () => {
@@ -778,14 +787,32 @@ function mount(root, panel) {
       root.animate([{ transform: `translateY(${shift}px)` }, { transform: 'none' }], { duration: MOVE_MS, easing: 'cubic-bezier(.16, 1, .3, 1)' });
     }
     resize(false, true);
+    redrawSoon();
   }
-  function openRules() {
+  // The whole field again, axis, lane and every person, once the panel has settled: a browser
+  // that skipped a repaint beside the panel's frosted glass gets a fresh one.
+  let redrawTimer = 0;
+  function redrawSoon() {
+    clearTimeout(redrawTimer);
+    requestAnimationFrame(() => requestAnimationFrame(() => redrawAll()));
+    redrawTimer = setTimeout(redrawAll, MOVE_MS + 60);
+  }
+  function redrawAll() {
+    resize(true, false);
+    for (let i = 0; i < N; i++) place(i);
+  }
+  // The panel opens from the scene's links and from the line under the bars; focus goes back
+  // to whichever button opened it.
+  const openers = () => [openButton, ...(rulesBox ? rulesBox.querySelectorAll('[data-action="open-rules"]') : [])].filter(Boolean);
+  let opener = openButton;
+  function openRules(from = openButton) {
     if (tuning()) return;
+    opener = from || openButton;
     document.dispatchEvent(new CustomEvent('stage:close-why'));
     clearTimeout(hideTimer);
     panel.hidden = false;
     toggleTuning(true);
-    openButton.setAttribute('aria-expanded', 'true');
+    for (const button of openers()) button.setAttribute('aria-expanded', 'true');
     const S = state.settings;
     const preset = PRESETS.find((p) => sameAs(S, p.settings));
     setLine(explain, preset ? explainFor({ preset: preset.id }, S.scale) : explainFor({ key: 'type', value: S.type }, S.scale));
@@ -796,14 +823,13 @@ function mount(root, panel) {
     if (!tuning()) return;
     panel.classList.remove('is-open');
     toggleTuning(false);
-    openButton.setAttribute('aria-expanded', 'false');
+    for (const button of openers()) button.setAttribute('aria-expanded', 'false');
     hideTimer = setTimeout(() => {
       if (!tuning()) panel.hidden = true;
     }, MOVE_MS);
-    updateNote();
-    if (returnFocus) openButton.focus({ preventScroll: true });
+    if (returnFocus) (opener && opener.isConnected ? opener : openButton)?.focus({ preventScroll: true });
   }
-  openButton?.addEventListener('click', openRules);
+  openButton?.addEventListener('click', () => openRules(openButton));
   panel.querySelector('[data-action="close"]').addEventListener('click', () => closeRules());
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && tuning()) {
@@ -813,35 +839,208 @@ function mount(root, panel) {
   });
   document.addEventListener('lab:close-rules', () => closeRules(false));
 
+  /* ---------- Which rules find the best people? ---------- */
+
+  // One bar for each set of rules, with its average over the dozen simulated companies from
+  // data/figures.json (tools/lab-check.mjs keeps those equal to the model's). "Stars" or "A named
+  // yes" picks which bars show. A tap on a bar runs its rules on this company at a quick pace, and
+  // the line under the chart says what they find and what they cost. Once the run has finished,
+  // the line adds this run's own number when it differs from the average, so the line never
+  // gets ahead of the counter.
+  const rules = { list: [], scale: 'stars', selected: null, chance: 1.25 };
+  const figuresData =
+    (window.chartData && window.chartData.figures) ||
+    fetch(new URL('../data/figures.json', import.meta.url)).then((res) => {
+      if (!res.ok) throw new Error(`data/figures.json returned HTTP ${res.status}`);
+      return res.json();
+    });
+
+  const ruleFor = (id) => rules.list.find((r) => r.id === id);
+  // The rules on screen, when they are one of the bars with our assumptions.
+  const matchingRule = () => (assumptionsUntouched() ? rules.list.find((r) => sameAs(state.settings, r.settings)) : null);
+
+  // m: the finished run's measures, or null while it is still running.
+  function ruleLine(r, m) {
+    const about = Math.round(r.hits);
+    const here = m && m.hits !== null ? m.hits : about;
+    const cost = r.cost.replace('{n}', String(Math.round(r.costValue ?? 0)));
+    return `In the simulation, ${r.finds} about ${about} of the 10 best${here !== about ? `, ${here} in this run` : ''}. The cost: ${cost}.`;
+  }
+
+  // The line under the chart and the pressed bar, for whatever rules the lab is running.
+  function describeRules(m = state.run && state.run.done ? state.snap.metrics : null) {
+    if (!rules.list.length || !resultLine) return;
+    const r = matchingRule();
+    rules.selected = r ? r.id : null;
+    if (r && r.scale !== rules.scale) {
+      rules.scale = r.scale;
+      renderBars();
+    }
+    markRules();
+    if (r) setLine(resultLine, ruleLine(r, m));
+    else if (m) setLine(resultLine, `In the simulation, your rules find ${m.hits} of the 10 best in this run.`);
+  }
+
+  function markRules() {
+    for (const bar of rulesBox.querySelectorAll('[data-rule]')) bar.setAttribute('aria-pressed', String(bar.dataset.rule === rules.selected));
+    for (const pill of rulesBox.querySelectorAll('[data-scale]')) pill.setAttribute('aria-pressed', String(pill.dataset.scale === rules.scale));
+  }
+
+  function renderBars(grow = false) {
+    const list = rulesBox.querySelector('.rules-bars');
+    const shownRules = rules.list.filter((r) => r.scale === rules.scale).sort((a, b) => b.hits - a.hits);
+    list.innerHTML = shownRules
+      .map(
+        (r) =>
+          `<li><button type="button" class="rules-bar" data-rule="${r.id}" aria-pressed="false">` +
+          `<span class="rules-name">${r.label}</span>` +
+          `<span class="rules-track" aria-hidden="true"><span class="rules-fill" style="--v:${(r.hits / 10).toFixed(3)}"></span></span>` +
+          `<span class="rules-value">${r.hits.toFixed(1)}<span class="visually-hidden"> of the 10 best on average</span></span>` +
+          `</button></li>`,
+      )
+      .join('');
+    if (grow && !reduced) {
+      list.classList.add('is-pending');
+      requestAnimationFrame(() => requestAnimationFrame(() => list.classList.remove('is-pending')));
+    }
+    markRules();
+  }
+
+  function runRule(id) {
+    const r = ruleFor(id);
+    if (!r) return;
+    useRules(r.settings);
+    describeRules();
+    if (reduced) finishNow();
+    else play(QUICK_ROUND_MS);
+  }
+
+  function buildRules(data) {
+    if (!rulesBox || !data || !data.rules) return;
+    rules.list = data.rules.settings;
+    rules.chance = data.rules.chance;
+    rulesBox.querySelector('.fallback')?.remove();
+    rulesBox.insertAdjacentHTML(
+      'beforeend',
+      `<div class="rules-head">` +
+        `<p class="label rules-title" id="rules-title">Which rules find the best people? In our simulation.</p>` +
+        `<div class="rules-pills" role="group" aria-label="Show the rules for">` +
+        `<button type="button" class="rules-pill" data-scale="stars" aria-pressed="true">Stars</button>` +
+        `<button type="button" class="rules-pill" data-scale="yes" aria-pressed="false">A named yes</button>` +
+        `</div></div>` +
+        `<div class="rules-chart" style="--guess:${(rules.chance / 10).toFixed(4)}">` +
+        `<p class="rules-guess label" aria-hidden="true"><span>Guessing</span></p>` +
+        `<ol class="rules-bars" role="list"></ol>` +
+        `</div>` +
+        // The bars are the model's output, not a measurement of any real product.
+        `<p class="rules-caveat">These are simulated, not measured. The direction of each effect comes from research; the sizes are our guesses. Change them under <button type="button" class="text-button" data-action="open-rules" aria-controls="lab-panel" aria-expanded="false">Try other rules</button>.</p>` +
+        `<p class="label rules-note">Of the 10 most skilled, how many the top 10 finds, on average across 12 simulated companies. Guessing finds about 1.</p>`,
+    );
+    rulesBox.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const bar = target && target.closest('[data-rule]');
+      const pill = target && target.closest('[data-scale]');
+      const open = target && target.closest('[data-action="open-rules"]');
+      if (open) openRules(open);
+      else if (bar) runRule(bar.dataset.rule);
+      else if (pill && pill.dataset.scale !== rules.scale) {
+        rules.scale = pill.dataset.scale;
+        renderBars(true);
+      }
+    });
+    renderBars();
+    describeRules();
+    placeRules();
+  }
+  figuresData.then(buildRules).catch((err) => console.warn('Scene 5 kept its fallback because the rules chart could not be built.', err));
+
+  // Beside the lab on desktop, in the text column; on a phone, under the lab, which stays pinned
+  // at the top of its scene while the bars scroll, so a tapped bar and its result are in view.
+  const wide = window.matchMedia('(min-width: 960px)');
+  const fixBeat = document.querySelector('.beat[data-beat="fix"]');
+  const visual = scene.querySelector('.scene-visual');
+  function placeRules() {
+    if (!rulesBox || !fixBeat || !visual) return;
+    const beside = wide.matches || !html.classList.contains('stage-on');
+    if (beside && rulesBox.parentElement !== fixBeat) fixBeat.insertBefore(rulesBox, fixBeat.querySelector('.beat-links'));
+    if (!beside && rulesBox.parentElement !== visual) visual.append(rulesBox);
+  }
+  wide.addEventListener('change', placeRules);
+
+  /* ---------- How this works ---------- */
+
+  // Three plain steps above the lab. Beside the text they stay open. On a phone, while they are
+  // open they stand in for scene 4's intro and the key (lab.css), and they fold to one line once
+  // scene 4's first run has played, never before the reader has had about six seconds with them.
+  // The intro line then carries the run's result. A phone too short for the steps and a readable
+  // chart starts with them folded. The title opens and closes them, and a reader who has used it
+  // keeps their choice.
+  const how = document.getElementById('lab-how');
+  const howTitle = how && how.querySelector('.lab-how-title');
+  const howBody = how && how.querySelector('.lab-how-body');
+  let howToggle = null;
+  let howTouched = false;
+  let howFolded = false;
+  let howShownAt = 0;
+  let howTimer = 0;
+  function setHow(open) {
+    if (!how) return;
+    clearTimeout(howTimer);
+    howTimer = 0;
+    how.classList.toggle('is-closed', !open);
+    scene.classList.toggle('is-how-open', open);
+    if (howToggle) howToggle.setAttribute('aria-expanded', String(open));
+    if (howBody) howBody.inert = !open;
+  }
+  if (howTitle) {
+    howTitle.innerHTML = '<button type="button" class="lab-how-toggle" aria-expanded="true" aria-controls="lab-how-body">How this works</button>';
+    howToggle = howTitle.firstElementChild;
+    howToggle.addEventListener('click', () => {
+      howTouched = true;
+      setHow(how.classList.contains('is-closed'));
+    });
+  }
+  if (how && !wide.matches && window.innerHeight < 600) {
+    howFolded = true;
+    setHow(false);
+  } else setHow(true);
+  function foldHowSoon() {
+    if (!how || howFolded || howTouched || wide.matches) return;
+    howFolded = true;
+    const wait = Math.max(1200, 6000 - (performance.now() - howShownAt));
+    howTimer = setTimeout(() => setHow(false), wait);
+  }
+
   /* ---------- The stage ---------- */
 
-  // Scene 4 plays the worst rules from round 0, each time it arrives. Scene 5 keeps whatever
-  // scene 4 was showing; reached straight, it shows the worst rules' finished run, so the
-  // switch has a before. Leaving the lab pauses it.
+  // Scene 4 plays the worst rules from round 0, each time it arrives. Scene 5 opens on the rules
+  // its headline names, praise tied to real work: the dots travel from wherever they were to
+  // that run's end as the scene lands, and its bar is the one pressed. Leaving the lab pauses it.
   function onScene({ id, previousId }) {
     state.scene = id;
+    if (id === 'lab' && !howShownAt) howShownAt = performance.now();
+    // A fold still waiting when the reader moves on happens at once, out of view.
+    if (id !== 'lab' && howTimer) setHow(false);
     if (id === 'lab' && previousId !== 'lab') {
       closeRules(false);
-      resetRules();
+      useRules(WORST);
       setLine(labBody, bodyIntro);
-      startRun();
       idle();
       if (reduced) finishNow();
       else startTimer = setTimeout(() => state.scene === 'lab' && play(), previousId ? 650 : 450);
     } else if (id === 'fix' && previousId !== 'fix') {
-      if (previousId !== 'lab') {
-        closeRules(false);
-        resetRules();
-        startRun();
-        finishNow();
-      }
-      updateNote();
+      closeRules(false);
+      useRules(WORK);
+      settle();
     } else if (id !== 'lab' && id !== 'fix') {
       closeRules(false);
       pause();
     }
   }
-  document.addEventListener('stage:scene', (event) => onScene(event.detail));
+  document.addEventListener('stage:scene', (event) => {
+    onScene(event.detail);
+    placeRules();
+  });
 
   reduceMotion.addEventListener('change', (event) => {
     reduced = event.matches;
@@ -923,6 +1122,7 @@ function labTemplate(N) {
       <button type="button" class="text-button label lab-replay" data-action="replay">Replay</button>
     </div>
     <p class="lab-explain line"></p>
+    <p class="lab-result line"></p>
     <div class="lab-live visually-hidden" aria-live="polite"></div>`;
 }
 
@@ -966,13 +1166,20 @@ function panelTemplate(start) {
 
 /* ---------- Helpers ---------- */
 
-// The axis end for the yes scale: the first round number at least 10% above the top
-// standing, and never below the current end, so the axis only grows during a run.
-function axisEnd(snap, current) {
-  let top = 0;
-  for (const s of snap.scores) if (s !== null && s > top) top = s;
-  const need = top * 1.1;
-  const nice = YES_AXIS.find((v) => v >= need) ?? Math.ceil(need / 1000) * 1000;
+// Weighted yeses get the square-root axis; a plain count of yeses a straight one.
+function rootAxis(S) {
+  return S.scale === 'yes' && weightedYeses(S);
+}
+
+// The axis end for the yes scale: the first round number at or above the 95th percentile of
+// standings, so the crowd fills the field and the few past it wait at its end. It never drops
+// below the current end, so the axis only grows during a run.
+function axisEnd(snap, current, ends) {
+  const standings = snap.scores.filter((s) => s !== null).sort((a, b) => a - b);
+  if (!standings.length) return current;
+  const p95 = standings[Math.ceil(standings.length * 0.95) - 1];
+  const last = ends[ends.length - 1];
+  const nice = ends.find((v) => v >= p95) ?? Math.ceil(p95 / last) * last;
   return Math.max(current, nice);
 }
 
