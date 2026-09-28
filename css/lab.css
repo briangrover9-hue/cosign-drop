@@ -1055,3 +1055,30 @@ html.stage-on .scene-lab[data-beat="lab"] .lab-result,
   scrollbar-color: var(--ink-rule) transparent;
   mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), rgba(0, 0, 0, 0.15));
 }
+
+/* Phones, scene 5: give the bars more of the screen by tightening the pinned lab above them,
+   and fade the bottom edge so it's clear the list scrolls. */
+@media (max-width: 959.98px) {
+  html.stage-on .scene-lab[data-beat="fix"] .scene-body {
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .lab-field-wrap {
+    height: clamp(84px, 14vh, 160px);
+  }
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .lab-big {
+    font-size: 1.5rem;
+  }
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .lab-result {
+    min-height: 0;
+    font-size: 0.875rem;
+    line-height: 1.35;
+  }
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .rules-bar {
+    min-height: 30px;
+    padding: 1px 0;
+  }
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .scene-visual {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), rgba(0, 0, 0, 0.2));
+  }
+}
