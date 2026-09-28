@@ -115,7 +115,7 @@
     {
       "id": "tripadvisor2015",
       "title": "TripAdvisor hotels",
-      "measure": "Rated 4.5 or higher",
+      "measure": "Rated 4.5 or higher. People rate businesses honestly.",
       "now": {
         "label": "2015",
         "value": 26
@@ -125,7 +125,7 @@
         "url": "https://internet.psych.wisc.edu/wp-content/uploads/532-Master/532-UnitPages/Unit-10/Zervas_2015.pdf"
       },
       "name": "TripAdvisor hotels, 2015",
-      "note": "Rated 4.5 or higher. Businesses get honest ratings."
+      "note": "Rated 4.5 or higher"
     }
   ],
   "validity": {
