@@ -234,7 +234,10 @@ html:not(.stage-on) .frame-cue {
 html.stage-on .stage {
   position: fixed;
   inset: 0;
+  /* Clipped, not just hidden: a hidden box can still be scrolled by a link to a scene or by a
+     control brought into view, which would shift the whole scene. */
   overflow: hidden;
+  overflow: clip;
   /* Swipes belong to the stage; pinch zoom still works. */
   touch-action: pinch-zoom;
 }
@@ -578,6 +581,14 @@ html.is-sudden .w {
 .scene-lab .scene-text {
   display: grid;
 }
+/* Beside the chart, the lab's text starts at the top of its column, so scene 5's headline stays
+   put when its rules chart changes height, and a column taller than the screen keeps its
+   headline in view. */
+@media (min-width: 960px) {
+  html.stage-on .scene-lab .scene-text {
+    align-self: start;
+  }
+}
 .beat {
   grid-area: 1 / 1;
   display: grid;
@@ -754,8 +765,6 @@ html:not(.stage-on) .beat {
   }
 }
 
-/* Laptops with short windows: size the words by the window's height as well as its width,
-   so a scene's text always fits between the top title and the bottom counter. */
 @media (min-width: 960px) and (max-height: 900px) {
   .scene-text {
     gap: 12px;

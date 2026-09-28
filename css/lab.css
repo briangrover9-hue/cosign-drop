@@ -1050,7 +1050,6 @@ html.stage-on .scene-lab[data-beat="lab"] .lab-result,
   }
 }
 
-/* The panel's controls run longer than a laptop window: show that it scrolls. */
 .lab-panel-body {
   scrollbar-width: thin;
   scrollbar-color: var(--ink-rule) transparent;
