@@ -626,6 +626,23 @@ html.stage-on .scene-lab[data-beat="lab"] .lab-result,
     flex: none;
     padding-bottom: 12px;
   }
+  /* Scene 5 fits one screen like the others, so a swipe moves the scene instead of scrolling
+     inside it. The scene's own line already says the run's result, and the chart marks
+     guessing, so those two lines give way; the caveat stays. */
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .lab-result,
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .rules-note {
+    display: none;
+  }
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .scene-visual {
+    gap: 8px;
+  }
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .scene-visual > .rules {
+    padding-bottom: 0;
+  }
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .rules-caveat {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
 }
 /* A phone too short for the steps and a readable chart keeps scene 4's intro, which says the
    same in a sentence, and the steps give way. */
@@ -1064,7 +1081,7 @@ html.stage-on .scene-lab[data-beat="lab"] .lab-result,
     line-height: 1.35;
   }
   html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .lab-field-wrap {
-    height: clamp(84px, 14vh, 160px);
+    height: clamp(76px, 10vh, 160px);
   }
   html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .lab-big {
     font-size: 1.5rem;
@@ -1075,10 +1092,11 @@ html.stage-on .scene-lab[data-beat="lab"] .lab-result,
     line-height: 1.35;
   }
   html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .rules-bar {
-    min-height: 30px;
+    min-height: 29px;
     padding: 1px 0;
   }
-  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .scene-visual {
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), rgba(0, 0, 0, 0.2));
+  /* The caveat under the bars already says these are simulated. */
+  html.stage-on .scene-lab[data-beat="fix"]:not(.is-tuning) .rules-title-sim {
+    display: none;
   }
 }

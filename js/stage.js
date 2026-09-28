@@ -332,7 +332,15 @@ document.addEventListener(
     }
     const area = event.target instanceof Element ? event.target.closest('.scene-visual') : null;
     const scrolls = area && area.scrollHeight > area.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(area).overflowY);
-    touch = { x: event.touches[0].clientX, y: event.touches[0].clientY, area: scrolls ? area : null, top: scrolls ? area.scrollTop : 0 };
+    // Where the area sat when the finger landed decides the swipe. At touchend an iPhone may
+    // still be bouncing past the end, which reads as a scroll and would trap the reader.
+    touch = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+      area: scrolls ? area : null,
+      atTop: scrolls ? area.scrollTop <= 2 : true,
+      atBottom: scrolls ? area.scrollTop + area.clientHeight >= area.scrollHeight - 2 : true,
+    };
   },
   { passive: true },
 );
@@ -350,14 +358,11 @@ document.addEventListener('touchend', (event) => {
   const t = event.changedTouches[0];
   const dx = t.clientX - touch.x;
   const dy = t.clientY - touch.y;
-  const { area, top } = touch;
+  const { atTop, atBottom } = touch;
   touch = null;
-  // A swipe that scrolled its area stays in the scene; one at the area's end moves the scene.
-  if (area) {
-    if (Math.abs(area.scrollTop - top) > 2) return;
-    const atEnd = dy < 0 ? area.scrollTop + area.clientHeight >= area.scrollHeight - 2 : area.scrollTop <= 0;
-    if (!atEnd) return;
-  }
+  // A swipe that starts with its area already at that end moves the scene; any other swipe
+  // was scrolling the area and stays in the scene.
+  if (dy < 0 ? !atBottom : !atTop) return;
   if (Math.abs(dy) > 44 && Math.abs(dy) > Math.abs(dx) * 1.2) go(current + (dy < 0 ? 1 : -1));
 });
 document.addEventListener('touchcancel', () => (touch = null));

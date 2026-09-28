@@ -923,7 +923,7 @@ function mount(root, panel) {
     rulesBox.insertAdjacentHTML(
       'beforeend',
       `<div class="rules-head">` +
-        `<p class="label rules-title" id="rules-title">Which rules find the best people? In our simulation.</p>` +
+        `<p class="label rules-title" id="rules-title">Which rules find the best people?<span class="rules-title-sim"> In our simulation.</span></p>` +
         `<div class="rules-pills" role="group" aria-label="Show the rules for">` +
         `<button type="button" class="rules-pill" data-scale="stars" aria-pressed="true">Stars</button>` +
         `<button type="button" class="rules-pill" data-scale="yes" aria-pressed="false">A named yes</button>` +
